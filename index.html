@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <title>嘻嘻</title>
     <style>
         * {
             padding: 0;
@@ -33,7 +33,79 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
             text-fill-color: transparent;
-            /* Safari 特有属性 */
+        }
+
+        .input-group {
+            margin: 15px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        label {
+            width: 60px;
+            text-align: right;
+            margin-right: 10px;
+            color: #666;
+        }
+
+        input {
+            width: 120px;
+            height: 30px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 0 10px;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        input:focus {
+            border-color: #409eff;
+            box-shadow: 0 0 5px rgba(64,158,255,.5);
+        }
+
+        input::placeholder {
+            color: #999;
+        }
+
+        button {
+            padding: 8px 20px;
+            font-size: 16px;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 15px 8px;
+        }
+
+        .calc-btn {
+            background: linear-gradient(45deg, #409eff, #42b983);
+        }
+
+        .save-btn {
+            background: linear-gradient(45deg, #ff9900, #ff6666);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(64,158,255,0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+            box-shadow: none;
+        }
+
+        .error {
+            border-color: #ff4444 !important;
+        }
+
+        .error-message {
+            color: #ff4444;
+            font-size: 12px;
+            margin-top: 5px;
+            min-height: 17px;
         }
     </style>
 </head>
@@ -41,8 +113,25 @@
 <body>
     <div id="app" v-cloak>
         <div>
-            <div class="coung">{{months}}个月{{remainingDays}}天</div>
+            <div class="coung">{{totalMonths}}个月{{remainingDays}}天</div>
             <div class="coung">{{totalDays}}天</div>
+            <div class="input-group">
+                <label for="year">年份</label>
+                <input id="year" placeholder="请输入年份" type="text" v-model="year" :class="{'error': errors.year}">
+            </div>
+            <div class="error-message" v-if="errors.year">{{errors.year}}</div>
+            <div class="input-group">
+                <label for="month">月份</label>
+                <input id="month" placeholder="请输入月份" type="text" v-model="month" :class="{'error': errors.month}">
+            </div>
+            <div class="error-message" v-if="errors.month">{{errors.month}}</div>
+            <div class="input-group">
+                <label for="day">日期</label>
+                <input id="day" placeholder="请输入日期" type="text" v-model="day" :class="{'error': errors.day}">
+            </div>
+            <div class="error-message" v-if="errors.day">{{errors.day}}</div>
+            <button class="calc-btn" @click="calcBabyDays">计算</button>
+            <button class="save-btn" @click="saveToLocalStorage">计算并保存</button>
         </div>
     </div>
     <script src="./vue.min.js"></script>
@@ -51,37 +140,118 @@
             el: "#app",
             data() {
                 return {
+                    year: 2024,
+                    month: 6,
+                    day: 23,
+
                     totalDays: 0,
-                    months: 0,
-                    remainingDays: 0
+                    totalMonths: 0,
+                    remainingDays: 0,//剩余天数
+
+                    errors: {
+                        year: '',
+                        month: '',
+                        day: ''
+                    }
                 };
             },
             created() {
+                // 从本地缓存读取数据
+                const savedData = localStorage.getItem('babyBirthday');
+                if (savedData) {
+                    const data = JSON.parse(savedData);
+                    this.year = data.year;
+                    this.month = data.month;
+                    this.day = data.day;
+                }
                 this.calcBabyDays();
             },
             methods: {
+                validateInputs() {
+                    this.errors = {
+                        year: '',
+                        month: '',
+                        day: ''
+                    };
+
+                    let isValid = true;
+
+                    // 验证年份
+                    const yearNum = parseInt(this.year);
+                    if (!this.year || isNaN(yearNum)) {
+                        this.errors.year = '请输入有效的年份';
+                        isValid = false;
+                    } else if (yearNum < 1900 || yearNum > 2100) {
+                        this.errors.year = '年份必须在1900-2100之间';
+                        isValid = false;
+                    }
+
+                    // 验证月份
+                    const monthNum = parseInt(this.month);
+                    if (!this.month || isNaN(monthNum)) {
+                        this.errors.month = '请输入有效的月份';
+                        isValid = false;
+                    } else if (monthNum < 1 || monthNum > 12) {
+                        this.errors.month = '月份必须在1-12之间';
+                        isValid = false;
+                    }
+
+                    // 验证日期
+                    const dayNum = parseInt(this.day);
+                    if (!this.day || isNaN(dayNum)) {
+                        this.errors.day = '请输入有效的日期';
+                        isValid = false;
+                    } else {
+                        const daysInMonth = new Date(yearNum, monthNum, 0).getDate();
+                        if (dayNum < 1 || dayNum > daysInMonth) {
+                            this.errors.day = `日期必须在1-${daysInMonth}之间`;
+                            isValid = false;
+                        }
+                    }
+
+                    return isValid;
+                },
                 calcBabyDays() {
+                    if (!this.validateInputs()) {
+                        return;
+                    }
+
+                    console.log(this.year, this.month, this.day);
                     // 使用常量定义一天的毫秒数,提高代码可读性
                     const MILLISECONDS_PER_DAY = 24 * 60 * 60 * 1000;
 
                     // 使用Date.UTC确保时区一致性
-                    const birthday = new Date(Date.UTC(2024, 5, 23));
+                    const birthday = new Date(Date.UTC(this.year, this.month - 1, this.day));
                     const today = new Date();
 
                     // 使用Math.abs确保结果为正数
                     const timeDiff = Math.abs(today - birthday);
 
                     // 计算总天数
-                    const totalDays = Math.ceil(timeDiff / MILLISECONDS_PER_DAY);
+                    const totalDays = Math.floor(timeDiff / MILLISECONDS_PER_DAY);
                     this.totalDays = totalDays;
 
                     // 计算月份和剩余天数
-                    this.months = Math.floor(totalDays / 30);
+                    this.totalMonths = Math.floor(totalDays / 30);
                     this.remainingDays = totalDays % 30;
 
                     // 使用模板字符串优化日志输出
-                    console.log(`🌷 距离宝宝生日还有 ${this.months}月${this.remainingDays}天 (共${totalDays}天)`);
+                    console.log(`🌷 距离宝宝生日还有 ${this.totalMonths}月${this.remainingDays}天 (共${totalDays}天)`);
                 },
+                saveToLocalStorage() {
+                    if (!this.validateInputs()) {
+                        return;
+                    }
+                    this.calcBabyDays();
+                    // 保存到本地缓存
+                    const data = {
+                        year: this.year,
+                        month: this.month,
+                        day: this.day
+                    };
+                    localStorage.setItem('babyBirthday', JSON.stringify(data));
+                    alert('保存成功！');
+                }
             },
         });
     </script>
