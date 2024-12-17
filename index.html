@@ -130,8 +130,7 @@
                 <input id="day" placeholder="请输入日期" type="text" v-model="day" :class="{'error': errors.day}">
             </div>
             <div class="error-message" v-if="errors.day">{{errors.day}}</div>
-            <button class="calc-btn" @click="calcBabyDays">计算</button>
-            <button class="save-btn" @click="saveToLocalStorage">计算并保存</button>
+            <button class="calc-btn" @click="saveToLocalStorage">计算</button>
         </div>
     </div>
     <script src="./vue.min.js"></script>
@@ -228,11 +227,11 @@
                     const timeDiff = Math.abs(today - birthday);
 
                     // 计算总天数
-                    const totalDays = Math.floor(timeDiff / MILLISECONDS_PER_DAY);
+                    const totalDays = Math.ceil(timeDiff / MILLISECONDS_PER_DAY);
                     this.totalDays = totalDays;
 
                     // 计算月份和剩余天数
-                    this.totalMonths = Math.ceil(totalDays / 30);
+                    this.totalMonths = Math.floor(totalDays / 30);
                     this.remainingDays = totalDays % 30;
 
                     // 使用模板字符串优化日志输出
