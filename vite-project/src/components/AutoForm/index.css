@@ -1,0 +1,185 @@
+.form-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.input-group {
+    margin-bottom: 15px;
+    display: flex;
+    align-items: flex-start;
+}
+
+.input-group label {
+    width: 100px;
+    text-align: right;
+    margin-right: 10px;
+    line-height: 32px;
+}
+
+.input-wrapper {
+    flex: 1;
+}
+
+.required {
+    color: #f56c6c;
+    margin-right: 4px;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="url"],
+select,
+textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #dcdfe6;
+    border-radius: 4px;
+    transition: border-color 0.2s;
+    font-size: 14px;
+    color: #606266;
+}
+
+input[type="text"]::placeholder,
+input[type="email"]::placeholder,
+input[type="password"]::placeholder,
+input[type="number"]::placeholder,
+input[type="url"]::placeholder,
+select::placeholder,
+textarea::placeholder {
+    color: #c0c4cc;
+    font-size: 14px;
+}
+
+input[type="radio"],
+input[type="checkbox"] {
+    margin-right: 5px;
+}
+
+textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.error-message {
+    position: absolute;
+    color: #f56c6c;
+    font-size: 12px;
+}
+
+.button-group {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.submit-btn,
+.reset-btn {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.submit-btn {
+    background: #409eff;
+    color: white;
+}
+
+.reset-btn {
+    background: #909399;
+    color: white;
+}
+
+.submit-btn:hover {
+    background: #66b1ff;
+}
+
+.reset-btn:hover {
+    background: #a6a9ad;
+}
+
+/* 文件上传样式 */
+.file-upload {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+}
+
+.file-input {
+    position: absolute;
+    width: 0;
+    height: 0;
+    opacity: 0;
+}
+
+label.file-label {
+    width: 200px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.file-text {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #dcdfe6;
+    border-right: none;
+    border-radius: 4px 0 0 4px;
+    background: #fff;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #606266;
+    font-size: 14px;
+}
+
+.file-button {
+    padding: 8px 20px;
+    background: #409eff;
+    color: white;
+    border-radius: 0 4px 4px 0;
+}
+
+/* 颜色选择器样式 */
+.color-picker {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.color-input {
+    width: 50px;
+    height: 32px;
+    padding: 0;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.color-value {
+    font-family: monospace;
+    color: #606266;
+    font-size: 14px;
+}
+
+/* 日期输入框样式 */
+.date-input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #dcdfe6;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #606266;
+}
+
+.date-input::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    padding: 4px;
+}

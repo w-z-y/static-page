@@ -232,7 +232,7 @@
                     this.totalDays = totalDays;
 
                     // 计算月份和剩余天数
-                    this.totalMonths = Math.floor(totalDays / 30);
+                    this.totalMonths = Math.ceil(totalDays / 30);
                     this.remainingDays = totalDays % 30;
 
                     // 使用模板字符串优化日志输出
