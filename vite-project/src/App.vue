@@ -1,6 +1,6 @@
 <script setup>
 import { ref, onMounted, computed, unref } from 'vue'
-import AutoForm from './components/AutoForm/index.vue'
+import AutoForm from './components/AutoForm/src/index.vue'
 
 
 const formData = ref({
@@ -22,6 +22,7 @@ const formData = ref({
 // 表单配置
 const formConfig = ref([
   { label: '姓名', type: 'text', key: 'name' },
+  { label: '姓名1', type: 'text1', key: 'name1' },
   { label: '邮箱', type: 'email', key: 'email' },
   {
     label: '性别',
@@ -81,7 +82,13 @@ const formRules = computed(() => ({
 </script>
 
 <template>
-  <AutoForm :formData="formData" :formConfig="formConfig" :formRules="formRules" />
+  <AutoForm :formData="formData" :formConfig="formConfig" :formRules="formRules">
+    <template #default="{ item }">
+      <template v-if="item.type === 'text1'">
+        slot
+      </template>
+    </template>
+  </AutoForm>
 </template>
 
 <style scoped></style>

@@ -1,7 +1,8 @@
 <script setup>
 import { ref, onMounted, computed, unref } from 'vue'
-import { useMockData } from './hooks'
+import useMockData from '../hooks/useMockData'
 import { generatePlaceholder } from './utils'
+import FormItem from './FormItem.vue'
 const props = defineProps({
   formData: {
     type: Object,
@@ -16,7 +17,6 @@ const props = defineProps({
     required: true
   }
 })
-
 
 // 生成验证规则
 const generateValidationRules = (key, type, label) => {
@@ -188,50 +188,15 @@ onMounted(async () => {
 
 <template>
   <div class="form-container">
-    <div class="input-group" v-for="item in enrichFormConfig" :key="item.key">
-      <label>
-        <span v-if="item.required" class="required">*</span>
-        {{ item.label }}：
-      </label>
-
-      <div class="input-wrapper">
-        <select v-if="item.type === 'select'" v-model="formData[item.key]" :placeholder="item.placeholder"
-          @change="validateField(item, formData[item.key])">
-          <option v-for="opt in item.options" :key="opt" :value="opt">{{ opt }}</option>
-        </select>
-
-        <textarea v-else-if="item.type === 'textarea'" v-model="formData[item.key]" :placeholder="item.placeholder"
-          @input="validateField(item, formData[item.key])"></textarea>
-
-        <template v-else-if="['radio', 'checkbox'].includes(item.type) && item.options.length > 0">
-          <template v-for="opt in item.options" :key="opt.value">
-            <input :type="item.type" v-model="formData[item.key]" :value="opt.value" :id="opt.value"
-              @change="validateField(item, formData[item.key])">
-            <label :for="opt.value">{{ opt.label }}</label>
-          </template>
-        </template>
-
-        <div v-else-if="item.type === 'file'" class="file-upload">
-          <input type="file" :id="item.key" @change="handleFileChange" class="file-input">
-          <label :for="item.key" class="file-label">
-            <span class="file-text">{{ formData[item.key]?.name || '选择文件' }}</span>
-            <span class="file-button">浏览</span>
-          </label>
-        </div>
-
-        <div v-else-if="item.type === 'color'" class="color-picker">
-          <input type="color" v-model="formData[item.key]" class="color-input"
-            @input="validateField(item, formData[item.key])">
-          <span class="color-value">{{ formData[item.key] }}</span>
-        </div>
-
-        <input v-else :type="item.type" v-model="formData[item.key]" :placeholder="item.placeholder"
-          @input="validateField(item, formData[item.key])" :min="item.min" :max="item.max" :step="item.step"
-          :class="{ 'date-input': item.type === 'date' }">
-
-        <div class="error-message">{{ formErrors[item.key] }}</div>
-      </div>
-    </div>
+    <FormItem v-for="item in enrichFormConfig" :key="item.key" :item="item" v-model="formData[item.key]"
+      :validate-field="validateField" :handle-file-change="handleFileChange">
+      <template #default="{ item }">
+        <slot :item="item" />
+      </template>
+      <template #error>
+        {{ formErrors[item.key] }}
+      </template>
+    </FormItem>
 
     <div class="button-group">
       <button class="submit-btn" @click="submitForm">提交</button>

@@ -1,7 +1,6 @@
 import { unref } from 'vue'
 
-
-export function useMockData(formConfig) {
+export default function useMockData(formConfig) {
     const mockData = {
         cities: ['北京', '上海', '广州', '深圳', '杭州', '成都', '武汉', '西安'],
         hobbies: [
