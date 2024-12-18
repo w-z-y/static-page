@@ -112,13 +112,16 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
             text-fill-color: transparent;
-            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.1);
             letter-spacing: 2px;
         }
 
         .birthday {
             font-size: 28px;
-            color: #444;
+            background: linear-gradient(45deg, #8EC5FC, #E0C3FC);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-fill-color: transparent;
             margin-bottom: 30px;
             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
             letter-spacing: 1px;
@@ -275,10 +278,10 @@
         </div>
 
         <el-dialog title="设置" :visible.sync="showSettings" width="90%" :close-on-click-modal="false"
-            custom-class="settings-dialog">
+            @open="initFormData" custom-class="settings-dialog">
             <el-form :model="formData" label-width="80px" :rules="rules" ref="settingsForm">
-                <el-form-item label="宝宝名称" prop="title">
-                    <el-input v-model="formData.title" placeholder="请输入宝宝名称"></el-input>
+                <el-form-item label="宝宝名字" prop="title">
+                    <el-input v-model="formData.title" placeholder="请输入宝宝名字"></el-input>
                 </el-form-item>
                 <el-form-item label="宝宝生日" prop="birthDate">
                     <el-date-picker v-model="formData.birthDate" type="date" placeholder="选择宝宝生日" format="yyyy-MM-dd"
@@ -332,7 +335,7 @@
                     },
                     rules: {
                         title: [
-                            { required: true, message: '请输入宝宝名称', trigger: 'blur' }
+                            { required: true, message: '请输入宝宝名字', trigger: 'blur' }
                         ],
                         birthDate: [
                             { required: true, message: '请选择宝宝生日', trigger: 'change' }
@@ -421,6 +424,7 @@
                     this.cropper = new Cropper(image, {
                         aspectRatio: window.innerWidth / window.innerHeight,
                         viewMode: 1,
+                        autoCropArea: 1, // 设置初始裁剪框为最大
                         crop: () => {
                             const canvas = this.cropper.getCroppedCanvas();
                             this.formData.bgImage = canvas.toDataURL('image/jpeg');
