@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>嘻嘻</title>
+    <title>宝宝生日计算</title>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
     <style>
         * {
             padding: 0;
@@ -26,6 +27,7 @@
             background-position: center;
             background-repeat: no-repeat;
             position: relative;
+            font-family: "Helvetica Neue",Helvetica,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","微软雅黑",Arial,sans-serif;
         }
 
         .bg-mask {
@@ -41,113 +43,78 @@
         .content {
             position: relative;
             z-index: 1;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 15px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
         }
 
         .count {
             font-size: 60px;
-            /* 从左到右的渐变色 */
-            background: linear-gradient(45deg, skyblue, pink);
-            /* 为了在所有浏览器中都能看到渐变效果，可以使用多个浏览器前缀 */
+            font-weight: bold;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #409EFF, #F56C6C);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
             text-fill-color: transparent;
         }
 
-        .input-group {
-            margin: 15px 0;
+        .birthday {
+            font-size: 24px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .settings {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+        }
+
+        .settings-btn {
+            width: 50px;
+            height: 50px;
+            padding: 0;
+            margin: 0;
             display: flex;
             align-items: center;
             justify-content: center;
-        }
-
-        label {
-            width: 60px;
-            text-align: right;
-            margin-right: 10px;
-            color: #666;
-        }
-
-        input {
-            width: 120px;
-            height: 30px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            padding: 0 10px;
-            outline: none;
-            transition: all 0.3s;
-        }
-
-        input:focus {
-            border-color: #409eff;
-            box-shadow: 0 0 5px rgba(64, 158, 255, .5);
-        }
-
-        input::placeholder {
-            color: #999;
-        }
-
-        button {
-            padding: 8px 20px;
-            font-size: 16px;
+            background: linear-gradient(45deg, #ff9900, #ff6666);
             color: white;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 153, 0, 0.3);
             border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin: 15px 8px;
         }
 
-        .calc-btn {
-            background: linear-gradient(45deg, #409eff, #42b983);
-        }
-
-        .save-btn {
-            background: linear-gradient(45deg, #ff9900, #ff6666);
-        }
-
-        button:hover {
+        .settings-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(64, 158, 255, 0.3);
+            box-shadow: 0 8px 20px rgba(255, 153, 0, 0.4);
         }
 
-        button:active {
-            transform: translateY(0);
-            box-shadow: none;
+        .settings-btn i {
+            font-size: 24px;
         }
 
-        .error {
-            border-color: #ff4444 !important;
+        .settings-dialog .el-dialog__body {
+            padding: 20px;
         }
 
-        .error-message {
-            color: #ff4444;
-            font-size: 12px;
-            margin-top: 5px;
-            min-height: 17px;
+        .settings-item {
+            margin-bottom: 20px;
         }
 
-        .bg-upload {
-            margin: 15px 0;
+        .settings-item:last-child {
+            margin-bottom: 0;
         }
 
-        .bg-upload input[type="file"] {
-            display: none;
-        }
-
-        .bg-upload label {
-            width: auto;
-            padding: 8px 20px;
-            background: linear-gradient(45deg, #ff9900, #ff6666);
-            color: white;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .bg-upload label:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(64, 158, 255, 0.3);
+        .dialog-footer {
+            text-align: right;
+            margin-top: 20px;
         }
     </style>
 </head>
@@ -156,50 +123,74 @@
     <div id="app" v-cloak :style="bgStyle">
         <div class="bg-mask"></div>
         <div class="content">
+            <div class="birthday">宝宝生日: {{birthDate}}</div>
             <div class="count">{{totalMonths}}个月{{remainingDays}}天</div>
             <div class="count">{{totalDays}}天</div>
-            <div class="input-group">
-                <label for="year">年份</label>
-                <input id="year" placeholder="请输入年份" type="text" v-model="year" :class="{'error': errors.year}">
-            </div>
-            <div class="error-message" v-if="errors.year">{{errors.year}}</div>
-            <div class="input-group">
-                <label for="month">月份</label>
-                <input id="month" placeholder="请输入月份" type="text" v-model="month" :class="{'error': errors.month}">
-            </div>
-            <div class="error-message" v-if="errors.month">{{errors.month}}</div>
-            <div class="input-group">
-                <label for="day">日期</label>
-                <input id="day" placeholder="请输入日期" type="text" v-model="day" :class="{'error': errors.day}">
-            </div>
-            <div class="error-message" v-if="errors.day">{{errors.day}}</div>
-            <button class="calc-btn" @click="saveToLocalStorage">计算</button>
-            <div class="bg-upload">
-                <label for="bgUpload">上传背景图片</label>
-                <input id="bgUpload" type="file" accept="image/*" @change="handleBgUpload">
-            </div>
         </div>
+        <div class="settings">
+            <button class="settings-btn" @click="showSettings = true">
+                <i class="el-icon-setting"></i>
+            </button>
+        </div>
+
+        <el-dialog
+            title="设置"
+            :visible.sync="showSettings"
+            width="30%"
+            custom-class="settings-dialog">
+            <el-form :model="formData" label-width="80px">
+                <el-form-item label="宝宝名称">
+                    <el-input v-model="formData.title" placeholder="请输入宝宝名称"></el-input>
+                </el-form-item>
+                <el-form-item label="宝宝生日">
+                    <el-date-picker
+                        v-model="formData.birthDate"
+                        type="date"
+                        placeholder="选择宝宝生日"
+                        format="yyyy-MM-dd"
+                        value-format="yyyy-MM-dd"
+                        style="width: 100%">
+                    </el-date-picker>
+                </el-form-item>
+                <el-form-item label="背景图片">
+                    <el-upload
+                        class="upload-demo"
+                        action="#"
+                        :auto-upload="false"
+                        :show-file-list="false"
+                        :on-change="handleBgUpload">
+                        <el-button size="small" type="primary">更换背景图片</el-button>
+                    </el-upload>
+                </el-form-item>
+            </el-form>
+            <div class="dialog-footer">
+                <el-button @click="showSettings = false">取 消</el-button>
+                <el-button type="primary" @click="handleSaveSettings">确 定</el-button>
+            </div>
+        </el-dialog>
     </div>
     <script src="./lib/vue.min.js"></script>
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
     <script>
         const vm = new Vue({
             el: "#app",
             data() {
                 return {
+                    birthDate: '',
                     year: 2024,
                     month: 6,
                     day: 23,
-
                     totalDays: 0,
                     totalMonths: 0,
-                    remainingDays: 0,//剩余天数
-
-                    errors: {
-                        year: '',
-                        month: '',
-                        day: ''
-                    },
-                    bgImage: ''
+                    remainingDays: 0,
+                    bgImage: '',
+                    title: '嘻嘻',
+                    showSettings: false,
+                    formData: {
+                        title: '',
+                        birthDate: '',
+                        bgImage: ''
+                    }
                 };
             },
             computed: {
@@ -210,115 +201,87 @@
                 }
             },
             created() {
-                // 从本地缓存读取数据
                 const savedData = localStorage.getItem('babyBirthday');
                 if (savedData) {
                     const data = JSON.parse(savedData);
                     this.year = data.year;
                     this.month = data.month;
                     this.day = data.day;
+                    this.birthDate = `${data.year}-${String(data.month).padStart(2, '0')}-${String(data.day).padStart(2, '0')}`;
                     this.bgImage = data.bgImage || '';
+                    this.title = data.title || '嘻嘻';
+                    document.title = this.title;
                 }
                 this.calcBabyDays();
+                this.initFormData();
             },
             methods: {
-                handleBgUpload(e) {
-                    const file = e.target.files[0];
+                initFormData() {
+                    this.formData = {
+                        title: this.title,
+                        birthDate: this.birthDate,
+                        bgImage: this.bgImage
+                    };
+                },
+                handleDateChange(val) {
+                    if (val) {
+                        const [year, month, day] = val.split('-');
+                        this.year = parseInt(year);
+                        this.month = parseInt(month);
+                        this.day = parseInt(day);
+                        this.calcBabyDays();
+                    }
+                },
+                handleBgUpload(file) {
                     if (file) {
                         const reader = new FileReader();
                         reader.onload = (e) => {
-                            this.bgImage = e.target.result;
-                            // 立即保存背景图到本地存储
-                            this.saveToLocalStorage();
+                            this.formData.bgImage = e.target.result;
                         };
-                        reader.readAsDataURL(file);
+                        reader.readAsDataURL(file.raw);
                     }
                 },
-                validateInputs() {
-                    this.errors = {
-                        year: '',
-                        month: '',
-                        day: ''
-                    };
-
-                    let isValid = true;
-
-                    // 验证年份
-                    const yearNum = parseInt(this.year);
-                    if (!this.year || isNaN(yearNum)) {
-                        this.errors.year = '请输入有效的年份';
-                        isValid = false;
-                    } else if (yearNum < 1900 || yearNum > 2100) {
-                        this.errors.year = '年份必须在1900-2100之间';
-                        isValid = false;
+                handleSaveSettings() {
+                    this.title = this.formData.title;
+                    this.birthDate = this.formData.birthDate;
+                    this.bgImage = this.formData.bgImage;
+                    document.title = this.title;
+                    
+                    if (this.birthDate) {
+                        const [year, month, day] = this.birthDate.split('-');
+                        this.year = parseInt(year);
+                        this.month = parseInt(month);
+                        this.day = parseInt(day);
+                        this.calcBabyDays();
                     }
-
-                    // 验证月份
-                    const monthNum = parseInt(this.month);
-                    if (!this.month || isNaN(monthNum)) {
-                        this.errors.month = '请输入有效的月份';
-                        isValid = false;
-                    } else if (monthNum < 1 || monthNum > 12) {
-                        this.errors.month = '月份必须在1-12之间';
-                        isValid = false;
-                    }
-
-                    // 验证日期
-                    const dayNum = parseInt(this.day);
-                    if (!this.day || isNaN(dayNum)) {
-                        this.errors.day = '请输入有效的日期';
-                        isValid = false;
-                    } else {
-                        const daysInMonth = new Date(yearNum, monthNum, 0).getDate();
-                        if (dayNum < 1 || dayNum > daysInMonth) {
-                            this.errors.day = `日期必须在1-${daysInMonth}之间`;
-                            isValid = false;
-                        }
-                    }
-
-                    return isValid;
+                    
+                    this.saveToLocalStorage();
+                    this.showSettings = false;
                 },
                 calcBabyDays() {
-                    if (!this.validateInputs()) {
-                        return;
-                    }
-
-                    console.log(this.year, this.month, this.day);
-                    // 使用常量定义一天的毫秒数,提高代码可读性
                     const MILLISECONDS_PER_DAY = 24 * 60 * 60 * 1000;
-
-                    // 使用Date.UTC确保时区一致性
                     const birthday = new Date(Date.UTC(this.year, this.month - 1, this.day));
                     const today = new Date();
-
-                    // 使用Math.abs确保结果为正数
                     const timeDiff = Math.abs(today - birthday);
-
-                    // 计算总天数
                     const totalDays = Math.ceil(timeDiff / MILLISECONDS_PER_DAY);
                     this.totalDays = totalDays;
-
-                    // 计算月份和剩余天数
                     this.totalMonths = Math.floor(totalDays / 30);
                     this.remainingDays = totalDays % 30;
-
-                    // 使用模板字符串优化日志输出
                     console.log(`🌷 距离宝宝生日还有 ${this.totalMonths}月${this.remainingDays}天 (共${totalDays}天)`);
                 },
                 saveToLocalStorage() {
-                    if (!this.validateInputs()) {
-                        return;
-                    }
-                    this.calcBabyDays();
-                    // 保存到本地缓存
                     const data = {
                         year: this.year,
                         month: this.month,
                         day: this.day,
-                        bgImage: this.bgImage
+                        bgImage: this.bgImage,
+                        title: this.title
                     };
                     localStorage.setItem('babyBirthday', JSON.stringify(data));
-                    alert('保存成功！');
+                    this.$message({
+                        message: '保存成功！',
+                        type: 'success'
+                    });
                 }
             },
         });
