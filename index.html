@@ -40,7 +40,7 @@
             font-family: 'Mochiy Pop One', "PingFang SC", "Microsoft YaHei", sans-serif;
             background: linear-gradient(135deg, #E0C3FC 0%, #8EC5FC 100%);
             animation: gradientBG 15s ease infinite;
-            background-size: 400% 400%;
+            background-size: 100% 100%;
         }
 
         @keyframes gradientBG {
@@ -196,6 +196,7 @@
         }
 
         .cropper-preview {
+            display: block;
             max-width: 100%;
             max-height: 400px;
             border-radius: 15px;
@@ -302,8 +303,8 @@
                         <i class="el-icon-picture" style="font-size: 28px; color: #8EC5FC; cursor: pointer;"></i>
                         <span style="margin-left: 15px; color: #666;">上传图片</span>
                     </el-upload>
-                    <div v-if="tempImageUrl" class="cropper-container">
-                        <img :src="tempImageUrl" class="cropper-preview" ref="cropperImage">
+                    <div v-if="tempImageUrl || formData.bgImage" class="cropper-container">
+                        <img :src="tempImageUrl || formData.bgImage" class="cropper-preview" ref="cropperImage" style="display: block;">
                     </div>
                 </el-form-item>
             </el-form>
