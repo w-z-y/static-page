@@ -15,7 +15,8 @@
             box-sizing: border-box;
         }
 
-        html, body {
+        html,
+        body {
             width: 100%;
             height: 100%;
             overflow: hidden;
@@ -47,9 +48,11 @@
             0% {
                 background-position: 0% 50%;
             }
+
             50% {
                 background-position: 100% 50%;
             }
+
             100% {
                 background-position: 0% 50%;
             }
@@ -78,11 +81,11 @@
             padding: 40px;
             background: rgba(255, 255, 255, 0.4);
             border-radius: 30px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
             backdrop-filter: blur(15px);
             width: 90%;
             max-width: 500px;
-            border: 3px solid rgba(255,255,255,0.3);
+            border: 3px solid rgba(255, 255, 255, 0.3);
             animation: float 6s ease-in-out infinite;
         }
 
@@ -90,9 +93,11 @@
             0% {
                 transform: translatey(0px);
             }
+
             50% {
                 transform: translatey(-20px);
             }
+
             100% {
                 transform: translatey(0px);
             }
@@ -107,7 +112,7 @@
             -webkit-text-fill-color: transparent;
             background-clip: text;
             text-fill-color: transparent;
-            text-shadow: 3px 3px 6px rgba(0,0,0,0.1);
+            text-shadow: 3px 3px 6px rgba(0, 0, 0, 0.1);
             letter-spacing: 2px;
         }
 
@@ -115,7 +120,7 @@
             font-size: 28px;
             color: #444;
             margin-bottom: 30px;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
             letter-spacing: 1px;
         }
 
@@ -140,7 +145,7 @@
             cursor: pointer;
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             box-shadow: 0 5px 20px rgba(142, 197, 252, 0.4);
-            border: 3px solid rgba(255,255,255,0.3);
+            border: 3px solid rgba(255, 255, 255, 0.3);
         }
 
         .settings-btn:hover {
@@ -243,11 +248,11 @@
                 transform: translate(-50%, -50%) !important;
                 border-radius: 20px !important;
             }
-            
+
             .count {
                 font-size: 42px;
             }
-            
+
             .birthday {
                 font-size: 22px;
             }
@@ -269,42 +274,29 @@
             </button>
         </div>
 
-        <el-dialog
-            title="设置"
-            :visible.sync="showSettings"
-            width="90%"
-            :close-on-click-modal="false"
+        <el-dialog title="设置" :visible.sync="showSettings" width="90%" :close-on-click-modal="false"
             custom-class="settings-dialog">
             <el-form :model="formData" label-width="80px" :rules="rules" ref="settingsForm">
                 <el-form-item label="宝宝名称" prop="title">
                     <el-input v-model="formData.title" placeholder="请输入宝宝名称"></el-input>
                 </el-form-item>
                 <el-form-item label="宝宝生日" prop="birthDate">
-                    <el-date-picker
-                        v-model="formData.birthDate"
-                        type="date"
-                        placeholder="选择宝宝生日"
-                        format="yyyy-MM-dd"
-                        value-format="yyyy-MM-dd"
-                        :picker-options="{
+                    <el-date-picker v-model="formData.birthDate" type="date" placeholder="选择宝宝生日" format="yyyy-MM-dd"
+                        value-format="yyyy-MM-dd" :picker-options="{
                             type: 'date',
                             firstDayOfWeek: 1
-                        }"
-                        style="width: 100%">
+                        }" style="width: 100%">
                     </el-date-picker>
                 </el-form-item>
                 <el-form-item label="背景图片">
-                    <el-upload
-                        class="upload-demo"
-                        action="#"
-                        :auto-upload="false"
-                        :show-file-list="false"
+                    <el-upload class="upload-demo" action="#" :auto-upload="false" :show-file-list="false"
                         :on-change="handleBgUpload">
                         <i class="el-icon-picture" style="font-size: 28px; color: #8EC5FC; cursor: pointer;"></i>
                         <span style="margin-left: 15px; color: #666;">上传图片</span>
                     </el-upload>
                     <div v-if="tempImageUrl || formData.bgImage" class="cropper-container">
-                        <img :src="tempImageUrl || formData.bgImage" class="cropper-preview" ref="cropperImage" style="display: block;">
+                        <img :src="tempImageUrl || formData.bgImage" class="cropper-preview" ref="cropperImage"
+                            style="display: block;object-fit: cover;">
                     </div>
                 </el-form-item>
             </el-form>
@@ -318,7 +310,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
     <script>
         const APP_VERSION = '1.0.2'; // 添加版本号常量
-        
+
         const vm = new Vue({
             el: "#app",
             data() {
@@ -364,6 +356,11 @@
                         this.cropper = null;
                         this.tempImageUrl = '';
                     }
+                    if (val && this.formData.bgImage) {
+                        this.$nextTick(() => {
+                            this.initCropper(this.formData.bgImage);
+                        });
+                    }
                 }
             },
             created() {
@@ -373,7 +370,7 @@
                     localStorage.clear();
                     localStorage.setItem('appVersion', APP_VERSION);
                 }
-                
+
                 const savedData = localStorage.getItem('babyBirthday');
                 if (savedData) {
                     const data = JSON.parse(savedData);
@@ -387,11 +384,11 @@
                 }
                 this.calcBabyDays();
                 this.initFormData();
-                
+
                 // 设置CSS变量
                 const aspectRatio = window.innerWidth / window.innerHeight;
                 document.documentElement.style.setProperty('--aspect-ratio', aspectRatio);
-                
+
                 // 监听窗口大小变化
                 window.addEventListener('resize', () => {
                     const newAspectRatio = window.innerWidth / window.innerHeight;
@@ -415,23 +412,28 @@
                         this.calcBabyDays();
                     }
                 },
+                initCropper(imageUrl) {
+                    if (this.cropper) {
+                        this.cropper.destroy();
+                    }
+                    const image = this.$refs.cropperImage;
+                    image.src = imageUrl;
+                    this.cropper = new Cropper(image, {
+                        aspectRatio: window.innerWidth / window.innerHeight,
+                        viewMode: 1,
+                        crop: () => {
+                            const canvas = this.cropper.getCroppedCanvas();
+                            this.formData.bgImage = canvas.toDataURL('image/jpeg');
+                        }
+                    });
+                },
                 handleBgUpload(file) {
                     if (file) {
                         const reader = new FileReader();
                         reader.onload = (e) => {
                             this.tempImageUrl = e.target.result;
                             this.$nextTick(() => {
-                                if (this.cropper) {
-                                    this.cropper.destroy();
-                                }
-                                this.cropper = new Cropper(this.$refs.cropperImage, {
-                                    aspectRatio: window.innerWidth / window.innerHeight,
-                                    viewMode: 1,
-                                    crop: () => {
-                                        const canvas = this.cropper.getCroppedCanvas();
-                                        this.formData.bgImage = canvas.toDataURL('image/jpeg');
-                                    }
-                                });
+                                this.initCropper(e.target.result);
                             });
                         };
                         reader.readAsDataURL(file.raw);
@@ -442,17 +444,17 @@
                         if (!valid) {
                             return;
                         }
-                        
+
                         if (!this.formData.title || !this.formData.birthDate) {
                             this.$message.error('请填写必填项');
                             return;
                         }
-                        
+
                         this.title = this.formData.title;
                         this.birthDate = this.formData.birthDate;
                         this.bgImage = this.formData.bgImage;
                         document.title = this.title;
-                        
+
                         if (this.birthDate) {
                             const [year, month, day] = this.birthDate.split('-');
                             this.year = parseInt(year);
@@ -460,7 +462,7 @@
                             this.day = parseInt(day);
                             this.calcBabyDays();
                         }
-                        
+
                         this.saveToLocalStorage();
                         this.showSettings = false;
                     });
