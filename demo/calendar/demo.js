@@ -1,4 +1,4 @@
-import { createApp, ref, computed } from "../lib/vue3.min.js";
+import { createApp, ref, computed } from "../../lib/vue3.min.js";
 import {
   sortByTimeStamp,
   handleColorOpacity,

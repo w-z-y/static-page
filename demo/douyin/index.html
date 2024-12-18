@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>抖音风格视频切换</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #000;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .video-wrapper {
+            height: 100vh;
+            position: relative;
+            transition: transform 0.3s;
+        }
+
+        .video-wrapper.animating {
+            pointer-events: none;
+        }
+
+        .video-item {
+            height: 100vh;
+            width: 100%;
+            position: relative;
+            display: flex;
+            justify-content: center;
+        }
+
+        video {
+            width: 60%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .video-blur-left,
+        .video-blur-right {
+            position: absolute;
+            top: 0;
+            width: 20%;
+            height: 100%;
+            backdrop-filter: blur(10px);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 20px;
+        }
+
+        .video-blur-left {
+            left: 0;
+        }
+
+        .video-blur-right {
+            right: 0;
+            align-items: center;
+        }
+
+        .video-info {
+            color: #fff;
+            z-index: 1;
+            margin-bottom: 60px;
+        }
+
+        .author {
+            font-size: 18px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .description {
+            font-size: 16px;
+            max-width: 100%;
+            line-height: 1.4;
+        }
+
+        .actions {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+            margin-bottom: 60px;
+        }
+
+        .action-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .action-btn {
+            width: 44px;
+            height: 44px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .action-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: scale(1.1);
+        }
+
+        .action-count {
+            color: #fff;
+            font-size: 13px;
+            text-align: center;
+            min-width: 44px;
+        }
+
+        .video-controls {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 100;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 8px;
+        }
+
+        .play-btn {
+            color: #fff;
+            cursor: pointer;
+            font-size: 24px;
+            width: 40px;
+            text-align: center;
+        }
+
+        .progress-bar {
+            flex: 1;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 2px;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .progress {
+            height: 100%;
+            background: #fff;
+            border-radius: 2px;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <div class="container">
+            <div class="video-wrapper" :class="{ 'animating': isAnimating }" :style="wrapperStyle">
+                <div class="video-item" v-for="(video, index) in videos" :key="index">
+                    <div class="video-blur-left">
+                        <div class="video-info">
+                            <div class="author">@{{ video.username }}</div>
+                            <div class="description">{{ video.description }}</div>
+                        </div>
+                    </div>
+                    <video 
+                        :src="video.src" 
+                        :ref="el => { if(el) videoRefs[index] = el }"
+                        loop 
+                        @loadeddata="handleVideoLoaded(index)"
+                        @timeupdate="handleTimeUpdate(index)"
+                        @click="togglePlay(index)"
+                    ></video>
+                    <div class="video-blur-right">
+                        <div class="actions">
+                            <div class="action-item" v-for="(action, key) in video.actions" :key="key">
+                                <div class="action-btn">{{ action.icon }}</div>
+                                <div class="action-count">{{ action.count }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="video-controls">
+            <div class="play-btn" @click="togglePlay(currentIndex)">
+                {{ videos[currentIndex].isPlaying ? '⏸' : '▶️' }}
+            </div>
+            <div class="progress-bar" @click="handleProgressClick($event, currentIndex)">
+                <div class="progress" :style="{ width: videos[currentIndex].progress + '%' }"></div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { createApp, ref, computed } from "../../lib/vue3.min.js";
+
+        createApp({
+            setup() {
+                const currentIndex = ref(0)
+                const startY = ref(0)
+                const videoRefs = ref({})
+                const isAnimating = ref(false)
+
+                // 随机视频源列表 - 100个视频
+                const videoSources = Array(100).fill().map((_, i) => {
+                    const sources = [
+                        'https://media.w3.org/2010/05/sintel/trailer.mp4',
+                        'https://media.w3.org/2010/05/bunny/trailer.mp4',
+                        'https://media.w3.org/2010/05/video/movie_300.mp4'
+                    ]
+                    return sources[i % sources.length]
+                })
+
+                // 初始化100个视频数据
+                const videos = ref(Array(100).fill().map((_, i) => ({
+                    src: videoSources[i],
+                    username: `抖音达人${i + 1}`,
+                    description: `分享生活的美好时刻 #生活 #日常 ${i + 1}`,
+                    actions: {
+                        like: { icon: '❤️', count: Math.floor(Math.random() * 50) + 'w' },
+                        comment: { icon: '💬', count: Math.floor(Math.random() * 10) + 'w' },
+                        share: { icon: '⤴️', count: Math.floor(Math.random() * 5) + 'w' }
+                    },
+                    isPlaying: false,
+                    progress: 0,
+                    currentTime: 0
+                })))
+
+                const wrapperStyle = computed(() => ({
+                    transform: `translateY(-${currentIndex.value * 100}vh)`
+                }))
+
+                const handleVideoLoaded = (index) => {
+                    if (index === currentIndex.value) {
+                        togglePlay(index)
+                    }
+                }
+
+                const togglePlay = (index) => {
+                    const video = videoRefs.value[index]
+                    if (video) {
+                        // 暂停其他所有视频
+                        Object.entries(videoRefs.value).forEach(([idx, v]) => {
+                            if (idx != index) {
+                                v.pause()
+                                videos.value[idx].isPlaying = false
+                            }
+                        })
+
+                        if (videos.value[index].isPlaying) {
+                            video.pause()
+                        } else {
+                            video.play()
+                        }
+                        videos.value[index].isPlaying = !videos.value[index].isPlaying
+                    }
+                }
+
+                const handleTimeUpdate = (index) => {
+                    const video = videoRefs.value[index]
+                    if (video) {
+                        const progress = (video.currentTime / video.duration) * 100
+                        videos.value[index].progress = progress
+                        videos.value[index].currentTime = video.currentTime
+                    }
+                }
+
+                const handleProgressClick = (event, index) => {
+                    const video = videoRefs.value[index]
+                    if (video) {
+                        const rect = event.target.getBoundingClientRect()
+                        const ratio = (event.clientX - rect.left) / rect.width
+                        video.currentTime = ratio * video.duration
+                    }
+                }
+
+                const handleTouchStart = (e) => {
+                    if (!isAnimating.value) {
+                        startY.value = e.touches[0].clientY
+                    }
+                }
+
+                const handleTouchEnd = (e) => {
+                    if (isAnimating.value) return
+
+                    const diff = e.changedTouches[0].clientY - startY.value
+
+                    if (diff < -50 && currentIndex.value < videos.value.length - 1) {
+                        isAnimating.value = true
+                        currentIndex.value++
+                        setTimeout(() => {
+                            isAnimating.value = false
+                            togglePlay(currentIndex.value)
+                        }, 300)
+                    } else if (diff > 50 && currentIndex.value > 0) {
+                        isAnimating.value = true
+                        currentIndex.value--
+                        setTimeout(() => {
+                            isAnimating.value = false
+                            togglePlay(currentIndex.value)
+                        }, 300)
+                    }
+                }
+
+                const handleWheel = (e) => {
+                    if (isAnimating.value) return
+
+                    if (e.deltaY > 0 && currentIndex.value < videos.value.length - 1) {
+                        isAnimating.value = true
+                        currentIndex.value++
+                        setTimeout(() => {
+                            isAnimating.value = false
+                            togglePlay(currentIndex.value)
+                        }, 300)
+                    } else if (e.deltaY < 0 && currentIndex.value > 0) {
+                        isAnimating.value = true
+                        currentIndex.value--
+                        setTimeout(() => {
+                            isAnimating.value = false
+                            togglePlay(currentIndex.value)
+                        }, 300)
+                    }
+                }
+
+                document.addEventListener('touchstart', handleTouchStart)
+                document.addEventListener('touchend', handleTouchEnd)
+                document.addEventListener('wheel', handleWheel)
+
+                // 播放第一个视频
+                setTimeout(() => {
+                    togglePlay(0)
+                }, 0)
+
+                return {
+                    videos,
+                    wrapperStyle,
+                    videoRefs,
+                    isAnimating,
+                    togglePlay,
+                    handleVideoLoaded,
+                    handleTimeUpdate,
+                    handleProgressClick,
+                    currentIndex
+                }
+            }
+        }).mount('#app')
+    </script>
+</body>
+
+</html>
