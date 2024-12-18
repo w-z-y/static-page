@@ -173,11 +173,11 @@
                 <input id="day" placeholder="请输入日期" type="text" v-model="day" :class="{'error': errors.day}">
             </div>
             <div class="error-message" v-if="errors.day">{{errors.day}}</div>
+            <button class="calc-btn" @click="saveToLocalStorage">计算</button>
             <div class="bg-upload">
                 <label for="bgUpload">上传背景图片</label>
                 <input id="bgUpload" type="file" accept="image/*" @change="handleBgUpload">
             </div>
-            <button class="calc-btn" @click="saveToLocalStorage">计算</button>
         </div>
     </div>
     <script src="./lib/vue.min.js"></script>
@@ -228,6 +228,8 @@
                         const reader = new FileReader();
                         reader.onload = (e) => {
                             this.bgImage = e.target.result;
+                            // 立即保存背景图到本地存储
+                            this.saveToLocalStorage();
                         };
                         reader.readAsDataURL(file);
                     }
