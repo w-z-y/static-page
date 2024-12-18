@@ -3,13 +3,21 @@
 
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>宝宝生日计算</title>
     <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
     <style>
         * {
             padding: 0;
             margin: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
         }
 
         [v-cloak] {
@@ -17,18 +25,26 @@
         }
 
         #app {
-            height: 100vh;
+            width: 100%;
+            height: 100%;
             overflow: hidden;
             display: flex;
             justify-content: center;
             align-items: center;
             text-align: center;
-            background-size: cover;
+            background-size: contain;
             background-position: center;
             background-repeat: no-repeat;
             position: relative;
             font-family: "Helvetica Neue",Helvetica,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","微软雅黑",Arial,sans-serif;
             background: linear-gradient(0deg, rgb(251, 194, 235) 0%, rgb(166, 193, 238) 100%);
+        }
+
+        @media screen and (max-width: 768px) {
+            #app {
+                background-size: cover;
+                background-position: center;
+            }
         }
 
         .bg-mask {
@@ -49,6 +65,8 @@
             border-radius: 15px;
             box-shadow: 0 8px 32px rgba(0,0,0,0.1);
             backdrop-filter: blur(10px);
+            width: 90%;
+            max-width: 500px;
         }
 
         .count {
@@ -123,8 +141,44 @@
             height: 44px;
             font-size: 16px;
             border-radius: 22px;
-            background: linear-gradient(45deg, #ff9900, #ff6666);
+            background: linear-gradient(45deg, #409EFF, #F56C6C);
             border: none;
+        }
+
+        .cropper-container {
+            width: 100%;
+            height: 400px;
+            margin-top: 10px;
+        }
+
+        .cropper-preview {
+            max-width: 100%;
+            max-height: 400px;
+        }
+
+        /* 添加cropper框选区域样式 */
+        .cropper-face,
+        .cropper-move {
+            aspect-ratio: 9 / 16;
+        }
+
+        /* 背景图片上传按钮样式 */
+        .upload-demo .el-upload {
+            text-align: left;
+            border: 2px dashed #dcdfe6;
+            border-radius: 6px;
+            padding: 10px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+        }
+
+        .upload-demo:hover {
+            border-color: #409EFF;
+        }
+
+        .upload-demo i {
+            margin-left: 10px;
         }
 
         @media screen and (max-width: 768px) {
@@ -166,18 +220,23 @@
             title="设置"
             :visible.sync="showSettings"
             width="90%"
+            :close-on-click-modal="false"
             custom-class="settings-dialog">
-            <el-form :model="formData" label-width="80px">
-                <el-form-item label="宝宝名称">
+            <el-form :model="formData" label-width="80px" :rules="rules" ref="settingsForm">
+                <el-form-item label="宝宝名称" prop="title">
                     <el-input v-model="formData.title" placeholder="请输入宝宝名称"></el-input>
                 </el-form-item>
-                <el-form-item label="宝宝生日">
+                <el-form-item label="宝宝生日" prop="birthDate">
                     <el-date-picker
                         v-model="formData.birthDate"
                         type="date"
                         placeholder="选择宝宝生日"
                         format="yyyy-MM-dd"
                         value-format="yyyy-MM-dd"
+                        :picker-options="{
+                            type: 'date',
+                            firstDayOfWeek: 1
+                        }"
                         style="width: 100%">
                     </el-date-picker>
                 </el-form-item>
@@ -188,8 +247,12 @@
                         :auto-upload="false"
                         :show-file-list="false"
                         :on-change="handleBgUpload">
-                        <el-button size="small" type="primary">更换背景图片</el-button>
+                        <i class="el-icon-picture" style="font-size: 24px; color: #409EFF; cursor: pointer;"></i>
+                        <span style="margin-left: 10px; color: #606266;">上传图片</span>
                     </el-upload>
+                    <div v-if="tempImageUrl" class="cropper-container">
+                        <img :src="tempImageUrl" class="cropper-preview" ref="cropperImage">
+                    </div>
                 </el-form-item>
             </el-form>
             <div class="dialog-footer">
@@ -199,6 +262,7 @@
     </div>
     <script src="./lib/vue.min.js"></script>
     <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
     <script>
         const APP_VERSION = '1.0.0'; // 添加版本号常量
         
@@ -220,7 +284,17 @@
                         title: '',
                         birthDate: '',
                         bgImage: ''
-                    }
+                    },
+                    rules: {
+                        title: [
+                            { required: true, message: '请输入宝宝名称', trigger: 'blur' }
+                        ],
+                        birthDate: [
+                            { required: true, message: '请选择宝宝生日', trigger: 'change' }
+                        ]
+                    },
+                    tempImageUrl: '',
+                    cropper: null
                 };
             },
             computed: {
@@ -228,6 +302,15 @@
                     return this.bgImage ? {
                         backgroundImage: `url(${this.bgImage})`
                     } : {}
+                }
+            },
+            watch: {
+                showSettings(val) {
+                    if (!val && this.cropper) {
+                        this.cropper.destroy();
+                        this.cropper = null;
+                        this.tempImageUrl = '';
+                    }
                 }
             },
             created() {
@@ -273,27 +356,51 @@
                     if (file) {
                         const reader = new FileReader();
                         reader.onload = (e) => {
-                            this.formData.bgImage = e.target.result;
+                            this.tempImageUrl = e.target.result;
+                            this.$nextTick(() => {
+                                if (this.cropper) {
+                                    this.cropper.destroy();
+                                }
+                                this.cropper = new Cropper(this.$refs.cropperImage, {
+                                    aspectRatio: 9/16,
+                                    viewMode: 1,
+                                    crop: () => {
+                                        const canvas = this.cropper.getCroppedCanvas();
+                                        this.formData.bgImage = canvas.toDataURL('image/jpeg');
+                                    }
+                                });
+                            });
                         };
                         reader.readAsDataURL(file.raw);
                     }
                 },
                 handleSaveSettings() {
-                    this.title = this.formData.title;
-                    this.birthDate = this.formData.birthDate;
-                    this.bgImage = this.formData.bgImage;
-                    document.title = this.title;
-                    
-                    if (this.birthDate) {
-                        const [year, month, day] = this.birthDate.split('-');
-                        this.year = parseInt(year);
-                        this.month = parseInt(month);
-                        this.day = parseInt(day);
-                        this.calcBabyDays();
-                    }
-                    
-                    this.saveToLocalStorage();
-                    this.showSettings = false;
+                    this.$refs.settingsForm.validate((valid) => {
+                        if (!valid) {
+                            return;
+                        }
+                        
+                        if (!this.formData.title || !this.formData.birthDate) {
+                            this.$message.error('请填写必填项');
+                            return;
+                        }
+                        
+                        this.title = this.formData.title;
+                        this.birthDate = this.formData.birthDate;
+                        this.bgImage = this.formData.bgImage;
+                        document.title = this.title;
+                        
+                        if (this.birthDate) {
+                            const [year, month, day] = this.birthDate.split('-');
+                            this.year = parseInt(year);
+                            this.month = parseInt(month);
+                            this.day = parseInt(day);
+                            this.calcBabyDays();
+                        }
+                        
+                        this.saveToLocalStorage();
+                        this.showSettings = false;
+                    });
                 },
                 calcBabyDays() {
                     const MILLISECONDS_PER_DAY = 24 * 60 * 60 * 1000;
