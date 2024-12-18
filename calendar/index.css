@@ -1,0 +1,25 @@
+.date-container {
+    display: flex;
+    flex-wrap: wrap
+}
+
+.week-item {
+    display: flex;
+    height: 200px;
+    width: 100%;
+
+    .date-item {
+        width: calc((1 / 7) * 100%);
+        outline: 1px solid #eee;
+
+        .date-body {
+            position: relative;
+        }
+    }
+}
+
+.text-overflow {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="./index.css">
+    </link>
+</head>
+
+<body>
+    <div id="app">
+        <div class="date-container">
+            <div class="week-item" v-for="week in splitDateList" :key="week[0]">
+                <div v-for="date in week" :key="date" class="date-item">
+                    <div class="date-header">
+                        {{ new Date(date).getDate() }}
+                    </div>
+                    <div class="date-body">
+                        <template v-for="event in eventDistribution[date]">
+                            <div v-if="event.isFirstDay" @mouseenter="handleMouseEnter(event)"
+                                @mouseleave="handleMouseLeave" :key="event.id" :style="eventStyle(event)"
+                                class="text-overflow event-item" :title="event.title">
+                                {{ event.title }}
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="./demo.js" type="module"></script>
+</body>
+
+</html>
