@@ -129,7 +129,7 @@
 
         .settings {
             position: fixed;
-            top: 25px;
+            bottom: 25px;
             right: 25px;
             z-index: 100;
         }
@@ -177,20 +177,30 @@
         .dialog-footer {
             text-align: center;
             margin-top: 25px;
+            display: flex;
+            gap: 15px;
         }
 
-        .dialog-footer .el-button--primary {
-            width: 100%;
+        .dialog-footer .el-button {
+            flex: 1;
             height: 50px;
             font-size: 18px;
             border-radius: 25px;
-            background: linear-gradient(45deg, #E0C3FC, #8EC5FC);
-            border: none;
             letter-spacing: 2px;
             transition: all 0.3s ease;
         }
 
-        .dialog-footer .el-button--primary:hover {
+        .dialog-footer .el-button--primary {
+            background: linear-gradient(45deg, #E0C3FC, #8EC5FC);
+            border: none;
+        }
+
+        .dialog-footer .el-button--default {
+            border: 2px solid #8EC5FC;
+            color: #8EC5FC;
+        }
+
+        .dialog-footer .el-button:hover {
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(142, 197, 252, 0.4);
         }
@@ -241,6 +251,33 @@
             transform: scale(1.1);
         }
 
+        /* 自定义Message样式 */
+        .el-message {
+            min-width: 320px;
+            padding: 15px 20px;
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            background: linear-gradient(45deg, rgba(224, 195, 252, 0.9), rgba(142, 197, 252, 0.9)) !important;
+            border: none !important;
+        }
+
+        .el-message__content {
+            color: white !important;
+            font-size: 16px;
+            font-weight: 500;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .el-message .el-icon-success,
+        .el-message .el-icon-error,
+        .el-message .el-icon-info,
+        .el-message .el-icon-warning {
+            color: white !important;
+            font-size: 20px;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
         @media screen and (max-width: 768px) {
             .settings-dialog {
                 width: 95% !important;
@@ -288,7 +325,7 @@
                         value-format="yyyy-MM-dd" :picker-options="{
                             type: 'date',
                             firstDayOfWeek: 1
-                        }" style="width: 100%">
+                        }" style="width: 100%" :editable="false">
                     </el-date-picker>
                 </el-form-item>
                 <el-form-item label="背景图片">
@@ -304,6 +341,7 @@
                 </el-form-item>
             </el-form>
             <div class="dialog-footer">
+                <el-button @click="showSettings = false">取 消</el-button>
                 <el-button type="primary" @click="handleSaveSettings">保 存</el-button>
             </div>
         </el-dialog>
@@ -563,7 +601,10 @@
                     localStorage.setItem('babyBirthday', JSON.stringify(data));
                     this.$message({
                         message: '保存成功！',
-                        type: 'success'
+                        type: 'success',
+                        duration: 2000,
+                        showClose: true,
+                        center: true
                     });
                 }
             },
