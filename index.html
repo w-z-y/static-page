@@ -28,6 +28,7 @@
             background-repeat: no-repeat;
             position: relative;
             font-family: "Helvetica Neue",Helvetica,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","微软雅黑",Arial,sans-serif;
+            background: linear-gradient(0deg, rgb(251, 194, 235) 0%, rgb(166, 193, 238) 100%);
         }
 
         .bg-mask {
@@ -113,8 +114,36 @@
         }
 
         .dialog-footer {
-            text-align: right;
+            text-align: center;
             margin-top: 20px;
+        }
+
+        .dialog-footer .el-button--primary {
+            width: 100%;
+            height: 44px;
+            font-size: 16px;
+            border-radius: 22px;
+            background: linear-gradient(45deg, #ff9900, #ff6666);
+            border: none;
+        }
+
+        @media screen and (max-width: 768px) {
+            .settings-dialog {
+                width: 90% !important;
+                margin: 0 auto !important;
+                position: fixed !important;
+                top: 50% !important;
+                left: 50% !important;
+                transform: translate(-50%, -50%) !important;
+            }
+            
+            .count {
+                font-size: 40px;
+            }
+            
+            .birthday {
+                font-size: 20px;
+            }
         }
     </style>
 </head>
@@ -123,9 +152,9 @@
     <div id="app" v-cloak :style="bgStyle">
         <div class="bg-mask"></div>
         <div class="content">
-            <div class="birthday">宝宝生日: {{birthDate}}</div>
-            <div class="count">{{totalMonths}}个月{{remainingDays}}天</div>
-            <div class="count">{{totalDays}}天</div>
+            <div class="birthday">宝宝生日: {{birthDate || '-'}}</div>
+            <div class="count">{{birthDate ? totalMonths + '个月' + remainingDays + '天' : '-'}}</div>
+            <div class="count">{{birthDate ? totalDays + '天' : '-'}}</div>
         </div>
         <div class="settings">
             <button class="settings-btn" @click="showSettings = true">
@@ -136,7 +165,7 @@
         <el-dialog
             title="设置"
             :visible.sync="showSettings"
-            width="30%"
+            width="90%"
             custom-class="settings-dialog">
             <el-form :model="formData" label-width="80px">
                 <el-form-item label="宝宝名称">
@@ -164,8 +193,7 @@
                 </el-form-item>
             </el-form>
             <div class="dialog-footer">
-                <el-button @click="showSettings = false">取 消</el-button>
-                <el-button type="primary" @click="handleSaveSettings">确 定</el-button>
+                <el-button type="primary" @click="handleSaveSettings">保 存</el-button>
             </div>
         </el-dialog>
     </div>
@@ -177,14 +205,14 @@
             data() {
                 return {
                     birthDate: '',
-                    year: 2024,
-                    month: 6,
-                    day: 23,
+                    year: null,
+                    month: null,
+                    day: null,
                     totalDays: 0,
                     totalMonths: 0,
                     remainingDays: 0,
                     bgImage: '',
-                    title: '嘻嘻',
+                    title: '',
                     showSettings: false,
                     formData: {
                         title: '',
