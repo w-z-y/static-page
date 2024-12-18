@@ -159,7 +159,7 @@
         /* 添加cropper框选区域样式 */
         .cropper-face,
         .cropper-move {
-            aspect-ratio: 9 / 16;
+            aspect-ratio: var(--aspect-ratio);
         }
 
         /* 背景图片上传按钮样式 */
@@ -334,6 +334,16 @@
                 }
                 this.calcBabyDays();
                 this.initFormData();
+                
+                // 设置CSS变量
+                const aspectRatio = window.innerWidth / window.innerHeight;
+                document.documentElement.style.setProperty('--aspect-ratio', aspectRatio);
+                
+                // 监听窗口大小变化
+                window.addEventListener('resize', () => {
+                    const newAspectRatio = window.innerWidth / window.innerHeight;
+                    document.documentElement.style.setProperty('--aspect-ratio', newAspectRatio);
+                });
             },
             methods: {
                 initFormData() {
@@ -362,7 +372,7 @@
                                     this.cropper.destroy();
                                 }
                                 this.cropper = new Cropper(this.$refs.cropperImage, {
-                                    aspectRatio: 9/16,
+                                    aspectRatio: window.innerWidth / window.innerHeight,
                                     viewMode: 1,
                                     crop: () => {
                                         const canvas = this.cropper.getCroppedCanvas();
