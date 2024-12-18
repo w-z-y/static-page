@@ -9,6 +9,9 @@ import {
 } from "./utils.js";
 import { events } from "./event.js";
 
+
+import Calendar from '../../components/Calendar/index.js';
+
 // 事件悬浮状态 Hook
 function useEventHover() {
   const hoveredEvent = ref(null);
@@ -137,6 +140,9 @@ function useEventData(year, month) {
 }
 
 const app = createApp({
+  components: {
+    Calendar
+  },
   setup() {
     // 事件配置
     const calendarConfig = {

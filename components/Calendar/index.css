@@ -1,0 +1,131 @@
+.calendar {
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+    font-family: Arial, sans-serif;
+    position: relative;
+
+    &::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border: 1px solid #eee;
+        pointer-events: none;
+    }
+
+    .calendar-header {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        padding: 15px;
+        position: relative;
+
+        &::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 1px;
+            background: #eee;
+        }
+
+        & button {
+            padding: 5px 10px;
+            background: #fff;
+            border-radius: 4px;
+            cursor: pointer;
+            position: relative;
+
+            &::before {
+                content: '';
+                position: absolute;
+                inset: 0;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                pointer-events: none;
+            }
+
+            &:hover {
+                background: #f5f5f5;
+            }
+        }
+    }
+
+    .calendar-body {
+        .weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            text-align: center;
+            background: #f5f5f5;
+            padding: 10px 0;
+            position: relative;
+
+            &::after {
+                content: '';
+                position: absolute;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                height: 1px;
+                background: #eee;
+            }
+        }
+
+        .weeks {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+
+            .day {
+                cursor: pointer;
+                position: relative;
+
+                &::after {
+                    content: '';
+                    position: absolute;
+                    right: 0;
+                    top: 0;
+                    bottom: 0;
+                    width: 1px;
+                    background: #eee;
+                }
+
+                &::before {
+                    content: '';
+                    position: absolute;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    height: 1px;
+                    background: #eee;
+                }
+
+                &:last-child {
+                    &::after {
+                        display: none;
+                    }
+                }
+
+                &.is-today {
+                    background: #f0f0f0;
+                }
+
+                &:hover {
+                    background: #edf1ff;
+                }
+
+                .day-header {
+                    padding: 15px;
+                    font-size: 14px;
+                    font-weight: bold;
+                }
+
+                .day-body {
+                    position: relative;
+                    height: 100px;
+                }
+            }
+        }
+    }
+}
