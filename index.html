@@ -293,7 +293,7 @@
                 </el-form-item>
                 <el-form-item label="背景图片">
                     <el-upload class="upload-demo" action="#" :auto-upload="false" :show-file-list="false"
-                        :on-change="handleBgUpload">
+                        :on-change="handleBgUpload" :before-upload="beforeUpload">
                         <i class="el-icon-picture" style="font-size: 28px; color: #8EC5FC; cursor: pointer;"></i>
                         <span style="margin-left: 15px; color: #666;">上传图片</span>
                     </el-upload>
@@ -381,9 +381,11 @@
                     this.month = data.month;
                     this.day = data.day;
                     this.birthDate = `${data.year}-${String(data.month).padStart(2, '0')}-${String(data.day).padStart(2, '0')}`;
-                    this.bgImage = data.bgImage || '';
                     this.title = data.title || '嘻嘻';
                     document.title = this.title;
+
+                    // 从IndexedDB加载背景图片
+                    this.loadBgImageFromDB();
                 }
                 this.calcBabyDays();
                 this.initFormData();
@@ -424,15 +426,37 @@
                     this.cropper = new Cropper(image, {
                         aspectRatio: window.innerWidth / window.innerHeight,
                         viewMode: 1,
-                        autoCropArea: 1, // 设置初始裁剪框为最大
+                        autoCropArea: 1,
+                        quality: 1, // 设置最高质量
+                        imageSmoothingEnabled: true,
+                        imageSmoothingQuality: 'high',
                         crop: () => {
-                            const canvas = this.cropper.getCroppedCanvas();
-                            this.formData.bgImage = canvas.toDataURL('image/jpeg');
+                            const canvas = this.cropper.getCroppedCanvas({
+                                maxWidth: 4096, // 支持更大分辨率
+                                maxHeight: 4096,
+                                imageSmoothingEnabled: true,
+                                imageSmoothingQuality: 'high'
+                            });
+                            this.formData.bgImage = canvas.toDataURL('image/jpeg', 0.9); // 使用较高质量
                         }
                     });
                 },
+                beforeUpload(file) {
+                    const isImage = file.type.startsWith('image/');
+                    const isLt20M = file.size / 1024 / 1024 < 20; // 增加到20MB
+
+                    if (!isImage) {
+                        this.$message.error('只能上传图片文件!');
+                        return false;
+                    }
+                    if (!isLt20M) {
+                        this.$message.error('图片大小不能超过 20MB!');
+                        return false;
+                    }
+                    return true;
+                },
                 handleBgUpload(file) {
-                    if (file) {
+                    if (file && this.beforeUpload(file.raw)) {
                         const reader = new FileReader();
                         reader.onload = (e) => {
                             this.tempImageUrl = e.target.result;
@@ -443,8 +467,49 @@
                         reader.readAsDataURL(file.raw);
                     }
                 },
+                async loadBgImageFromDB() {
+                    try {
+                        const db = await this.openDB();
+                        const transaction = db.transaction(['images'], 'readonly');
+                        const store = transaction.objectStore('images');
+                        const request = store.get('bgImage');
+                        
+                        request.onsuccess = (event) => {
+                            if (event.target.result) {
+                                this.bgImage = event.target.result.data;
+                            }
+                        };
+                    } catch (error) {
+                        console.error('加载背景图片失败:', error);
+                    }
+                },
+                async saveBgImageToDB(imageData) {
+                    try {
+                        const db = await this.openDB();
+                        const transaction = db.transaction(['images'], 'readwrite');
+                        const store = transaction.objectStore('images');
+                        await store.put({id: 'bgImage', data: imageData});
+                    } catch (error) {
+                        console.error('保存背景图片失败:', error);
+                    }
+                },
+                openDB() {
+                    return new Promise((resolve, reject) => {
+                        const request = indexedDB.open('babyBirthdayDB', 1);
+                        
+                        request.onerror = () => reject(request.error);
+                        request.onsuccess = () => resolve(request.result);
+                        
+                        request.onupgradeneeded = (event) => {
+                            const db = event.target.result;
+                            if (!db.objectStoreNames.contains('images')) {
+                                db.createObjectStore('images', { keyPath: 'id' });
+                            }
+                        };
+                    });
+                },
                 handleSaveSettings() {
-                    this.$refs.settingsForm.validate((valid) => {
+                    this.$refs.settingsForm.validate(async (valid) => {
                         if (!valid) {
                             return;
                         }
@@ -456,7 +521,13 @@
 
                         this.title = this.formData.title;
                         this.birthDate = this.formData.birthDate;
-                        this.bgImage = this.formData.bgImage;
+                        
+                        // 如果有新的背景图片
+                        if (this.formData.bgImage) {
+                            this.bgImage = this.formData.bgImage;
+                            await this.saveBgImageToDB(this.formData.bgImage);
+                        }
+                        
                         document.title = this.title;
 
                         if (this.birthDate) {
@@ -487,7 +558,6 @@
                         year: this.year,
                         month: this.month,
                         day: this.day,
-                        bgImage: this.bgImage,
                         title: this.title
                     };
                     localStorage.setItem('babyBirthday', JSON.stringify(data));
