@@ -119,12 +119,6 @@ function useForm(config, initialData = {}) {
     return !error
   }
 
-  // 文件处理
-  const handleFileChange = ({ target: { files: [file] } }) => {
-    formData.value.file = file
-    validateField(enrichFormConfig.value.find(item => item.key === 'file'), file)
-  }
-
   // 表单验证与提交
   const validate = () => enrichFormConfig.value
     .map(item => validateField(item, unref(formData)[item.key]))
@@ -161,7 +155,6 @@ function useForm(config, initialData = {}) {
     formData,
     formErrors,
     validateField,
-    handleFileChange,
     submitForm,
     resetForm,
     enrichFormConfig,
@@ -169,19 +162,15 @@ function useForm(config, initialData = {}) {
   }
 }
 
-const { formErrors, validateField, handleFileChange, submitForm, resetForm, enrichFormConfig } = useForm(props.formConfig, props.formData)
+const { formErrors, validateField, submitForm, resetForm, enrichFormConfig } = useForm(props.formConfig, props.formData)
 const { mockData, getFieldOptions } = useMockData(props.formConfig)
 
 const submitFormData = async data => new Promise(resolve => setTimeout(() => resolve(data), 1000))
 
 onMounted(async () => {
   await Promise.all([
-    getFieldOptions('city', mockData.cities, ['北京', '上海', '广州', '深圳']),
-    getFieldOptions('hobbies', mockData.hobbies, [
-      { label: '阅读', value: 'reading' },
-      { label: '运动', value: 'sports' },
-      { label: '音乐', value: 'music' }
-    ])
+    getFieldOptions('city', mockData.cities),
+    getFieldOptions('hobbies', mockData.hobbies)
   ])
 })
 </script>
@@ -189,7 +178,7 @@ onMounted(async () => {
 <template>
   <div class="form-container">
     <FormItem v-for="item in enrichFormConfig" :key="item.key" :item="item" v-model="formData[item.key]"
-      :validate-field="validateField" :handle-file-change="handleFileChange">
+      :validate-field="validateField" >
       <template #default="{ item }">
         <slot :item="item" />
       </template>

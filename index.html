@@ -22,6 +22,25 @@
             justify-content: center;
             align-items: center;
             text-align: center;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            position: relative;
+        }
+
+        .bg-mask {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.85);
+            z-index: 0;
+        }
+
+        .content {
+            position: relative;
+            z-index: 1;
         }
 
         .coung {
@@ -107,12 +126,36 @@
             margin-top: 5px;
             min-height: 17px;
         }
+
+        .bg-upload {
+            margin: 15px 0;
+        }
+
+        .bg-upload input[type="file"] {
+            display: none;
+        }
+
+        .bg-upload label {
+            width: auto;
+            padding: 8px 20px;
+            background: linear-gradient(45deg, #ff9900, #ff6666);
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .bg-upload label:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(64,158,255,0.3);
+        }
     </style>
 </head>
 
 <body>
-    <div id="app" v-cloak>
-        <div>
+    <div id="app" v-cloak :style="bgStyle">
+        <div class="bg-mask"></div>
+        <div class="content">
             <div class="coung">{{totalMonths}}个月{{remainingDays}}天</div>
             <div class="coung">{{totalDays}}天</div>
             <div class="input-group">
@@ -130,10 +173,14 @@
                 <input id="day" placeholder="请输入日期" type="text" v-model="day" :class="{'error': errors.day}">
             </div>
             <div class="error-message" v-if="errors.day">{{errors.day}}</div>
+            <div class="bg-upload">
+                <label for="bgUpload">上传背景图片</label>
+                <input id="bgUpload" type="file" accept="image/*" @change="handleBgUpload">
+            </div>
             <button class="calc-btn" @click="saveToLocalStorage">计算</button>
         </div>
     </div>
-    <script src="./vue.min.js"></script>
+    <script src="./lib/vue.min.js"></script>
     <script>
         const vm = new Vue({
             el: "#app",
@@ -151,8 +198,16 @@
                         year: '',
                         month: '',
                         day: ''
-                    }
+                    },
+                    bgImage: ''
                 };
+            },
+            computed: {
+                bgStyle() {
+                    return this.bgImage ? {
+                        backgroundImage: `url(${this.bgImage})`
+                    } : {}
+                }
             },
             created() {
                 // 从本地缓存读取数据
@@ -162,10 +217,21 @@
                     this.year = data.year;
                     this.month = data.month;
                     this.day = data.day;
+                    this.bgImage = data.bgImage || '';
                 }
                 this.calcBabyDays();
             },
             methods: {
+                handleBgUpload(e) {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            this.bgImage = e.target.result;
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                },
                 validateInputs() {
                     this.errors = {
                         year: '',
@@ -246,7 +312,8 @@
                     const data = {
                         year: this.year,
                         month: this.month,
-                        day: this.day
+                        day: this.day,
+                        bgImage: this.bgImage
                     };
                     localStorage.setItem('babyBirthday', JSON.stringify(data));
                     alert('保存成功！');

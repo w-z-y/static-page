@@ -13,15 +13,16 @@ const props = defineProps({
     validateField: {
         type: Function,
         required: true
-    },
-    handleFileChange: {
-        type: Function,
-        required: true
     }
 })
 
 const emit = defineEmits(['update:modelValue'])
 
+  // 文件处理
+  const handleFileChange = ({ target: { files: [file] } }) => {
+    emit('update:modelValue', file)
+    props.validateField(props.item, file)
+  }
 // 处理值更新
 const handleValueChange = (value) => {
     emit('update:modelValue', value)

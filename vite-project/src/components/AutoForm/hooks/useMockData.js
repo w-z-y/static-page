@@ -13,7 +13,7 @@ export default function useMockData(formConfig) {
         ]
     }
 
-    const getFieldOptions = async (key, data, fallback) => {
+    const getFieldOptions = async (key, data) => {
         try {
             const result = await new Promise(resolve => setTimeout(() => resolve(data), 10))
             const field = unref(formConfig).find(item => item.key === key)
@@ -21,7 +21,6 @@ export default function useMockData(formConfig) {
         } catch (error) {
             console.error(`获取${key}数据失败:`, error)
             const field = unref(formConfig).find(item => item.key === key)
-            if (field) field.options = fallback
         }
     }
 
