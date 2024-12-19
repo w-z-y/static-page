@@ -12,42 +12,28 @@
 
 <body>
     <div id="app">
-        <Calendar>
-            <template #day-header="{ date }">
-                {{date.getDate()}}
-            </template>
-            <template #day-body="{ date }">
+        <Calendar :week-starts-on-sunday="true" style="height: 900px;margin: 100px auto;">
+            <!-- <template #day-body="{ dates }">
                 <template v-for="event in eventDistribution[date.dateString]">
-                    <div v-if="event.isFirstDay" @mouseenter="handleMouseEnter(event)"
-                        @mouseleave="handleMouseLeave" :key="event.id" :style="eventStyle(event)"
-                        class="text-overflow event-item" :title="event.title" style="z-index: 1;">
+                    <div v-if="event.isFirstDay" @mouseenter="handleMouseEnter(event)" @mouseleave="handleMouseLeave"
+                        :key="event.id" :style="eventStyle(event)" class="text-overflow event-item" :title="event.title"
+                        style="z-index: 1;">
+                        {{ event.title }}
+                    </div>
+                </template>
+            </template> -->
+            <template #default="{ date }">
+                <template v-for="event in eventDistribution[date.getISODate()]">
+                    <div v-if="event.isFirstDay" @mouseenter="handleMouseEnter(event)" @mouseleave="handleMouseLeave"
+                        :key="event.id" :style="eventStyle(event)" class="text-overflow event-item" :title="event.title"
+                        style="z-index: 1;">
                         {{ event.title }}
                     </div>
                 </template>
             </template>
         </Calendar>
-
-        <!-- <div class="date-container">
-            <div class="week-item" v-for="week in splitDateList" :key="week[0]">
-                <div v-for="date in week" :key="date" class="date-item">
-                    <div class="date-header">
-                        {{ new Date(date).getDate() }}
-                        {{date}}
-                    </div>
-                    <div class="date-body">
-                        <template v-for="event in eventDistribution[date]">
-                            <div v-if="event.isFirstDay" @mouseenter="handleMouseEnter(event)"
-                                @mouseleave="handleMouseLeave" :key="event.id" :style="eventStyle(event)"
-                                class="text-overflow event-item" :title="event.title">
-                                {{ event.title }}
-                            </div>
-                        </template>
-                    </div>
-                </div>
-            </div>
-        </div> -->
     </div>
-    <script src="./demo.js" type="module"></script>
+    <script src="./index.js" type="module"></script>
 </body>
 
 </html>
