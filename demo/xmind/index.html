@@ -1,273 +1,651 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <meta charset="utf-8">
+    <title>商业计划书思维导图</title>
+    <style>
+        /* 基础样式 */
+        :root {
+            --node-padding: 8px 15px;
+            --node-min-width: 80px;
+            --node-border-radius: 4px;
+            --node-bg-color: #f8f8f8;
+            --root-node-bg: #1a237e;
+            --level1-node-bg: #fbe5d6;
+            --line-color: #ccc;
+        }
+
+        /* 容器样式 */
+        #mindmap-container {
+            width: 100%;
+            height: 800px;
+            border: 1px solid var(--line-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* 工具栏样式 */
+        #toolbar {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+        }
+
+        #toolbar button {
+            padding: 5px 10px;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+
+        #toolbar button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* 节点样式 */
+        .node {
+            position: absolute;
+            padding: var(--node-padding);
+            border-radius: var(--node-border-radius);
+            background-color: var(--node-bg-color);
+            min-width: var(--node-min-width);
+            text-align: center;
+            cursor: move;
+            user-select: none;
+        }
+
+        .node.root {
+            background-color: var(--root-node-bg);
+            color: white;
+            font-size: 18px;
+        }
+
+        .node.level1 {
+            background-color: var(--level1-node-bg);
+        }
+
+        .node.dragging {
+            opacity: 0.5;
+            z-index: 1000;
+            transform: scale(1.05);
+        }
+
+        .node.dragover {
+            border: 2px dashed #666;
+            transform: scale(1.05);
+        }
+
+        /* 编辑输入框样式 */
+        .node-edit-input {
+            position: absolute;
+            border: none;
+            background: transparent;
+            font: inherit;
+            text-align: center;
+            outline: none;
+            padding: var(--node-padding);
+            margin: 0;
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
+            left: 0;
+            top: 0;
+        }
+
+        /* 展开/收起按钮样式 */
+        .toggle-btn {
+            position: absolute;
+            right: -20px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: #fff;
+            border: 1px solid var(--line-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            cursor: pointer;
+            color: #666;
+            line-height: 1;
+            padding: 0;
+        }
+
+        .toggle-btn:hover {
+            background: #f0f0f0;
+        }
+
+        .toggle-btn::after {
+            content: "+";
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+        }
+
+        .node.expanded .toggle-btn::after {
+            content: "-";
+        }
+
+        /* 连接线样式 */
+        .line {
+            position: absolute;
+            fill: none;
+            stroke: #4B5EAA;
+            stroke-width: 2px;
+        }
+
+        /* 思维导图包装器样式 */
+        .mindmap-wrapper {
+            position: absolute;
+            top: 0;
+            left: 0;
+            min-width: 100%;
+            min-height: 100%;
+            transform-origin: 0 0;
+        }
+
+        .lines-layer,
+        .nodes-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .lines-layer {
+            overflow: visible;
+            pointer-events: none;
+        }
+
+        /* 添加拖拽预览样式 */
+        .drag-preview {
+            position: absolute;
+            border: 2px dashed #4B5EAA;
+            background-color: rgba(75, 94, 170, 0.1);
+            pointer-events: none;
+            z-index: 1000;
+            border-radius: var(--node-border-radius);
+            padding: var(--node-padding);
+            min-width: var(--node-min-width);
+        }
+
+        .node.drag-target {
+            background-color: rgba(75, 94, 170, 0.1);
+            border: 2px dashed #4B5EAA;
+        }
+    </style>
 </head>
 
 <body>
-    <script>
-        class XMindMap {
-            constructor(data) {
-                this.data = data;
-                this.canvas = document.createElement('canvas');
-                this.ctx = this.canvas.getContext('2d');
-                this.layout = 'alternate'; // 'alternate', 'right', 'left', 'down'
+    <div id="toolbar">
+        <button id="undoBtn" disabled>撤销</button>
+        <button id="redoBtn" disabled>重做</button>
+        <button id="zoomInBtn">放大</button>
+        <button id="zoomOutBtn">缩小</button>
+        <button id="resetBtn">重置</button>
+        <button id="printDataBtn">打印数据</button>
+    </div>
+    <div id="mindmap-container">
+        <div class="mindmap-wrapper">
+            <svg class="lines-layer" style="width: 5000px; height: 5000px;"></svg>
+            <div class="nodes-layer"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import mindmapData from './data.js';
+
+        class MindMap {
+            constructor(container, data) {
+                this.container = container;
+                this.wrapper = container.querySelector('.mindmap-wrapper');
+                this.linesLayer = this.wrapper.querySelector('.lines-layer');
+                this.nodesLayer = this.wrapper.querySelector('.nodes-layer');
+                this.data = this.deepClone(data);
+                this.nodes = new Map();
+                this.scale = 1;
+                this.translateX = 0;
+                this.translateY = 0;
+                this.collapsedNodes = new Set();
+                this.draggedNode = null;
+                this.dragPreview = null;
+                this.editingNode = null;
+
+                // 历史记录相关
+                this.history = [this.deepClone(data)];
+                this.currentHistoryIndex = 0;
+                this.maxHistoryLength = 50;
+
+                // 初始化按钮
+                this.initButtons();
+
+                // 初始化事件
                 this.init();
+                this.setupDragging();
+                this.setupHistory();
+                this.setupKeyboardShortcuts();
+            }
+
+            initButtons() {
+                this.undoBtn = document.getElementById('undoBtn');
+                this.redoBtn = document.getElementById('redoBtn');
+                this.zoomInBtn = document.getElementById('zoomInBtn');
+                this.zoomOutBtn = document.getElementById('zoomOutBtn');
+                this.resetBtn = document.getElementById('resetBtn');
+                this.printDataBtn = document.getElementById('printDataBtn');
+
+                this.zoomInBtn.addEventListener('click', () => this.zoom(1.1));
+                this.zoomOutBtn.addEventListener('click', () => this.zoom(0.9));
+                this.resetBtn.addEventListener('click', () => this.resetView());
+                this.printDataBtn.addEventListener('click', () => this.printData());
+            }
+
+            printData() {
+                console.log(this.data);
+            }
+
+            zoom(factor) {
+                const newScale = this.scale * factor;
+                if (newScale >= 0.1 && newScale <= 3) {
+                    this.scale = newScale;
+                    this.updateTransform();
+                }
+            }
+
+            resetView() {
+                this.scale = 1;
+                this.translateX = 0;
+                this.translateY = 0;
+                this.updateTransform();
+            }
+
+            deepClone(obj) {
+                return JSON.parse(JSON.stringify(obj));
+            }
+
+            setupKeyboardShortcuts() {
+                document.addEventListener('keydown', (e) => {
+                    if (e.ctrlKey) {
+                        if (e.key === 'z') {
+                            e.preventDefault();
+                            this.undo();
+                        } else if (e.key === 'y') {
+                            e.preventDefault();
+                            this.redo();
+                        }
+                    }
+                });
+            }
+
+            setupHistory() {
+                this.undoBtn.addEventListener('click', () => this.undo());
+                this.redoBtn.addEventListener('click', () => this.redo());
+                this.updateHistoryButtons();
+            }
+
+            undo() {
+                if (this.currentHistoryIndex > 0) {
+                    this.currentHistoryIndex--;
+                    this.data = this.deepClone(this.history[this.currentHistoryIndex]);
+                    this.rerender();
+                    this.updateHistoryButtons();
+                }
+            }
+
+            redo() {
+                if (this.currentHistoryIndex < this.history.length - 1) {
+                    this.currentHistoryIndex++;
+                    this.data = this.deepClone(this.history[this.currentHistoryIndex]);
+                    this.rerender();
+                    this.updateHistoryButtons();
+                }
+            }
+
+            addToHistory() {
+                // 删除当前位置之后的历史记录
+                this.history = this.history.slice(0, this.currentHistoryIndex + 1);
+
+                // 添加新的状态
+                this.history.push(this.deepClone(this.data));
+                this.currentHistoryIndex++;
+
+                // 限制历史记录长度
+                if (this.history.length > this.maxHistoryLength) {
+                    this.history.shift();
+                    this.currentHistoryIndex--;
+                }
+
+                this.updateHistoryButtons();
+            }
+
+            updateHistoryButtons() {
+                this.undoBtn.disabled = this.currentHistoryIndex === 0;
+                this.redoBtn.disabled = this.currentHistoryIndex === this.history.length - 1;
+            }
+
+            rerender() {
+                this.nodesLayer.innerHTML = '';
+                this.linesLayer.innerHTML = '';
+                this.nodes.clear();
+                const centerX = this.container.offsetWidth / 2;
+                const centerY = this.container.offsetHeight / 2;
+                this.renderNode(this.data, centerX, centerY, 0);
             }
 
             init() {
-                document.body.appendChild(this.canvas);
-                this.resizeCanvas();
-                window.addEventListener('resize', () => this.resizeCanvas());
-                
-                // 添加布局切换按钮
-                const layouts = ['alternate', 'right', 'left', 'down'];
-                const buttonContainer = document.createElement('div');
-                buttonContainer.style.position = 'fixed';
-                buttonContainer.style.top = '10px';
-                buttonContainer.style.left = '10px';
-                
-                layouts.forEach(layout => {
-                    const button = document.createElement('button');
-                    button.textContent = layout;
-                    button.onclick = () => {
-                        this.layout = layout;
-                        this.render();
-                    };
-                    buttonContainer.appendChild(button);
-                });
-                
-                document.body.appendChild(buttonContainer);
-                this.render();
+                const centerX = this.container.offsetWidth / 2;
+                const centerY = this.container.offsetHeight / 2;
+                this.renderNode(this.data, centerX, centerY, 0);
             }
 
-            resizeCanvas() {
-                this.canvas.width = window.innerWidth;
-                this.canvas.height = window.innerHeight;
+            calculateNodeHeight(nodeData) {
+                if (!nodeData.children?.length || this.collapsedNodes.has(nodeData.id)) return 40;
+
+                const totalHeight = nodeData.children.reduce((sum, child) =>
+                    sum + this.calculateNodeHeight(child), 0);
+                return Math.max(40, totalHeight + (nodeData.children.length - 1) * 20);
             }
 
-            calculateNodeWidth(node) {
-                if (!node.children || node.children.length === 0) {
-                    return this.ctx.measureText(node.title).width + 40;
+            isChildNode(parentNode, childId) {
+                if (!parentNode.children) return false;
+
+                return parentNode.children.some(child =>
+                    child.id === childId || this.isChildNode(child, childId));
+            }
+
+            renderNode(nodeData, x, y, level) {
+                const node = document.createElement('div');
+                node.className = `node ${level === 0 ? 'root' : level === 1 ? 'level1' : ''}`;
+                if (nodeData.children?.length) {
+                    node.className += this.collapsedNodes.has(nodeData.id) ? ' collapsed' : ' expanded';
                 }
-                
-                const childrenWidth = node.children.reduce((total, child) => {
-                    return total + this.calculateNodeWidth(child);
-                }, 0);
-                
-                const spacing = 50;
-                return Math.max(
-                    this.ctx.measureText(node.title).width + 40,
-                    childrenWidth + (node.children.length - 1) * spacing
-                );
+                node.textContent = nodeData.topic;
+                node.style.left = `${x}px`;
+                node.style.top = `${y}px`;
+                node.draggable = true;
+                node.dataset.id = nodeData.id;
+
+                this.setupNodeDragEvents(node, nodeData);
+                this.setupToggleButton(node, nodeData);
+                this.setupNodeEditEvents(node, nodeData);
+
+                this.nodesLayer.appendChild(node);
+
+                const nodeWidth = node.offsetWidth;
+                const nodeHeight = node.offsetHeight;
+                this.nodes.set(nodeData.id, {
+                    element: node,
+                    x,
+                    y,
+                    width: nodeWidth,
+                    height: nodeHeight
+                });
+
+                this.renderChildren(nodeData, x, y, level, nodeWidth, nodeHeight);
             }
 
-            drawNode(node, x, y, level = 0, direction = 'right') {
-                // 绘制节点背景
-                this.ctx.fillStyle = '#fff';
-                this.ctx.strokeStyle = '#333';
-                const width = this.ctx.measureText(node.title).width + 40;
-                const height = 30;
-                this.ctx.beginPath();
-                this.ctx.roundRect(x - width / 2, y - height / 2, width, height, 5);
-                this.ctx.fill();
-                this.ctx.stroke();
-
-                // 绘制文字
-                this.ctx.fillStyle = '#333';
-                this.ctx.font = '14px Arial';
-                this.ctx.textAlign = 'center';
-                this.ctx.textBaseline = 'middle';
-                this.ctx.fillText(node.title, x, y);
-
-                if (node.children && node.children.length > 0) {
-                    const spacing = 80; // 增加间距使布局更加宽松
-                    let startY = y - ((node.children.length - 1) * spacing) / 2; // 计算起始Y坐标以实现垂直居中
+            setupNodeEditEvents(node, nodeData) {
+                node.addEventListener('dblclick', (e) => {
+                    e.stopPropagation();
+                    if (this.editingNode) return;
                     
-                    // 根据布局方式确定子节点的位置
-                    node.children.forEach((child, index) => {
-                        let childX = x;
-                        let childY = startY + index * spacing; // 均匀分布子节点
-                        let nextDirection = direction;
-                        
-                        switch(this.layout) {
-                            case 'alternate':
-                                if (level === 0) {
-                                    // 第一层节点左右对称分布
-                                    const halfLength = Math.floor(node.children.length / 2);
-                                    if (index < halfLength) {
-                                        childX = x - 200;
-                                        nextDirection = 'left';
-                                    } else {
-                                        childX = x + 200;
-                                        nextDirection = 'right';
-                                    }
-                                } else {
-                                    // 后续层级保持父节点的方向
-                                    childX = direction === 'right' ? x + 200 : x - 200;
-                                }
-                                break;
-                                
-                            case 'right':
-                                childX = x + 200;
-                                break;
-                                
-                            case 'left':
-                                childX = x - 200;
-                                break;
-                                
-                            case 'down':
-                                childX = x - ((node.children.length - 1) * spacing) / 2 + index * spacing;
-                                childY = y + 120;
-                                break;
+                    this.editingNode = nodeData;
+                    node.draggable = false;
+                    
+                    const input = document.createElement('input');
+                    input.className = 'node-edit-input';
+                    input.value = nodeData.topic;
+                    input.style.color = node.style.color;
+                    
+                    const finishEdit = () => {
+                        const newValue = input.value.trim();
+                        if (newValue && newValue !== nodeData.topic) {
+                            nodeData.topic = newValue;
+                            this.addToHistory();
                         }
+                        input.remove();
+                        node.draggable = true;
+                        this.editingNode = null;
+                        this.rerender();
+                    };
 
-                        // 绘制连线
-                        this.ctx.beginPath();
-                        this.ctx.moveTo(x, y);
+                    input.addEventListener('blur', finishEdit);
+                    input.addEventListener('keydown', (e) => {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            finishEdit();
+                        } else if (e.key === 'Escape') {
+                            input.value = nodeData.topic;
+                            finishEdit();
+                        }
+                    });
+
+                    node.appendChild(input);
+                    input.focus();
+                    input.select();
+                });
+            }
+
+            setupNodeDragEvents(node, nodeData) {
+                node.addEventListener('dragstart', (e) => {
+                    if (this.editingNode) {
+                        e.preventDefault();
+                        return;
+                    }
+                    this.draggedNode = nodeData;
+                    node.classList.add('dragging');
+                    e.dataTransfer.setData('text/plain', nodeData.id);
+                    
+                    // 创建拖拽预览元素
+                    this.dragPreview = document.createElement('div');
+                    this.dragPreview.className = 'drag-preview';
+                    this.dragPreview.style.width = `${node.offsetWidth}px`;
+                    this.dragPreview.style.height = `${node.offsetHeight}px`;
+                    document.body.appendChild(this.dragPreview);
+                });
+
+                node.addEventListener('dragend', () => {
+                    node.classList.remove('dragging');
+                    this.draggedNode = null;
+                    // 移除预览元素
+                    if (this.dragPreview) {
+                        this.dragPreview.remove();
+                        this.dragPreview = null;
+                    }
+                    // 移除所有目标节点的高亮
+                    document.querySelectorAll('.node.drag-target').forEach(n => {
+                        n.classList.remove('drag-target');
+                    });
+                });
+
+                node.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    if (this.draggedNode &&
+                        this.draggedNode.id !== nodeData.id &&
+                        !this.isChildNode(this.draggedNode, nodeData.id)) {
+                        node.classList.add('drag-target');
                         
-                        // 使用贝塞尔曲线使连线更平滑
-                        if (this.layout === 'down') {
-                            const controlY = y + (childY - y) / 2;
-                            this.ctx.bezierCurveTo(x, controlY, childX, controlY, childX, childY);
+                        // 更新预览元素位置
+                        if (this.dragPreview) {
+                            const rect = node.getBoundingClientRect();
+                            this.dragPreview.style.left = `${rect.right + 10}px`;
+                            this.dragPreview.style.top = `${rect.top}px`;
+                        }
+                    }
+                });
+
+                node.addEventListener('dragleave', () => {
+                    node.classList.remove('drag-target');
+                });
+
+                // 更新拖拽时的预览位置
+                document.addEventListener('dragover', (e) => {
+                    if (this.dragPreview) {
+                        this.dragPreview.style.left = `${e.clientX + 10}px`;
+                        this.dragPreview.style.top = `${e.clientY + 10}px`;
+                    }
+                });
+
+                node.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    node.classList.remove('dragover');
+
+                    if (this.draggedNode &&
+                        this.draggedNode.id !== nodeData.id &&
+                        !this.isChildNode(this.draggedNode, nodeData.id)) {
+                        this.handleNodeDrop(nodeData);
+                    }
+                });
+            }
+
+            handleNodeDrop(targetNode) {
+                this.removeNodeFromParent(this.draggedNode);
+
+                if (!targetNode.children) {
+                    targetNode.children = [];
+                }
+                targetNode.children.push(this.draggedNode);
+
+                this.addToHistory();
+                this.rerender();
+                this.printData(); // 拖拽完成后打印新数据
+            }
+
+            setupToggleButton(node, nodeData) {
+                if (nodeData.children?.length) {
+                    const toggleBtn = document.createElement('div');
+                    toggleBtn.className = 'toggle-btn';
+                    node.appendChild(toggleBtn);
+
+                    toggleBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        if (this.collapsedNodes.has(nodeData.id)) {
+                            this.collapsedNodes.delete(nodeData.id);
                         } else {
-                            const controlX = x + (childX - x) / 2;
-                            this.ctx.bezierCurveTo(controlX, y, controlX, childY, childX, childY);
+                            this.collapsedNodes.add(nodeData.id);
                         }
-                        this.ctx.stroke();
-
-                        // 绘制子节点
-                        this.drawNode(child, childX, childY, level + 1, nextDirection);
+                        this.rerender();
                     });
                 }
             }
 
-            render() {
-                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-                // 将中心主题放在画布中心
-                this.drawNode(this.data.root, this.canvas.width / 2, this.canvas.height / 2);
+            renderChildren(nodeData, x, y, level, nodeWidth, nodeHeight) {
+                if (nodeData.children && !this.collapsedNodes.has(nodeData.id)) {
+                    const totalHeight = this.calculateNodeHeight(nodeData);
+                    let currentY = y - totalHeight / 2;
+
+                    nodeData.children.forEach(child => {
+                        const childHeight = this.calculateNodeHeight(child);
+                        const childX = x + (level === 0 ? 300 : 200);
+                        const childY = currentY + childHeight / 2;
+
+                        this.renderNode(child, childX, childY, level + 1);
+
+                        const childNode = this.nodes.get(child.id);
+                        if (childNode) {
+                            this.drawConnection(
+                                x + nodeWidth,
+                                y + nodeHeight / 2,
+                                childX,
+                                childY + childNode.height / 2
+                            );
+                        }
+
+                        currentY += childHeight + 20;
+                    });
+                }
+            }
+
+            removeNodeFromParent(node) {
+                const findAndRemove = (parentNode) => {
+                    if (!parentNode.children) return false;
+
+                    const index = parentNode.children.findIndex(child => child.id === node.id);
+                    if (index !== -1) {
+                        parentNode.children.splice(index, 1);
+                        if (parentNode.children.length === 0) {
+                            delete parentNode.children;
+                        }
+                        return true;
+                    }
+
+                    return parentNode.children.some(child => findAndRemove(child));
+                };
+
+                findAndRemove(this.data);
+            }
+
+            drawConnection(x1, y1, x2, y2) {
+                const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                path.setAttribute("class", "line");
+
+                const dx = (x2 - x1) / 2;
+                const d = `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`;
+
+                path.setAttribute("d", d);
+                this.linesLayer.appendChild(path);
+            }
+
+            setupDragging() {
+                let isDragging = false;
+                let startX, startY;
+
+                const startDrag = (e) => {
+                    if (e.target.classList.contains('node')) return;
+                    isDragging = true;
+                    startX = e.clientX - this.translateX;
+                    startY = e.clientY - this.translateY;
+                };
+
+                const drag = (e) => {
+                    if (!isDragging) return;
+                    e.preventDefault();
+
+                    this.translateX = e.clientX - startX;
+                    this.translateY = e.clientY - startY;
+                    this.updateTransform();
+                };
+
+                const stopDrag = () => {
+                    isDragging = false;
+                };
+
+                this.container.addEventListener('mousedown', startDrag);
+                document.addEventListener('mousemove', drag);
+                document.addEventListener('mouseup', stopDrag);
+
+                this.container.addEventListener('wheel', (e) => {
+                    e.preventDefault();
+
+                    const rect = this.container.getBoundingClientRect();
+                    const mouseX = e.clientX - rect.left;
+                    const mouseY = e.clientY - rect.top;
+
+                    const x = (mouseX - this.translateX) / this.scale;
+                    const y = (mouseY - this.translateY) / this.scale;
+
+                    this.zoom(e.deltaY > 0 ? 0.9 : 1.1);
+
+                    this.translateX = mouseX - x * this.scale;
+                    this.translateY = mouseY - y * this.scale;
+                    this.updateTransform();
+                });
+            }
+
+            updateTransform() {
+                this.wrapper.style.transform =
+                    `translate(${this.translateX}px, ${this.translateY}px) scale(${this.scale})`;
             }
         }
 
-        // 示例数据
-        const xmindData = {
-            root: {
-                title: "中心主题",
-                children: [
-                    {
-                        title: "前端开发",
-                        children: [{
-                            title: "HTML",
-                            children: [
-                                {
-                                    title: "语义化标签",
-                                    children: [
-                                        {
-                                            title: "header",
-                                            children: []
-                                        },
-                                        {
-                                            title: "footer", 
-                                            children: []
-                                        }
-                                    ]
-                                },
-                                {
-                                    title: "表单元素",
-                                    children: []
-                                }
-                            ]
-                        },
-                        {
-                            title: "CSS",
-                            children: [
-                                {
-                                    title: "选择器",
-                                    children: [
-                                        {
-                                            title: "ID选择器",
-                                            children: []
-                                        },
-                                        {
-                                            title: "类选择器",
-                                            children: []
-                                        }
-                                    ]
-                                },
-                                {
-                                    title: "布局",
-                                    children: [
-                                        {
-                                            title: "Flex",
-                                            children: []
-                                        },
-                                        {
-                                            title: "Grid",
-                                            children: []
-                                        }
-                                    ]
-                                }
-                            ]
-                        }]
-                    },
-                    {
-                        title: "后端开发",
-                        children: [
-                            {
-                                title: "Java",
-                                children: [
-                                    {
-                                        title: "Spring",
-                                        children: [
-                                            {
-                                                title: "IoC",
-                                                children: []
-                                            },
-                                            {
-                                                title: "AOP",
-                                                children: []
-                                            }
-                                        ]
-                                    },
-                                    {
-                                        title: "JVM",
-                                        children: [
-                                            {
-                                                title: "内存模型",
-                                                children: []
-                                            },
-                                            {
-                                                title: "垃圾回收",
-                                                children: []
-                                            }
-                                        ]
-                                    }
-                                ]
-                            },
-                            {
-                                title: "Python",
-                                children: [
-                                    {
-                                        title: "Django",
-                                        children: []
-                                    },
-                                    {
-                                        title: "Flask",
-                                        children: []
-                                    }
-                                ]
-                            }
-                        ]
-                    }
-                ]
-            }
-        };
-
-        // 创建并初始化思维导图
-        const xmindMap = new XMindMap(xmindData);
+        new MindMap(document.getElementById('mindmap-container'), mindmapData);
     </script>
 </body>
 
