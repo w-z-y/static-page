@@ -3,275 +3,280 @@
 
 <head>
     <meta charset="utf-8">
-    <title>商业计划书思维导图</title>
-    <style>
-        /* 基础样式 */
-        :root {
-            --node-padding: 8px 15px;
-            --node-min-width: 80px;
-            --node-border-radius: 4px;
-            --node-bg-color: #f8f8f8;
-            --root-node-bg: #1a237e;
-            --level1-node-bg: #fbe5d6;
-            --line-color: #ccc;
-        }
-
-        /* 容器样式 */
-        #mindmap-container {
-            width: 100%;
-            height: 800px;
-            border: 1px solid var(--line-color);
-            position: relative;
-            overflow: hidden;
-        }
-
-        /* 工具栏样式 */
-        #toolbar {
-            position: fixed;
-            top: 20px;
-            left: 20px;
-            z-index: 1000;
-        }
-
-        #toolbar button {
-            padding: 5px 10px;
-            margin-right: 10px;
-            cursor: pointer;
-        }
-
-        #toolbar button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        /* 节点样式 */
-        .node {
-            position: absolute;
-            padding: var(--node-padding);
-            border-radius: var(--node-border-radius);
-            background-color: var(--node-bg-color);
-            min-width: var(--node-min-width);
-            text-align: center;
-            cursor: move;
-            user-select: none;
-        }
-
-        .node.root {
-            background-color: var(--root-node-bg);
-            color: white;
-            font-size: 18px;
-        }
-
-        .node.level1 {
-            background-color: var(--level1-node-bg);
-        }
-
-        .node.dragging {
-            opacity: 0.5;
-            z-index: 1000;
-            transform: scale(1.05);
-        }
-
-        .node.dragover {
-            border: 2px dashed #666;
-            transform: scale(1.05);
-        }
-
-        /* 编辑输入框样式 */
-        .node-edit-input {
-            position: absolute;
-            border: none;
-            background: transparent;
-            font: inherit;
-            text-align: center;
-            outline: none;
-            padding: var(--node-padding);
-            margin: 0;
-            width: 100%;
-            height: 100%;
-            box-sizing: border-box;
-            left: 0;
-            top: 0;
-        }
-
-        /* 展开/收起按钮样式 */
-        .toggle-btn {
-            position: absolute;
-            right: -20px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            background: #fff;
-            border: 1px solid var(--line-color);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            cursor: pointer;
-            color: #666;
-            line-height: 1;
-            padding: 0;
-        }
-
-        .toggle-btn:hover {
-            background: #f0f0f0;
-        }
-
-        .toggle-btn::after {
-            content: "+";
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            height: 100%;
-        }
-
-        .node.expanded .toggle-btn::after {
-            content: "-";
-        }
-
-        /* 连接线样式 */
-        .line {
-            position: absolute;
-            fill: none;
-            stroke: #4B5EAA;
-            stroke-width: 2px;
-        }
-
-        /* 思维导图包装器样式 */
-        .mindmap-wrapper {
-            position: absolute;
-            top: 0;
-            left: 0;
-            min-width: 100%;
-            min-height: 100%;
-            transform-origin: 0 0;
-        }
-
-        .lines-layer,
-        .nodes-layer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-        }
-
-        .lines-layer {
-            overflow: visible;
-            pointer-events: none;
-        }
-
-        /* 添加拖拽预览样式 */
-        .drag-preview {
-            position: absolute;
-            border: 2px dashed #4B5EAA;
-            background-color: rgba(75, 94, 170, 0.1);
-            pointer-events: none;
-            z-index: 1000;
-            border-radius: var(--node-border-radius);
-            padding: var(--node-padding);
-            min-width: var(--node-min-width);
-        }
-
-        .node.drag-target {
-            background-color: rgba(75, 94, 170, 0.1);
-            border: 2px dashed #4B5EAA;
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>思维导图</title>
+    <!-- 引入样式文件 -->
+    <link rel="stylesheet" href="./index.css">
 </head>
 
 <body>
+    <!-- 工具栏 -->
     <div id="toolbar">
-        <button id="undoBtn" disabled>撤销</button>
-        <button id="redoBtn" disabled>重做</button>
-        <button id="zoomInBtn">放大</button>
-        <button id="zoomOutBtn">缩小</button>
-        <button id="resetBtn">重置</button>
-        <button id="printDataBtn">打印数据</button>
+        <button onclick="mindmap.undo()" id="undoBtn" disabled>撤销</button>
+        <button onclick="mindmap.redo()" id="redoBtn" disabled>重做</button>
+        <button onclick="mindmap.zoomAtPoint(1.1)" id="zoomInBtn">放大</button>
+        <button onclick="mindmap.zoomAtPoint(0.9)" id="zoomOutBtn">缩小</button>
+        <button onclick="mindmap.resetView()" id="resetBtn">重置</button>
+        <button onclick="console.log(mindmap.data)" id="printDataBtn">打印数据</button>
+        <button onclick="mindmap.toggleCollapse()" id="toggleCollapseBtn">展开/收起</button>
     </div>
+
+    <!-- 思维导图容器 -->
     <div id="mindmap-container">
         <div class="mindmap-wrapper">
+            <!-- SVG连线层 -->
             <svg class="lines-layer" style="width: 5000px; height: 5000px;"></svg>
+            <!-- 节点层 -->
             <div class="nodes-layer"></div>
         </div>
     </div>
 
     <script type="module">
+        // 导入思维导图数据
         import mindmapData from './data.js';
 
+        /**
+         * 思维导图类
+         */
         class MindMap {
-            constructor(container, data) {
-                this.container = container;
-                this.wrapper = container.querySelector('.mindmap-wrapper');
-                this.linesLayer = this.wrapper.querySelector('.lines-layer');
-                this.nodesLayer = this.wrapper.querySelector('.nodes-layer');
-                this.data = this.deepClone(data);
-                this.nodes = new Map();
-                this.scale = 1;
-                this.translateX = 0;
-                this.translateY = 0;
-                this.collapsedNodes = new Set();
-                this.draggedNode = null;
-                this.dragPreview = null;
-                this.editingNode = null;
+            // 单例实例
+            static instance = null;
 
-                // 历史记录相关
-                this.history = [this.deepClone(data)];
-                this.currentHistoryIndex = 0;
-                this.maxHistoryLength = 50;
+            /**
+             * 构造函数
+             * @param {HTMLElement} container - 容器元素
+             * @param {Object} data - 思维导图数据
+             * @param {Object} config - 配置项
+             */
+            constructor(container, data, config = {}) {
+                // 初始化属性
+                Object.assign(this, {
+                    container,
+                    wrapper: container.querySelector('.mindmap-wrapper'),
+                    linesLayer: container.querySelector('.lines-layer'),
+                    nodesLayer: container.querySelector('.nodes-layer'),
+                    data: JSON.parse(JSON.stringify(data)),
+                    nodes: new Map(), // 存储节点信息
+                    scale: 1, // 缩放比例
+                    translateX: 0, // X轴平移距离
+                    translateY: 0, // Y轴平移距离
+                    collapsedNodes: new Set(), // 已折叠的节点
+                    draggedNode: null, // 当前拖拽的节点
+                    dragPreview: null, // 拖拽预览
+                    editingNode: null, // 正在编辑的节点
+                    maxScale: config.maxScale || 50, // 最大缩放比例
+                    history: [JSON.parse(JSON.stringify(data))], // 历史记录
+                    currentHistoryIndex: 0, // 当前历史记录索引
+                    maxHistoryLength: 50, // 最大历史记录长度
+                    selectedNode: null, // 选中的节点
+                    selectedNodeElement: null, // 存储当前选中的节点元素
+                });
 
-                // 初始化按钮
-                this.initButtons();
-
-                // 初始化事件
+                // 初始化
                 this.init();
                 this.setupDragging();
                 this.setupHistory();
                 this.setupKeyboardShortcuts();
+                this.setupTouchEvents();
             }
 
-            initButtons() {
-                this.undoBtn = document.getElementById('undoBtn');
-                this.redoBtn = document.getElementById('redoBtn');
-                this.zoomInBtn = document.getElementById('zoomInBtn');
-                this.zoomOutBtn = document.getElementById('zoomOutBtn');
-                this.resetBtn = document.getElementById('resetBtn');
-                this.printDataBtn = document.getElementById('printDataBtn');
-
-                this.zoomInBtn.addEventListener('click', () => this.zoom(1.1));
-                this.zoomOutBtn.addEventListener('click', () => this.zoom(0.9));
-                this.resetBtn.addEventListener('click', () => this.resetView());
-                this.printDataBtn.addEventListener('click', () => this.printData());
+            /**
+             * 创建思维导图实例
+             */
+            static create(container, data, config) {
+                return new MindMap(container, data, config);
             }
 
-            printData() {
-                console.log(this.data);
+            /**
+             * 深拷贝对象
+             */
+            static deepClone = obj => JSON.parse(JSON.stringify(obj));
+
+            /**
+             * 计算节点高度
+             */
+            static calculateNodeHeight(nodeData, collapsedNodes) {
+                // 创建临时节点计算高度
+                const tempNode = document.createElement('div');
+                tempNode.className = 'node node-base';
+                tempNode.style.position = 'absolute';
+                tempNode.style.visibility = 'hidden';
+                tempNode.textContent = nodeData.topic;
+                document.body.appendChild(tempNode);
+
+                const nodeHeight = Math.max(40, tempNode.offsetHeight);
+                document.body.removeChild(tempNode);
+
+                // 如果节点没有子节点或已折叠,直接返回节点高度
+                if (!nodeData.children?.length || collapsedNodes.has(nodeData.id)) {
+                    return nodeHeight;
+                }
+
+                // 计算子节点总高度
+                const childrenHeight = nodeData.children.reduce((sum, child) =>
+                    sum + MindMap.calculateNodeHeight(child, collapsedNodes), 0);
+
+                // 返回节点高度和子节点总高度的最大值
+                return Math.max(nodeHeight, childrenHeight + (nodeData.children.length - 1) * 30);
             }
 
-            zoom(factor) {
-                const newScale = this.scale * factor;
-                if (newScale >= 0.1 && newScale <= 3) {
-                    this.scale = newScale;
+            /**
+             * 判断是否为子节点
+             */
+            static isChildNode(parentNode, childId) {
+                return parentNode.children?.some(child =>
+                    child.id === childId || MindMap.isChildNode(child, childId)) || false;
+            }
+
+            /**
+             * 计算节点列表总高度
+             */
+            static calculateNodesHeight(nodes, collapsedNodes) {
+                if (!nodes.length) return 0;
+                const totalHeight = nodes.reduce((sum, node) =>
+                    sum + MindMap.calculateNodeHeight(node, collapsedNodes), 0);
+                return totalHeight + (nodes.length - 1) * 30;
+            }
+
+            /**
+             * 计算两点间距离
+             */
+            static getTouchDistance(touches) {
+                return Math.hypot(
+                    touches[0].clientX - touches[1].clientX,
+                    touches[0].clientY - touches[1].clientY
+                );
+            }
+
+            /**
+             * 居中视图
+             */
+            centerView() {
+                const rootNode = this.nodes.get(this.data.id);
+                if (rootNode) {
+                    const rect = this.container.getBoundingClientRect();
+                    this.translateX = rect.width / 2 - rootNode.x * this.scale;
+                    this.translateY = rect.height / 2 - rootNode.y * this.scale;
                     this.updateTransform();
                 }
             }
 
+            /**
+             * 切换节点展开/折叠状态
+             */
+            toggleCollapse() {
+                const allCollapsed = this.isAllCollapsed(this.data);
+                const traverse = node => {
+                    if (node.children?.length > 0) {
+                        if (node.id !== this.data.id) {
+                            if (allCollapsed) {
+                                this.collapsedNodes.delete(node.id);
+                            } else {
+                                this.collapsedNodes.add(node.id);
+                            }
+                        }
+                        node.children.forEach(traverse);
+                    }
+                };
+                traverse(this.data);
+                this.rerender();
+            }
+
+            /**
+             * 判断节点是否全部折叠
+             */
+            isAllCollapsed(node) {
+                if (!node.children?.length) return true;
+                if (node.id === this.data.id) {
+                    return node.children.every(child => this.isAllCollapsed(child));
+                }
+                return this.collapsedNodes.has(node.id) &&
+                    node.children.every(child => this.isAllCollapsed(child));
+            }
+
+            /**
+             * 设置触摸事件
+             */
+            setupTouchEvents() {
+                let lastTouchDistance = 0;
+                let lastTouchX = 0;
+                let lastTouchY = 0;
+                let isTouching = false;
+
+                // 触摸开始
+                this.container.addEventListener('touchstart', e => {
+                    if (e.touches.length === 1) {
+                        isTouching = true;
+                        [lastTouchX, lastTouchY] = [e.touches[0].clientX, e.touches[0].clientY];
+                    } else if (e.touches.length === 2) {
+                        lastTouchDistance = MindMap.getTouchDistance(e.touches);
+                    }
+                });
+
+                // 触摸移动
+                this.container.addEventListener('touchmove', e => {
+                    e.preventDefault();
+                    if (e.touches.length === 1 && isTouching) {
+                        const [currentX, currentY] = [e.touches[0].clientX, e.touches[0].clientY];
+                        this.translateX += currentX - lastTouchX;
+                        this.translateY += currentY - lastTouchY;
+                        [lastTouchX, lastTouchY] = [currentX, currentY];
+                        this.updateTransform();
+                    } else if (e.touches.length === 2) {
+                        const currentDistance = MindMap.getTouchDistance(e.touches);
+                        if (lastTouchDistance > 0) {
+                            const scale = currentDistance / lastTouchDistance;
+                            const centerX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+                            const centerY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+                            this.zoomAtPoint(scale, centerX, centerY);
+                        }
+                        lastTouchDistance = currentDistance;
+                    }
+                });
+
+                // 触摸���束
+                this.container.addEventListener('touchend', () => {
+                    isTouching = false;
+                    lastTouchDistance = 0;
+                });
+            }
+            /**
+             * 在指定点缩放
+             */
+            zoomAtPoint(factor, x, y) {
+                const rect = this.container.getBoundingClientRect();
+                const centerX = x || rect.width / 2;
+                const centerY = y || rect.height / 2;
+
+                const newScale = this.scale * factor;
+                if (newScale >= 0.1 && newScale <= this.maxScale) {
+                    const [oldX, oldY] = [(centerX - this.translateX) / this.scale, (centerY - this.translateY) / this.scale];
+                    this.scale = newScale;
+                    this.translateX = centerX - oldX * this.scale;
+                    this.translateY = centerY - oldY * this.scale;
+                    this.updateTransform();
+                }
+            }
+            /**
+             * 缩放
+             */
+            zoom(factor) {
+                const rect = this.container.getBoundingClientRect();
+                this.zoomAtPoint(factor, rect.width / 2, rect.height / 2);
+            }
+            /**
+             * 重置视图
+             */
             resetView() {
-                this.scale = 1;
-                this.translateX = 0;
-                this.translateY = 0;
+                [this.scale, this.translateX, this.translateY] = [1, 0, 0];
                 this.updateTransform();
             }
 
-            deepClone(obj) {
-                return JSON.parse(JSON.stringify(obj));
-            }
-
+            /**
+             * 设置键盘快捷键
+             */
             setupKeyboardShortcuts() {
-                document.addEventListener('keydown', (e) => {
+                document.addEventListener('keydown', e => {
                     if (e.ctrlKey) {
                         if (e.key === 'z') {
                             e.preventDefault();
@@ -283,40 +288,44 @@
                     }
                 });
             }
-
+            /**
+             * 设置历史记录
+             */
             setupHistory() {
-                this.undoBtn.addEventListener('click', () => this.undo());
-                this.redoBtn.addEventListener('click', () => this.redo());
                 this.updateHistoryButtons();
             }
-
+            /**
+             * 撤销
+             */
             undo() {
                 if (this.currentHistoryIndex > 0) {
                     this.currentHistoryIndex--;
-                    this.data = this.deepClone(this.history[this.currentHistoryIndex]);
+                    this.data = JSON.parse(JSON.stringify(this.history[this.currentHistoryIndex]));
                     this.rerender();
                     this.updateHistoryButtons();
                 }
             }
 
+            /**
+             * 重做
+             */
             redo() {
                 if (this.currentHistoryIndex < this.history.length - 1) {
                     this.currentHistoryIndex++;
-                    this.data = this.deepClone(this.history[this.currentHistoryIndex]);
+                    this.data = JSON.parse(JSON.stringify(this.history[this.currentHistoryIndex]));
                     this.rerender();
                     this.updateHistoryButtons();
                 }
             }
 
+            /**
+             * 添加历史记录
+             */
             addToHistory() {
-                // 删除当前位置之后的历史记录
                 this.history = this.history.slice(0, this.currentHistoryIndex + 1);
-
-                // 添加新的状态
-                this.history.push(this.deepClone(this.data));
+                this.history.push(JSON.parse(JSON.stringify(this.data)));
                 this.currentHistoryIndex++;
 
-                // 限制历史记录长度
                 if (this.history.length > this.maxHistoryLength) {
                     this.history.shift();
                     this.currentHistoryIndex--;
@@ -325,11 +334,18 @@
                 this.updateHistoryButtons();
             }
 
+            /**
+             * 更新历史按钮状态
+             */
             updateHistoryButtons() {
-                this.undoBtn.disabled = this.currentHistoryIndex === 0;
-                this.redoBtn.disabled = this.currentHistoryIndex === this.history.length - 1;
+                const [undoBtn, redoBtn] = ['undoBtn', 'redoBtn'].map(id => document.getElementById(id));
+                undoBtn.disabled = this.currentHistoryIndex === 0;
+                redoBtn.disabled = this.currentHistoryIndex === this.history.length - 1;
             }
 
+            /**
+             * 重新渲染
+             */
             rerender() {
                 this.nodesLayer.innerHTML = '';
                 this.linesLayer.innerHTML = '';
@@ -339,32 +355,37 @@
                 this.renderNode(this.data, centerX, centerY, 0);
             }
 
+            /**
+             * 初始化
+             */
             init() {
                 const centerX = this.container.offsetWidth / 2;
                 const centerY = this.container.offsetHeight / 2;
                 this.renderNode(this.data, centerX, centerY, 0);
+                
+                // 添加画布点击事件
+                this.container.addEventListener('click', (e) => {
+                    // 如果点击的是画布空白处（不是节点）
+                    if (e.target === this.container || e.target === this.wrapper || 
+                        e.target === this.nodesLayer || e.target === this.linesLayer) {
+                        this.clearSelection();
+                    }
+                });
             }
 
-            calculateNodeHeight(nodeData) {
-                if (!nodeData.children?.length || this.collapsedNodes.has(nodeData.id)) return 40;
-
-                const totalHeight = nodeData.children.reduce((sum, child) =>
-                    sum + this.calculateNodeHeight(child), 0);
-                return Math.max(40, totalHeight + (nodeData.children.length - 1) * 20);
-            }
-
-            isChildNode(parentNode, childId) {
-                if (!parentNode.children) return false;
-
-                return parentNode.children.some(child =>
-                    child.id === childId || this.isChildNode(child, childId));
-            }
-
+            /**
+             * 渲染节点
+             */
             renderNode(nodeData, x, y, level) {
+                // 创建节点元素
                 const node = document.createElement('div');
-                node.className = `node ${level === 0 ? 'root' : level === 1 ? 'level1' : ''}`;
-                if (nodeData.children?.length) {
+                node.className = `node node-base ${level === 0 ? 'root' : `level-${level}`}`;
+                if (nodeData.children?.length && level !== 0) {
                     node.className += this.collapsedNodes.has(nodeData.id) ? ' collapsed' : ' expanded';
+                }
+                // 如果是当前选中的节点，添加选中样式类
+                if (this.selectedNode === nodeData.id) {
+                    node.className += ' selected';
                 }
                 node.textContent = nodeData.topic;
                 node.style.left = `${x}px`;
@@ -372,12 +393,20 @@
                 node.draggable = true;
                 node.dataset.id = nodeData.id;
 
+                if (nodeData.direction) {
+                    node.dataset.direction = nodeData.direction;
+                }
+
+                // 设置节点事件
                 this.setupNodeDragEvents(node, nodeData);
-                this.setupToggleButton(node, nodeData);
+                if (level !== 0) {
+                    this.setupToggleButton(node, nodeData);
+                }
                 this.setupNodeEditEvents(node, nodeData);
 
                 this.nodesLayer.appendChild(node);
 
+                // 记录节点信息
                 const nodeWidth = node.offsetWidth;
                 const nodeHeight = node.offsetHeight;
                 this.nodes.set(nodeData.id, {
@@ -388,36 +417,65 @@
                     height: nodeHeight
                 });
 
+                // 渲染子节点
                 this.renderChildren(nodeData, x, y, level, nodeWidth, nodeHeight);
+
+                // 如果是当前选中的节点，添加选中样式
+                if (this.selectedNode === nodeData.id) {
+                    node.classList.add('selected');
+                }
+
+                // 设置节点点击事件
+                node.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.clearSelection();
+                    node.classList.add('selected');
+                    this.selectedNodeElement = node;
+                    this.selectedNode = nodeData.id;
+                });
             }
 
+            /**
+             * 设置节点编辑事件
+             */
             setupNodeEditEvents(node, nodeData) {
-                node.addEventListener('dblclick', (e) => {
+                node.addEventListener('dblclick', e => {
                     e.stopPropagation();
                     if (this.editingNode) return;
-                    
+
+                    // 保存节点原始内容
+                    const originalContent = node.textContent;
+
+                    // 清空节点内容
+                    node.textContent = '';
+
                     this.editingNode = nodeData;
                     node.draggable = false;
-                    
+
+                    // 创建输入框
                     const input = document.createElement('input');
+                    input.type = 'text';
                     input.className = 'node-edit-input';
                     input.value = nodeData.topic;
-                    input.style.color = node.style.color;
-                    
+                    input.style.width = '100%';
+                    input.style.height = '100%';
+
+                    // 完成编辑
                     const finishEdit = () => {
                         const newValue = input.value.trim();
                         if (newValue && newValue !== nodeData.topic) {
                             nodeData.topic = newValue;
                             this.addToHistory();
+                            this.rerender();
+                        } else {
+                            node.textContent = originalContent;
                         }
-                        input.remove();
                         node.draggable = true;
                         this.editingNode = null;
-                        this.rerender();
                     };
 
                     input.addEventListener('blur', finishEdit);
-                    input.addEventListener('keydown', (e) => {
+                    input.addEventListener('keydown', e => {
                         if (e.key === 'Enter') {
                             e.preventDefault();
                             finishEdit();
@@ -433,98 +491,94 @@
                 });
             }
 
+            /**
+             * 设置节点拖拽事件
+             */
             setupNodeDragEvents(node, nodeData) {
-                node.addEventListener('dragstart', (e) => {
-                    if (this.editingNode) {
-                        e.preventDefault();
-                        return;
-                    }
-                    this.draggedNode = nodeData;
-                    node.classList.add('dragging');
-                    e.dataTransfer.setData('text/plain', nodeData.id);
-                    
-                    // 创建拖拽预览元素
-                    this.dragPreview = document.createElement('div');
-                    this.dragPreview.className = 'drag-preview';
-                    this.dragPreview.style.width = `${node.offsetWidth}px`;
-                    this.dragPreview.style.height = `${node.offsetHeight}px`;
-                    document.body.appendChild(this.dragPreview);
-                });
-
-                node.addEventListener('dragend', () => {
-                    node.classList.remove('dragging');
-                    this.draggedNode = null;
-                    // 移除预览元素
-                    if (this.dragPreview) {
-                        this.dragPreview.remove();
-                        this.dragPreview = null;
-                    }
-                    // 移除所有目标节点的高亮
-                    document.querySelectorAll('.node.drag-target').forEach(n => {
-                        n.classList.remove('drag-target');
-                    });
-                });
-
-                node.addEventListener('dragover', (e) => {
-                    e.preventDefault();
-                    if (this.draggedNode &&
-                        this.draggedNode.id !== nodeData.id &&
-                        !this.isChildNode(this.draggedNode, nodeData.id)) {
-                        node.classList.add('drag-target');
-                        
-                        // 更新预览元素位置
+                const dragEvents = {
+                    dragstart: e => {
+                        if (this.editingNode) {
+                            e.preventDefault();
+                            return;
+                        }
+                        this.draggedNode = nodeData;
+                        node.classList.add('dragging');
+                        e.dataTransfer.setData('text/plain', nodeData.id);
+                    },
+                    dragend: () => {
+                        node.classList.remove('dragging');
+                        this.draggedNode = null;
                         if (this.dragPreview) {
-                            const rect = node.getBoundingClientRect();
-                            this.dragPreview.style.left = `${rect.right + 10}px`;
-                            this.dragPreview.style.top = `${rect.top}px`;
+                            this.dragPreview.remove();
+                            this.dragPreview = null;
+                        }
+                        document.querySelectorAll('.node.drag-target').forEach(n => {
+                            n.classList.remove('drag-target');
+                        });
+                    },
+                    dragover: e => {
+                        e.preventDefault();
+                        if (this.draggedNode &&
+                            this.draggedNode.id !== nodeData.id &&
+                            !MindMap.isChildNode(this.draggedNode, nodeData.id)) {
+                            node.classList.add('drag-target');
+
+                            if (this.dragPreview) {
+                                const rect = node.getBoundingClientRect();
+                                this.dragPreview.style.left = `${rect.right + 10}px`;
+                                this.dragPreview.style.top = `${rect.top}px`;
+                            }
+                        }
+                    },
+                    dragleave: () => {
+                        node.classList.remove('drag-target');
+                    },
+                    drop: e => {
+                        e.preventDefault();
+                        node.classList.remove('dragover');
+
+                        if (this.draggedNode &&
+                            this.draggedNode.id !== nodeData.id &&
+                            !MindMap.isChildNode(this.draggedNode, nodeData.id)) {
+                            this.handleNodeDrop(nodeData);
                         }
                     }
+                };
+
+                Object.entries(dragEvents).forEach(([event, handler]) => {
+                    node.addEventListener(event, handler);
                 });
 
-                node.addEventListener('dragleave', () => {
-                    node.classList.remove('drag-target');
-                });
-
-                // 更新拖拽时的预览位置
-                document.addEventListener('dragover', (e) => {
+                document.addEventListener('dragover', e => {
                     if (this.dragPreview) {
                         this.dragPreview.style.left = `${e.clientX + 10}px`;
                         this.dragPreview.style.top = `${e.clientY + 10}px`;
                     }
                 });
-
-                node.addEventListener('drop', (e) => {
-                    e.preventDefault();
-                    node.classList.remove('dragover');
-
-                    if (this.draggedNode &&
-                        this.draggedNode.id !== nodeData.id &&
-                        !this.isChildNode(this.draggedNode, nodeData.id)) {
-                        this.handleNodeDrop(nodeData);
-                    }
-                });
             }
 
+            /**
+             * 处理节点拖拽放置
+             */
             handleNodeDrop(targetNode) {
                 this.removeNodeFromParent(this.draggedNode);
-
-                if (!targetNode.children) {
-                    targetNode.children = [];
-                }
+                if (!targetNode.children) targetNode.children = [];
                 targetNode.children.push(this.draggedNode);
-
                 this.addToHistory();
                 this.rerender();
-                this.printData(); // 拖拽完成后打印新数据
+                this.printData();
             }
 
+            /**
+             * 设置节点折叠按钮
+             */
             setupToggleButton(node, nodeData) {
                 if (nodeData.children?.length) {
                     const toggleBtn = document.createElement('div');
                     toggleBtn.className = 'toggle-btn';
                     node.appendChild(toggleBtn);
 
-                    toggleBtn.addEventListener('click', (e) => {
+                    toggleBtn.addEventListener('click', e => {
                         e.stopPropagation();
                         if (this.collapsedNodes.has(nodeData.id)) {
                             this.collapsedNodes.delete(nodeData.id);
@@ -536,35 +590,67 @@
                 }
             }
 
+            /**
+             * 渲染子节点
+             */
             renderChildren(nodeData, x, y, level, nodeWidth, nodeHeight) {
                 if (nodeData.children && !this.collapsedNodes.has(nodeData.id)) {
-                    const totalHeight = this.calculateNodeHeight(nodeData);
-                    let currentY = y - totalHeight / 2;
+                    const [leftNodes, rightNodes] = this.groupNodes(nodeData, level);
 
-                    nodeData.children.forEach(child => {
-                        const childHeight = this.calculateNodeHeight(child);
-                        const childX = x + (level === 0 ? 300 : 200);
-                        const childY = currentY + childHeight / 2;
+                    const renderNodesGroup = (nodes, isLeft) => {
+                        const verticalSpacing = 30;
+                        let currentY = y - (MindMap.calculateNodesHeight(nodes, this.collapsedNodes) / 2);
+                        const commonX = isLeft ? x - nodeWidth - 100 : x + (level === 0 ? nodeWidth / 2 : nodeWidth) + 100;
 
-                        this.renderNode(child, childX, childY, level + 1);
+                        nodes.forEach(child => {
+                            const childHeight = MindMap.calculateNodeHeight(child, this.collapsedNodes);
+                            const childY = currentY + childHeight / 2;
+                            const childX = commonX;
 
-                        const childNode = this.nodes.get(child.id);
-                        if (childNode) {
+                            child.direction = isLeft ? 'left' : 'right';
+                            this.renderNode(child, childX, childY, level + 1);
+
+                            const startX = isLeft ? x : (level === 0 ? x + nodeWidth / 2 : x + nodeWidth);
+                            const endX = isLeft ? childX + nodeWidth : childX;
                             this.drawConnection(
-                                x + nodeWidth,
-                                y + nodeHeight / 2,
-                                childX,
-                                childY + childNode.height / 2
+                                startX, y,
+                                endX, childY,
+                                startX + (isLeft ? -50 : 50), y,
+                                endX + (isLeft ? 50 : -50), childY
                             );
-                        }
 
-                        currentY += childHeight + 20;
-                    });
+                            currentY += childHeight + verticalSpacing;
+                        });
+                    };
+
+                    renderNodesGroup(leftNodes, true);
+                    renderNodesGroup(rightNodes, false);
                 }
             }
 
+            /**
+             * 分组节点
+             */
+            groupNodes(nodeData, level) {
+                const leftNodes = [];
+                const rightNodes = [];
+
+                nodeData.children.forEach(child => {
+                    if (level === 0) {
+                        (child.direction === 'left' ? leftNodes : rightNodes).push(child);
+                    } else {
+                        (nodeData.direction === 'left' ? leftNodes : rightNodes).push(child);
+                    }
+                });
+
+                return [leftNodes, rightNodes];
+            }
+
+            /**
+             * 从父节点中移除节点
+             */
             removeNodeFromParent(node) {
-                const findAndRemove = (parentNode) => {
+                const findAndRemove = parentNode => {
                     if (!parentNode.children) return false;
 
                     const index = parentNode.children.findIndex(child => child.id === node.id);
@@ -582,71 +668,81 @@
                 findAndRemove(this.data);
             }
 
-            drawConnection(x1, y1, x2, y2) {
+            /**
+             * 绘制连接线
+             */
+            drawConnection(x1, y1, x2, y2, controlX1, controlY1, controlX2, controlY2) {
                 const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
                 path.setAttribute("class", "line");
-
-                const dx = (x2 - x1) / 2;
-                const d = `M ${x1} ${y1} C ${x1 + dx} ${y1}, ${x2 - dx} ${y2}, ${x2} ${y2}`;
-
-                path.setAttribute("d", d);
+                path.setAttribute("d", `
+                    M ${x1} ${y1}
+                    C ${controlX1} ${controlY1},
+                      ${controlX2} ${controlY2},
+                      ${x2} ${y2}
+                `);
                 this.linesLayer.appendChild(path);
             }
 
+            /**
+             * 设置拖拽事件
+             */
             setupDragging() {
                 let isDragging = false;
                 let startX, startY;
 
-                const startDrag = (e) => {
+                this.container.addEventListener('mousedown', e => {
                     if (e.target.classList.contains('node')) return;
                     isDragging = true;
                     startX = e.clientX - this.translateX;
                     startY = e.clientY - this.translateY;
-                };
+                });
 
-                const drag = (e) => {
+                document.addEventListener('mousemove', e => {
                     if (!isDragging) return;
                     e.preventDefault();
-
                     this.translateX = e.clientX - startX;
                     this.translateY = e.clientY - startY;
                     this.updateTransform();
-                };
+                });
 
-                const stopDrag = () => {
-                    isDragging = false;
-                };
+                document.addEventListener('mouseup', () => isDragging = false);
 
-                this.container.addEventListener('mousedown', startDrag);
-                document.addEventListener('mousemove', drag);
-                document.addEventListener('mouseup', stopDrag);
-
-                this.container.addEventListener('wheel', (e) => {
+                this.container.addEventListener('wheel', e => {
                     e.preventDefault();
-
                     const rect = this.container.getBoundingClientRect();
                     const mouseX = e.clientX - rect.left;
                     const mouseY = e.clientY - rect.top;
-
                     const x = (mouseX - this.translateX) / this.scale;
                     const y = (mouseY - this.translateY) / this.scale;
-
                     this.zoom(e.deltaY > 0 ? 0.9 : 1.1);
-
                     this.translateX = mouseX - x * this.scale;
                     this.translateY = mouseY - y * this.scale;
                     this.updateTransform();
                 });
             }
 
+            /**
+             * 更新变换
+             */
             updateTransform() {
-                this.wrapper.style.transform =
-                    `translate(${this.translateX}px, ${this.translateY}px) scale(${this.scale})`;
+                this.wrapper.style.transform = `translate(${this.translateX}px, ${this.translateY}px) scale(${this.scale})`;
+            }
+
+            /**
+             * 清除选中状态
+             */
+            clearSelection() {
+                if (this.selectedNodeElement) {
+                    this.selectedNodeElement.classList.remove('selected');
+                    this.selectedNodeElement = null;
+                    this.selectedNode = null;
+                }
             }
         }
 
-        new MindMap(document.getElementById('mindmap-container'), mindmapData);
-    </script>
+        // 创建思维导图实例
+        window.mindmap = MindMap.create(document.getElementById('mindmap-container'), mindmapData);
+    </script>enterprise
 </body>
 
 </html>

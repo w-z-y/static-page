@@ -5,12 +5,13 @@ export default {
         {
             id: "target-market",
             topic: "目标市场",
+            direction: "right",
             children: [
                 {
                     id: "users",
                     topic: "用户",
                     children: [
-                        { id: "age", topic: "年龄" },
+                        { id: "age", topic: "年龄年龄年龄年龄年龄年龄年龄" },
                         { id: "gender", topic: "性别" },
                         { id: "income", topic: "收入" },
                         { id: "location", topic: "人群" }
@@ -32,6 +33,7 @@ export default {
         {
             id: "market-strategy",
             topic: "市场策略",
+            direction: "left",
             children: [
                 {
                     id: "achievement",
@@ -48,6 +50,7 @@ export default {
         {
             id: "management",
             topic: "管理团队",
+            direction: "left",
             children: [
                 {
                     id: "experience",
@@ -73,6 +76,7 @@ export default {
         {
             id: "execution",
             topic: "执行",
+            direction: "left",
             children: [
                 { id: "feasibility", topic: "可持续性" },
                 { id: "vision", topic: "愿景" },
@@ -83,7 +87,7 @@ export default {
             id: "enterprise",
             topic: "企业",
             children: [
-                { id: "employees", topic: "员工" },
+                { id: "employees", topic: "员工员工员工员工员工员工员工员工员工员工员工员工员工员工员工员工员工员工员工员工员工员工员工员工员工员工员工员工员工员工员工员工员工员工员工员工员工员工员工员工员工员工" },
                 { id: "office", topic: "办公场地" },
                 { id: "uniqueness", topic: "独特性" }
             ]
@@ -118,3 +122,4 @@ export default {
         }
     ]
 };
+
