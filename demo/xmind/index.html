@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <script>
+        class XMindMap {
+            constructor(data) {
+                this.data = data;
+                this.canvas = document.createElement('canvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.layout = 'alternate'; // 'alternate', 'right', 'left', 'down'
+                this.init();
+            }
+
+            init() {
+                document.body.appendChild(this.canvas);
+                this.resizeCanvas();
+                window.addEventListener('resize', () => this.resizeCanvas());
+                
+                // 添加布局切换按钮
+                const layouts = ['alternate', 'right', 'left', 'down'];
+                const buttonContainer = document.createElement('div');
+                buttonContainer.style.position = 'fixed';
+                buttonContainer.style.top = '10px';
+                buttonContainer.style.left = '10px';
+                
+                layouts.forEach(layout => {
+                    const button = document.createElement('button');
+                    button.textContent = layout;
+                    button.onclick = () => {
+                        this.layout = layout;
+                        this.render();
+                    };
+                    buttonContainer.appendChild(button);
+                });
+                
+                document.body.appendChild(buttonContainer);
+                this.render();
+            }
+
+            resizeCanvas() {
+                this.canvas.width = window.innerWidth;
+                this.canvas.height = window.innerHeight;
+            }
+
+            calculateNodeWidth(node) {
+                if (!node.children || node.children.length === 0) {
+                    return this.ctx.measureText(node.title).width + 40;
+                }
+                
+                const childrenWidth = node.children.reduce((total, child) => {
+                    return total + this.calculateNodeWidth(child);
+                }, 0);
+                
+                const spacing = 50;
+                return Math.max(
+                    this.ctx.measureText(node.title).width + 40,
+                    childrenWidth + (node.children.length - 1) * spacing
+                );
+            }
+
+            drawNode(node, x, y, level = 0, direction = 'right') {
+                // 绘制节点背景
+                this.ctx.fillStyle = '#fff';
+                this.ctx.strokeStyle = '#333';
+                const width = this.ctx.measureText(node.title).width + 40;
+                const height = 30;
+                this.ctx.beginPath();
+                this.ctx.roundRect(x - width / 2, y - height / 2, width, height, 5);
+                this.ctx.fill();
+                this.ctx.stroke();
+
+                // 绘制文字
+                this.ctx.fillStyle = '#333';
+                this.ctx.font = '14px Arial';
+                this.ctx.textAlign = 'center';
+                this.ctx.textBaseline = 'middle';
+                this.ctx.fillText(node.title, x, y);
+
+                if (node.children && node.children.length > 0) {
+                    const spacing = 80; // 增加间距使布局更加宽松
+                    let startY = y - ((node.children.length - 1) * spacing) / 2; // 计算起始Y坐标以实现垂直居中
+                    
+                    // 根据布局方式确定子节点的位置
+                    node.children.forEach((child, index) => {
+                        let childX = x;
+                        let childY = startY + index * spacing; // 均匀分布子节点
+                        let nextDirection = direction;
+                        
+                        switch(this.layout) {
+                            case 'alternate':
+                                if (level === 0) {
+                                    // 第一层节点左右对称分布
+                                    const halfLength = Math.floor(node.children.length / 2);
+                                    if (index < halfLength) {
+                                        childX = x - 200;
+                                        nextDirection = 'left';
+                                    } else {
+                                        childX = x + 200;
+                                        nextDirection = 'right';
+                                    }
+                                } else {
+                                    // 后续层级保持父节点的方向
+                                    childX = direction === 'right' ? x + 200 : x - 200;
+                                }
+                                break;
+                                
+                            case 'right':
+                                childX = x + 200;
+                                break;
+                                
+                            case 'left':
+                                childX = x - 200;
+                                break;
+                                
+                            case 'down':
+                                childX = x - ((node.children.length - 1) * spacing) / 2 + index * spacing;
+                                childY = y + 120;
+                                break;
+                        }
+
+                        // 绘制连线
+                        this.ctx.beginPath();
+                        this.ctx.moveTo(x, y);
+                        
+                        // 使用贝塞尔曲线使连线更平滑
+                        if (this.layout === 'down') {
+                            const controlY = y + (childY - y) / 2;
+                            this.ctx.bezierCurveTo(x, controlY, childX, controlY, childX, childY);
+                        } else {
+                            const controlX = x + (childX - x) / 2;
+                            this.ctx.bezierCurveTo(controlX, y, controlX, childY, childX, childY);
+                        }
+                        this.ctx.stroke();
+
+                        // 绘制子节点
+                        this.drawNode(child, childX, childY, level + 1, nextDirection);
+                    });
+                }
+            }
+
+            render() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                // 将中心主题放在画布中心
+                this.drawNode(this.data.root, this.canvas.width / 2, this.canvas.height / 2);
+            }
+        }
+
+        // 示例数据
+        const xmindData = {
+            root: {
+                title: "中心主题",
+                children: [
+                    {
+                        title: "前端开发",
+                        children: [{
+                            title: "HTML",
+                            children: [
+                                {
+                                    title: "语义化标签",
+                                    children: [
+                                        {
+                                            title: "header",
+                                            children: []
+                                        },
+                                        {
+                                            title: "footer", 
+                                            children: []
+                                        }
+                                    ]
+                                },
+                                {
+                                    title: "表单元素",
+                                    children: []
+                                }
+                            ]
+                        },
+                        {
+                            title: "CSS",
+                            children: [
+                                {
+                                    title: "选择器",
+                                    children: [
+                                        {
+                                            title: "ID选择器",
+                                            children: []
+                                        },
+                                        {
+                                            title: "类选择器",
+                                            children: []
+                                        }
+                                    ]
+                                },
+                                {
+                                    title: "布局",
+                                    children: [
+                                        {
+                                            title: "Flex",
+                                            children: []
+                                        },
+                                        {
+                                            title: "Grid",
+                                            children: []
+                                        }
+                                    ]
+                                }
+                            ]
+                        }]
+                    },
+                    {
+                        title: "后端开发",
+                        children: [
+                            {
+                                title: "Java",
+                                children: [
+                                    {
+                                        title: "Spring",
+                                        children: [
+                                            {
+                                                title: "IoC",
+                                                children: []
+                                            },
+                                            {
+                                                title: "AOP",
+                                                children: []
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        title: "JVM",
+                                        children: [
+                                            {
+                                                title: "内存模型",
+                                                children: []
+                                            },
+                                            {
+                                                title: "垃圾回收",
+                                                children: []
+                                            }
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                title: "Python",
+                                children: [
+                                    {
+                                        title: "Django",
+                                        children: []
+                                    },
+                                    {
+                                        title: "Flask",
+                                        children: []
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        };
+
+        // 创建并初始化思维导图
+        const xmindMap = new XMindMap(xmindData);
+    </script>
+</body>
+
+</html>
