@@ -234,7 +234,7 @@
                     }
                 });
 
-                // 触摸���束
+                // 触摸结束
                 this.container.addEventListener('touchend', () => {
                     isTouching = false;
                     lastTouchDistance = 0;
@@ -446,23 +446,20 @@
                     // 保存节点原始内容
                     const originalContent = node.textContent;
 
-                    // 清空节点内容
-                    node.textContent = '';
-
                     this.editingNode = nodeData;
                     node.draggable = false;
 
-                    // 创建输入框
-                    const input = document.createElement('input');
-                    input.type = 'text';
-                    input.className = 'node-edit-input';
-                    input.value = nodeData.topic;
-                    input.style.width = '100%';
-                    input.style.height = '100%';
+                    // 创建文本框
+                    const textarea = document.createElement('textarea');
+                    textarea.className = 'node-edit-input node-base';
+                    textarea.value = nodeData.topic;
+                    textarea.style.width = '100%';
+                    textarea.style.height = '100%';
+                    textarea.style.resize = 'none';
 
                     // 完成编辑
                     const finishEdit = () => {
-                        const newValue = input.value.trim();
+                        const newValue = textarea.value.trim();
                         if (newValue && newValue !== nodeData.topic) {
                             nodeData.topic = newValue;
                             this.addToHistory();
@@ -474,20 +471,20 @@
                         this.editingNode = null;
                     };
 
-                    input.addEventListener('blur', finishEdit);
-                    input.addEventListener('keydown', e => {
-                        if (e.key === 'Enter') {
+                    textarea.addEventListener('blur', finishEdit);
+                    textarea.addEventListener('keydown', e => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
                             e.preventDefault();
                             finishEdit();
                         } else if (e.key === 'Escape') {
-                            input.value = nodeData.topic;
+                            textarea.value = nodeData.topic;
                             finishEdit();
                         }
                     });
 
-                    node.appendChild(input);
-                    input.focus();
-                    input.select();
+                    node.appendChild(textarea);
+                    textarea.focus();
+                    textarea.select();
                 });
             }
 
@@ -742,7 +739,7 @@
 
         // 创建思维导图实例
         window.mindmap = MindMap.create(document.getElementById('mindmap-container'), mindmapData);
-    </script>enterprise
+    </script>
 </body>
 
 </html>
