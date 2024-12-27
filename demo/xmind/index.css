@@ -1,209 +1,65 @@
-/* 全局重置样式 */
-* {
-    margin: 0;
-    padding: 0;
-}
-
-/* CSS变量定义 */
-:root {
-    --node-padding: 10px 20px;
-    --node-min-width: 100px;
-    --node-max-width: 250px;
-    --node-border-radius: 6px;
-    --node-bg-color: #f8f8f8;
-    --root-node-bg: #1a237e;
-    --level1-node-bg: #fbe5d6;
-    --node-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    --line-color: #ccc;
-
-    --drag-border: 2px dashed #4B5EAA;
-    --drag-bg: rgba(75, 94, 170, 0.1);
-
-    --selected-outline: 2px solid #4B5EAA;
-    --selected-bg: rgba(75, 94, 170, 0.1);
-
-    --toggle-btn-size: 22px;
-    --toggle-btn-bg: #fff;
-    --toggle-btn-color: #666;
-    --toggle-btn-font-size: 16px;
-}
-
-/* 节点基础样式 */
-.node-base {
-    width: max-content;
-    word-wrap: break-word;
-    white-space: pre-wrap;
-    box-sizing: border-box;
-    min-width: var(--node-min-width);
-    max-width: var(--node-max-width);
-    border-radius: var(--node-border-radius);
-    padding: var(--node-padding);
-    min-height: 40px;
-    border: 1px solid red;
-}
-
-/* 容器样式 */
-#mindmap-container {
+#container {
     width: 100%;
-    height: 100vh;
-    border: 1px solid var(--line-color);
+    height: 100%;
+    min-width: 400px;
+    min-height: 400px;
     position: relative;
     overflow: hidden;
-    touch-action: none;
+    border: 1px solid #eee;
     box-sizing: border-box;
 }
 
-/* 思维导图包装器样式 */
-.mindmap-wrapper {
-    position: absolute;
-    top: 0;
-    left: 0;
-    min-width: 100%;
-    min-height: 100%;
-    transform-origin: 0 0;
-}
-
-/* 工具栏样式 */
-#toolbar {
-    position: fixed;
-    top: 20px;
-    left: 20px;
-    z-index: 1000;
-}
-
-#toolbar button {
-    padding: 5px 10px;
-    margin-right: 10px;
-    cursor: pointer;
-}
-
-#toolbar button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-/* 节点基本样式 */
-.node {
-    position: absolute;
-    background-color: var(--node-bg-color);
-    text-align: center;
-    cursor: move;
-    user-select: none;
-    touch-action: none;
-    height: auto;
-    /* box-shadow: var(--node-shadow); */
-    transition: transform 0.2s ease;
-}
-
-/* 根节点样式 */
-.node.root {
-    background-color: var(--root-node-bg);
-    color: white;
-    font-size: 30px;
-}
-
-/* 一级节点样式 */
-.node.level-1 {
-    background-color: var(--level1-node-bg);
-}
-
-/* 拖拽状态样式 */
-.node.dragging {
-    opacity: 1;
-    z-index: 1000;
-    transform: scale(1.05);
-    box-shadow: var(--node-shadow);
-}
-
-/* 拖拽目标样式 */
-.node.dragover,
-.node.drag-target {
-    border: var(--drag-border);
-    transform: scale(1.05);
-    box-shadow: var(--node-shadow);
-}
-
-.node.root.drag-target {
-    transform: scale(1.05);
-}
-
-/* 节点编辑输入框样式 */
-.node-edit-input {
-    width: 100%;
-    height: 100%;
-    position: absolute;
-    background: #fff;
-    font: inherit;
-    text-align: center;
-    border: none;
-    outline: none;
-    left: 0;
-    top: 0;
-    box-shadow: var(--node-shadow);
-    resize: none;
-}
-
-/* 展开/收起按钮样式 */
-.toggle-btn {
-    font-size: var(--toggle-btn-font-size);
-    position: absolute;
-    width: var(--toggle-btn-size);
-    height: var(--toggle-btn-size);
-    top: 50%;
-    border-radius: 50%;
-    background: var(--toggle-btn-bg);
-    border: 1px solid var(--line-color);
-    cursor: pointer;
-    color: var(--toggle-btn-color);
-    box-sizing: border-box;
-}
-
-.node[data-direction="left"] .toggle-btn {
-    left: calc(-1 * var(--toggle-btn-size));
-}
-
-.node[data-direction="right"] .toggle-btn {
-    right: calc(-1 * var(--toggle-btn-size));
-}
-
-.toggle-btn::after {
-    content: "+";
-    position: relative;
-    top: -2px;
-}
-
-.node.expanded .toggle-btn::after {
-    content: "-";
-}
-
-/* 连接线样式 */
-.line {
-    position: absolute;
-    fill: none;
-    stroke: #4B5EAA;
-    stroke-width: 2px;
-    transition: opacity 0.2s;
-}
-
-
-
-/* 图层样式 */
-.lines-layer,
-.nodes-layer {
+#container .lines-layer {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-}
-
-.lines-layer {
     overflow: visible;
-    pointer-events: none;
 }
 
-/* 选中状态样式 */
-.node.selected {
-    outline: var(--selected-outline);
-    box-shadow: var(--node-shadow);
+.node { 
+    position: absolute;
+    border-radius: 4px;
+    background-color: #fff;
+    cursor: pointer;
+    box-sizing: border-box;
+    padding: 20px;
+    transition: transform 200ms;
+    width: max-content;
+    text-align: center;
+}
+
+.node:hover {
+    transform: scale(1.05);
+}
+
+.node.is-root {
+    font-size: 30px;
+    background-color: #1a237e;
+    color: #fff;
+}
+
+.node .expand-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    background-color: #1a237e;
+    color: #fff;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+}
+
+.node[data-direction="left"] .expand-btn {
+    left: -10px;
+}
+
+.node[data-direction="right"] .expand-btn {
+    right: -10px;
 }

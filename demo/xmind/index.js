@@ -1,15 +1,14 @@
 
-import mindmapData from './data.js';
-
-const defaultConfig = {
-  groupGap: 0,
-  verticalGap: 10,
-  horizontalGap: 100
-}
+import mindmapData from './backup/data.js';
+import defaultConfig from './config.js'
 
 class MindMap {
   constructor(container, data, config = {}) {
-    this.config = { ...defaultConfig, ...config };
+    this.config = {
+      node: { ...defaultConfig.node, ...config.node },
+      line: { ...defaultConfig.line, ...config.line },
+      layout: { ...defaultConfig.layout, ...config.layout }
+    };
     this.container = typeof container === 'string' ? document.querySelector(container) : container;
     this.wrapper = this.container.querySelector('.mindmap-wrapper');
     this.linesLayer = this.container.querySelector('.lines-layer');
@@ -83,24 +82,37 @@ class Line {
   constructor(mindmap) {
     this.mindmap = mindmap;
     this.linesLayer = mindmap.linesLayer;
+    this.config = mindmap.config.line;
   }
 
   createPath() {
     const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    Object.entries({
-      stroke: '#666',
-      fill: 'none',
-      'stroke-width': '2'
-    }).forEach(([key, value]) => path.setAttribute(key, value));
+    path.setAttribute('stroke', this.config.stroke);
+    path.setAttribute('fill', 'none');
+    path.setAttribute('stroke-width', this.config.strokeWidth);
     return path;
   }
 
-  drawCurve(startX, startY, endX, endY, isLeft) {
-    const path = this.createPath();
-    const controlX = startX + (isLeft ? -1 : 1) * Math.abs(endX - startX) / 2;
-    path.setAttribute('d', `M ${startX} ${startY} C ${controlX} ${startY}, ${controlX} ${endY}, ${endX} ${endY}`);
-    this.linesLayer.appendChild(path);
-    return path;
+  // 计算连线路径
+  getLinePath(startX, startY, endX, endY, isLeft) {
+    const { cornerRadius } = this.config;
+    const midX = startX + (isLeft ? -1 : 1) * Math.abs(endX - startX) / 2;
+    let d = `M ${startX} ${startY}`;
+
+    if (startY !== endY) {
+      d += ` L ${midX} ${startY}`;
+
+      if (endY > startY) {
+        d += ` L ${midX} ${endY - cornerRadius}`;
+        d += ` Q ${midX} ${endY} ${midX + (isLeft ? -cornerRadius : cornerRadius)} ${endY}`;
+      } else {
+        d += ` L ${midX} ${endY + cornerRadius}`;
+        d += ` Q ${midX} ${endY} ${midX + (isLeft ? -cornerRadius : cornerRadius)} ${endY}`;
+      }
+    }
+
+    d += ` L ${endX} ${endY}`;
+    return d;
   }
 
   connect(parent, child) {
@@ -112,15 +124,17 @@ class Line {
     const endY = child.y + child.height / 2;
 
     if (line) {
-      const controlX = startX + (isLeft ? -1 : 1) * Math.abs(endX - startX) / 2;
-      line.path.setAttribute('d', `M ${startX} ${startY} C ${controlX} ${startY}, ${controlX} ${endY}, ${endX} ${endY}`);
       line.path.style.display = '';
+      line.path.setAttribute('d', this.getLinePath(startX, startY, endX, endY, isLeft));
       return line.path;
     }
 
-    const path = this.drawCurve(startX, startY, endX, endY, isLeft);
+    const path = this.createPath();
+    path.setAttribute('d', this.getLinePath(startX, startY, endX, endY, isLeft));
     path.dataset.parentId = parent.id;
     path.dataset.childId = child.id;
+    this.linesLayer.appendChild(path);
+
     line = { path, parentNode: parent, childNode: child };
     parent.childLines.push(line);
     child.parentLine = line;
@@ -135,7 +149,7 @@ class Line {
 class Layout {
   constructor(mindmap) {
     this.mindmap = mindmap;
-    this.config = mindmap.config;
+    this.config = mindmap.config.layout;
   }
 
   groupNodes(node, level) {
@@ -191,6 +205,7 @@ class Node {
     this.topic = data.topic;
     this.id = data.id;
     this.mindmap = mindmap;
+    this.config = mindmap.config.node;
     this.children = null;
     this.parent = null;
     this.x = this.y = this.width = this.height = this.totalHeight = 0;
@@ -240,6 +255,19 @@ class Node {
     el.dataset.id = this.id;
     el.dataset.level = this.level;
     el.draggable = true;
+
+    // 应用节点样式
+    Object.assign(el.style, {
+      padding: `${this.config.padding}px`,
+      fontSize: `${this.isRoot ? this.config.fontSize.root : this.config.fontSize.normal}px`,
+      maxWidth: `${this.config.maxWidth}px`,
+      borderRadius: `${this.config.borderRadius}px`,
+      borderWidth: `${this.config.borderWidth}px`,
+      borderStyle: 'solid',
+      borderColor: this.config.borderColor,
+      backgroundColor: this.isRoot ? this.config.backgroundColor.root : this.config.backgroundColor.normal,
+      color: this.isRoot ? this.config.color.root : this.config.color.normal
+    });
 
     if (this.data.children?.length && !this.isRoot) {
       el.appendChild(this.createExpandBtn());
