@@ -1,0 +1,108 @@
+#container {
+    width: 100%;
+    height: 100%;
+    min-width: 400px;
+    min-height: 400px;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid #eee;
+    box-sizing: border-box;
+    cursor: grab;
+}
+
+#container:active {
+    cursor: grabbing;
+}
+
+#container .lines-layer {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+}
+
+#container .lines-layer path {
+    transition: d 0.2s ease;
+    -webkit-transition: d 0.2s ease;
+}
+
+#container .mindmap-wrapper {
+    transform-origin: 0 0;
+}
+
+.node {
+    position: absolute;
+    left: 0;
+    top: 0;
+    cursor: pointer;
+    box-sizing: border-box;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    width: max-content;
+    text-align: center;
+    /* 提前渲染 */
+    /* will-change: transform; */
+    /* 元素背面是否展示 */
+    backface-visibility: hidden;
+    /* 字体抗锯齿 */
+    -webkit-font-smoothing: antialiased;
+}
+
+
+.node.is-root {
+    font-size: 30px;
+    background-color: #1a237e;
+    color: #fff;
+}
+
+/* 展开/收起按钮样式 */
+.node .expand-btn {
+    cursor: pointer;
+    transition: 200ms;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    background-color: #1a237e;
+    color: #fff;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    line-height: 1;
+    visibility: hidden;
+}
+
+.node:hover .expand-btn {
+    visibility: visible;
+}
+
+.node .expand-btn:hover {
+    transform: translateY(-50%) scale(1.2);
+}
+
+.node[data-direction="left"] .expand-btn {
+    left: -10px;
+}
+
+.node[data-direction="right"] .expand-btn {
+    right: -10px;
+}
+
+/* 节点编辑输入框样式 */
+.node-textarea {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    background: #fff;
+    font: inherit;
+    text-align: center;
+    border: none;
+    outline: none;
+    left: 0;
+    top: 0;
+    box-shadow: var(--node-shadow);
+    resize: none;
+}
