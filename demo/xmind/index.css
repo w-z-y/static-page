@@ -6,10 +6,10 @@
 
 /* CSS变量定义 */
 :root {
-    --node-padding: 8px 15px;
-    --node-min-width: 80px;
-    --node-max-width: 200px;
-    --node-border-radius: 4px;
+    --node-padding: 10px 20px;
+    --node-min-width: 100px;
+    --node-max-width: 250px;
+    --node-border-radius: 6px;
     --node-bg-color: #f8f8f8;
     --root-node-bg: #1a237e;
     --level1-node-bg: #fbe5d6;
@@ -39,7 +39,7 @@
     border-radius: var(--node-border-radius);
     padding: var(--node-padding);
     min-height: 40px;
-    border: 1px solid var(--line-color);
+    border: 1px solid red;
 }
 
 /* 容器样式 */
@@ -89,16 +89,16 @@
     text-align: center;
     cursor: move;
     user-select: none;
-    transform: translate(0, -50%);
     touch-action: none;
     height: auto;
+    /* box-shadow: var(--node-shadow); */
+    transition: transform 0.2s ease;
 }
 
 /* 根节点样式 */
 .node.root {
     background-color: var(--root-node-bg);
     color: white;
-    transform: translate(-50%, -50%);
     font-size: 30px;
 }
 
@@ -111,25 +111,20 @@
 .node.dragging {
     opacity: 1;
     z-index: 1000;
-    transform: translate(0, -50%) scale(1.05);
+    transform: scale(1.05);
     box-shadow: var(--node-shadow);
-}
-
-.node.root.dragging {
-    transform: translate(-50%, -50%) scale(1.05);
 }
 
 /* 拖拽目标样式 */
 .node.dragover,
 .node.drag-target {
     border: var(--drag-border);
-    transform: translate(0, -50%) scale(1.05);
-    background-color: var(--drag-bg);
+    transform: scale(1.05);
     box-shadow: var(--node-shadow);
 }
 
 .node.root.drag-target {
-    transform: translate(-50%, -50%) scale(1.05);
+    transform: scale(1.05);
 }
 
 /* 节点编辑输入框样式 */
@@ -155,7 +150,6 @@
     width: var(--toggle-btn-size);
     height: var(--toggle-btn-size);
     top: 50%;
-    transform: translateY(-50%);
     border-radius: 50%;
     background: var(--toggle-btn-bg);
     border: 1px solid var(--line-color);
@@ -212,8 +206,4 @@
 .node.selected {
     outline: var(--selected-outline);
     box-shadow: var(--node-shadow);
-}
-
-.node.root.selected {
-    transform: translate(-50%, -50%);
 }
