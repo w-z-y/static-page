@@ -3,18 +3,25 @@ export default class Line {
     constructor(mindmap) {
         this.mindmap = mindmap;
         this.linesLayer = mindmap.linesLayer;
-        this.config = mindmap.config.line;
+        this.config = mindmap.config;
+
     }
 
     createPath() {
+        const { lineStroke, lineStrokeWidth } = this.config;
         const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        path.setAttribute('stroke', this.config.stroke);
+        path.setAttribute('stroke', lineStroke);
         path.setAttribute('fill', 'none');
-        path.setAttribute('stroke-width', this.config.strokeWidth);
+        path.setAttribute('stroke-width', lineStrokeWidth);
+
+        const { transition } = this.config;
+        transition && (path.style.transition = `d ${transition}ms`);
+
         return path;
     }
 
     connect(parent, child) {
+        const { lineCornerRadius } = this.config;
         let line = parent.childLines.find(l => l.childNode === child);
         const isLeft = child.data.direction === 'left';
         const startX = parent.x + (isLeft ? 0 : parent.width);
@@ -24,12 +31,12 @@ export default class Line {
 
         if (line) {
             line.path.style.display = '';
-            line.path.setAttribute('d', getLinePath(startX, startY, endX, endY, isLeft, this.config.cornerRadius));
+            line.path.setAttribute('d', getLinePath(startX, startY, endX, endY, isLeft, lineCornerRadius));
             return line.path;
         }
 
         const path = this.createPath();
-        path.setAttribute('d', getLinePath(startX, startY, endX, endY, isLeft, this.config.cornerRadius));
+        path.setAttribute('d', getLinePath(startX, startY, endX, endY, isLeft, lineCornerRadius));
         path.dataset.parentId = parent.id;
         path.dataset.childId = child.id;
         this.linesLayer.appendChild(path);

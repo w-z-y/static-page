@@ -4,14 +4,16 @@ export default class Node {
     this.topic = data.topic;
     this.id = data.id;
     this.mindmap = mindmap;
-    this.config = mindmap.config.node;
+    this.config = mindmap.config;
     this.children = null;
     this.parent = null;
     this.x = this.y = this.width = this.height = this.totalHeight = 0;
     this.el = null;
     this.parentLine = null;
     this.childLines = [];
+
     this.isEditing = false;
+    this.isSelected = false;
   }
 
   get isRoot() {
@@ -24,10 +26,10 @@ export default class Node {
     const { offsetWidth, offsetHeight } = this.el;
     this.width = offsetWidth;
     this.height = offsetHeight;
-    this.mindmap.nodeMap.set(this.id, this);
 
     requestAnimationFrame(() => {
-      this.el.style.transition = 'transform 0.2s';
+      const { transition } = this.config;
+      transition && (this.el.style.transition = `transform ${transition}ms`);
     });
   }
 
@@ -51,6 +53,7 @@ export default class Node {
     btn.className = 'expand-btn';
     btn.textContent = '-';
     btn.onclick = e => this.handleExpandBtnClick(e, btn);
+    btn.ondblclick = e => e.stopPropagation();
     return btn;
   }
 
@@ -66,23 +69,39 @@ export default class Node {
 
     el.addEventListener('dblclick', e => this.startEditing(e));
 
-    Object.assign(el.style, {
-      padding: `${this.config.padding}px`,
-      fontSize: `${this.isRoot ? this.config.fontSize.root : this.config.fontSize.normal}px`,
-      maxWidth: `${this.config.maxWidth}px`,
-      borderRadius: `${this.config.borderRadius}px`,
-      borderWidth: `${this.config.borderWidth}px`,
-      borderStyle: 'solid',
-      borderColor: this.config.borderColor,
-      backgroundColor: this.isRoot ? this.config.backgroundColor.root : this.config.backgroundColor.normal,
-      color: this.isRoot ? this.config.color.root : this.config.color.normal
-    });
-
     if (this.data.children?.length && !this.isRoot) {
       el.appendChild(this.createExpandBtn());
     }
 
     this.mindmap.nodesLayer.appendChild(el);
+
+    el.addEventListener('click', e => {
+      e.stopPropagation();
+      this.select();
+    });
+
+    el.addEventListener('dragstart', e => {
+      e.stopPropagation();
+      this.select();
+      e.dataTransfer.setData('text/plain', this.id);
+    });
+
+    el.addEventListener('dragover', e => {
+      e.preventDefault();
+      e.stopPropagation();
+    });
+
+    el.addEventListener('drop', e => {
+      e.preventDefault();
+      e.stopPropagation();
+      const draggedNodeId = e.dataTransfer.getData('text/plain');
+      const draggedNode = this.mindmap.nodeMap.get(draggedNodeId);
+
+      if (draggedNode && draggedNode !== this && !this.isDescendantOf(draggedNode)) {
+        draggedNode.moveTo(this);
+      }
+    });
+
     return el;
   }
 
@@ -130,23 +149,6 @@ export default class Node {
     const textarea = document.createElement('textarea');
     textarea.value = this.topic;
     textarea.className = 'node node-textarea'
-    textarea.style.padding = `${this.config.padding}px`;
-    // textarea.style.cssText = `
-    //     width: 100%;
-    //     height: 100%;
-    //     border: none;
-    //     padding: 0;
-    //     margin: 0;
-    //     background: transparent;
-    //     font-size: inherit;
-    //     font-family: inherit;
-    //     resize: none;
-    //     position: absolute;
-    //     top: 0;
-    //     left: 0;
-    //     box-sizing: border-box;
-    //     padding: ${this.config.padding}px;
-    // `;
 
     this.el.appendChild(textarea);
     textarea.focus();
@@ -166,8 +168,9 @@ export default class Node {
 
     textarea.addEventListener('blur', finishEditing);
     textarea.addEventListener('keydown', e => {
-      if (e.key === 'Enter' && !e.shiftKey) {
+      if (e.key === 'Enter' && !e.shiftKey || e.key === 'Tab') {
         e.preventDefault();
+        e.stopPropagation();
         finishEditing();
       }
       if (e.key === 'Escape') {
@@ -187,4 +190,78 @@ export default class Node {
       this.mindmap.refresh();
     }
   }
+
+  select() {
+    this.mindmap.selectedNode?.unselect();
+    this.isSelected = true;
+    this.el.classList.add('is-selected');
+    this.mindmap.selectedNode = this;
+  }
+
+  unselect() {
+    this.isSelected = false;
+    this.el.classList.remove('is-selected');
+    if (this.mindmap.selectedNode === this) {
+      this.mindmap.selectedNode = null;
+    }
+  }
+
+  isDescendantOf(node) {
+    let parent = this.parent;
+    while (parent) {
+      if (parent === node) return true;
+      parent = parent.parent;
+    }
+    return false;
+  }
+
+  moveTo(newParent) {
+    // 递归清理所有子节点的连接线
+    const clearChildLines = (node) => {
+        node.children?.forEach(child => {
+            if (child.parentLine) {
+                child.parentLine.path.remove();
+                const index = node.childLines.indexOf(child.parentLine);
+                if (index > -1) {
+                    node.childLines.splice(index, 1);
+                }
+                child.parentLine = null;
+            }
+            clearChildLines(child);
+        });
+    };
+
+    // 清理当前节点及其所有子节点的连接线
+    if (this.parentLine) {
+        this.parentLine.path.remove();
+        const index = this.parent.childLines.indexOf(this.parentLine);
+        if (index > -1) {
+            this.parent.childLines.splice(index, 1);
+        }
+        this.parentLine = null;
+    }
+    clearChildLines(this);
+
+    // 更新节点关系
+    if (this.parent) {
+        const index = this.parent.children.indexOf(this);
+        if (index > -1) {
+            this.parent.children.splice(index, 1);
+            this.parent.data.children.splice(index, 1);
+        }
+    }
+
+    newParent.children = newParent.children || [];
+    newParent.data.children = newParent.data.children || [];
+    newParent.children.push(this);
+    newParent.data.children.push(this.data);
+    this.parent = newParent;
+
+    this.data.direction = newParent.data.direction;
+
+    this.mindmap.historyInstance.add(this.mindmap.data);
+    
+    this.mindmap.refresh();
+  }
 }
+

@@ -1,3 +1,13 @@
+const config = {
+  maxDepth: 3,
+  maxLeftChildren: 3,
+  maxRightChildren: 3
+}
+
+const randomDepth = Math.ceil(Math.random() * config.maxDepth)
+const randomLeftChildren = Math.ceil(Math.random() * config.maxLeftChildren)
+const randomRightChildren = Math.ceil(Math.random() * config.maxRightChildren)
+
 function generateRandomId() {
   return Math.random().toString(36).substring(2, 10);
 }
@@ -27,7 +37,7 @@ function generateNode(depth = 0, direction) {
     direction
   };
 
-  if (depth < 2) {
+  if (depth < randomDepth) {
     const childCount = Math.floor(Math.random() * 4) + 1;
     node.children = [];
     for (let i = 0; i < childCount; i++) {
@@ -38,6 +48,16 @@ function generateNode(depth = 0, direction) {
   return node;
 }
 
+function generateFreeNode() {
+  return {
+    id: generateRandomId(),
+    topic: generateRandomTopic(),
+    direction: 'free',
+    x: Math.random() * 800 - 400, // 随机位置 -400 到 400
+    y: Math.random() * 600 - 300  // 随机位置 -300 到 300
+  };
+}
+
 const mindmapData = {
   id: generateRandomId(),
   topic: '中心主题',
@@ -45,13 +65,16 @@ const mindmapData = {
 };
 
 // 生成左侧节点
-for (let i = 0; i < 2; i++) {
+for (let i = 0; i < randomLeftChildren; i++) {
   mindmapData.children.push(generateNode(0, 'left'));
 }
 
 // 生成右侧节点
-for (let i = 0; i < 2; i++) {
+for (let i = 0; i < randomRightChildren; i++) {
   mindmapData.children.push(generateNode(0, 'right'));
 }
+
+// 添加一个自由主题
+mindmapData.children.push(generateFreeNode());
 
 export default mindmapData;

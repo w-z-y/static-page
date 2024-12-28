@@ -1,0 +1,59 @@
+{
+  "id": "root",
+  "topic": "思维导图",
+  "children": [
+    {
+      "id": "left1",
+      "topic": "左侧主题1",
+      "direction": "left",
+      "children": [
+        {
+          "id": "left1-1",
+          "topic": "子主题1",
+          "direction": "left"
+        },
+        {
+          "id": "left1-2", 
+          "topic": "子主题2",
+          "direction": "left"
+        }
+      ]
+    },
+    {
+      "id": "right1",
+      "topic": "右侧主题1", 
+      "direction": "right",
+      "children": [
+        {
+          "id": "right1-1",
+          "topic": "子主题1",
+          "direction": "right"
+        }
+      ]
+    },
+    {
+      "id": "free1",
+      "topic": "自由主题1",
+      "direction": "free",
+      "x": 200,
+      "y": -150
+    },
+    {
+      "id": "free2", 
+      "topic": "自由主题2",
+      "direction": "free",
+      "x": -300,
+      "y": 200
+    }
+  ],
+  "connections": [
+    {
+      "from": "left1-1",
+      "to": "right1-1"
+    },
+    {
+      "from": "free1",
+      "to": "free2" 
+    }
+  ]
+}

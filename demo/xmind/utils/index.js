@@ -1,11 +1,3 @@
-// 配置合并方法
-export function mergeConfig(defaultConfig, customConfig) {
-    return Object.entries(defaultConfig).reduce((acc, [key, defaultValue]) => {
-        acc[key] = { ...defaultValue, ...(customConfig[key] || {}) };
-        return acc;
-    }, {});
-}
-
 // 获取连接线路径
 export function getLinePath(startX, startY, endX, endY, isLeft, cornerRadius) {
     const midX = startX + (isLeft ? -1 : 1) * Math.abs(endX - startX) / 2;

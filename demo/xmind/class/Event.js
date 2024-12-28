@@ -1,90 +1,134 @@
 export default class Event {
     constructor(mindmap) {
-      this.mindmap = mindmap;
-      this.setupWheelEvent();
-      this.setupDragEvent();
-      this.setupTouchEvent();
+        this.mindmap = mindmap;
+        this.config = mindmap.config;
+        this.setupWheelEvent();
+        this.setupDragEvent();
+        this.setupTouchEvent();
+        this.setupKeyboardEvent();
     }
-  
-    setupWheelEvent() {
-      this.mindmap.container.addEventListener('wheel', e => {
-        e.preventDefault();
-        const rect = this.mindmap.container.getBoundingClientRect();
-        const mouseX = e.clientX - rect.left;
-        const mouseY = e.clientY - rect.top;
-        const x = (mouseX - this.mindmap.offsetX) / this.mindmap.scale;
-        const y = (mouseY - this.mindmap.offsetY) / this.mindmap.scale;
-        const scaleFactor = e.deltaY > 0 ? (1 - this.mindmap.config.map.zoomStep) : (1 + this.mindmap.config.map.zoomStep);
-        const newScale = this.mindmap.scale * scaleFactor;
-  
-        if (newScale >= this.mindmap.config.map.zoomMin && newScale <= this.mindmap.config.map.zoomMax) {
-          this.mindmap.scale = newScale;
-          this.mindmap.offsetX = mouseX - x * this.mindmap.scale;
-          this.mindmap.offsetY = mouseY - y * this.mindmap.scale;
-          this.mindmap.wrapper.style.transform = `translate(${this.mindmap.offsetX}px, ${this.mindmap.offsetY}px) scale(${this.mindmap.scale})`;
-        }
-      });
-    }
-  
-    setupDragEvent() {
-        let isDragging = false;
-        let startX, startY;
-        let initialOffsetX, initialOffsetY;
+    // 键盘事件
+    setupKeyboardEvent() {
+        document.addEventListener('keydown', e => {
+            // Ctrl+Z 撤销
+            if (e.ctrlKey && e.key.toLowerCase() === 'z' && !e.shiftKey) {
+                e.preventDefault();
+                this.mindmap.historyInstance.undo();
+            }
 
-        this.mindmap.container.addEventListener('mousedown', e => {
-            if (e.target === this.mindmap.container || e.target === this.mindmap.wrapper) {
-                isDragging = true;
-                startX = e.clientX;
-                startY = e.clientY;
-                initialOffsetX = this.mindmap.offsetX;
-                initialOffsetY = this.mindmap.offsetY;
+            // Ctrl+Shift+Z 或 Ctrl+Y 重做
+            if ((e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'z') ||
+                (e.ctrlKey && e.key.toLowerCase() === 'y')) {
+                e.preventDefault();
+                this.mindmap.historyInstance.redo();
+            }
+
+
+            if (this.mindmap.selectedNode && !this.mindmap.selectedNode.isEditing) {
+                if (e.key === 'Tab') {
+                    e.preventDefault();
+                    this.mindmap.addChild(this.mindmap.selectedNode);
+                } else if (e.key === 'Enter') {
+                    e.preventDefault();
+                    this.mindmap.addSibling(this.mindmap.selectedNode);
+                } else if (e.key === 'Delete' || e.key === 'Backspace') {
+                    e.preventDefault();
+                    this.mindmap.deleteNode(this.mindmap.selectedNode);
+                }
             }
         });
-
-        document.addEventListener('mousemove', e => {
-            if (!isDragging) return;
-            
-            const deltaX = e.clientX - startX;
-            const deltaY = e.clientY - startY;
-            
-            this.mindmap.offsetX = initialOffsetX + deltaX;
-            this.mindmap.offsetY = initialOffsetY + deltaY;
-            
-            this.mindmap.wrapper.style.transform = 
-                `translate(${this.mindmap.offsetX}px, ${this.mindmap.offsetY}px) scale(${this.mindmap.scale})`;
-        });
-
-        document.addEventListener('mouseup', () => {
-            isDragging = false;
-        });
+    }
+    // 滚轮操作
+    setupWheelEvent() {
+        const handleWheel = e => {
+            e.preventDefault();
+            this.mindmap.zoom(e.deltaY > 0 ? 'out' : 'in', {
+                x: e.clientX,
+                y: e.clientY,
+            });
+        };
+        this.mindmap.container.addEventListener('wheel', handleWheel, { passive: false });
     }
 
-    setupTouchEvent() {
-        let lastTouchDistance = 0;
-        let isDragging = false;
-        let startX, startY;
-        let initialOffsetX, initialOffsetY;
+    // 拖拽操作
+    setupDragEvent() {
+        let dragState = {
+            isDragging: false,
+            startX: 0,
+            startY: 0,
+            initialOffsetX: 0,
+            initialOffsetY: 0
+        };
 
-        this.mindmap.container.addEventListener('touchstart', e => {
+        const handleMouseDown = e => {
             if (e.target === this.mindmap.container || e.target === this.mindmap.wrapper) {
-                isDragging = true;
-                startX = e.touches[0].clientX;
-                startY = e.touches[0].clientY;
-                initialOffsetX = this.mindmap.offsetX;
-                initialOffsetY = this.mindmap.offsetY;
+                dragState = {
+                    isDragging: true,
+                    startX: e.clientX,
+                    startY: e.clientY,
+                    initialOffsetX: this.mindmap.offsetX,
+                    initialOffsetY: this.mindmap.offsetY
+                };
+            }
+        };
+
+        const handleMouseMove = e => {
+            if (!dragState.isDragging) return;
+
+            const deltaX = e.clientX - dragState.startX;
+            const deltaY = e.clientY - dragState.startY;
+
+            this.mindmap.setPosition(
+                dragState.initialOffsetX + deltaX,
+                dragState.initialOffsetY + deltaY
+            );
+        };
+
+        const handleMouseUp = () => {
+            dragState.isDragging = false;
+        };
+
+        this.mindmap.container.addEventListener('mousedown', handleMouseDown);
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', handleMouseUp);
+    }
+
+    // 触屏操作
+    setupTouchEvent() {
+        let touchState = {
+            lastTouchDistance: 0,
+            isDragging: false,
+            startX: 0,
+            startY: 0,
+            initialOffsetX: 0,
+            initialOffsetY: 0
+        };
+
+        const handleTouchStart = e => {
+            if (e.target === this.mindmap.container || e.target === this.mindmap.wrapper) {
+                touchState = {
+                    ...touchState,
+                    isDragging: true,
+                    startX: e.touches[0].clientX,
+                    startY: e.touches[0].clientY,
+                    initialOffsetX: this.mindmap.offsetX,
+                    initialOffsetY: this.mindmap.offsetY
+                };
 
                 if (e.touches.length === 2) {
-                    lastTouchDistance = Math.hypot(
+                    touchState.lastTouchDistance = Math.hypot(
                         e.touches[0].clientX - e.touches[1].clientX,
                         e.touches[0].clientY - e.touches[1].clientY
                     );
                 }
             }
-        });
+        };
+
+        this.mindmap.container.addEventListener('touchstart', handleTouchStart);
 
         this.mindmap.container.addEventListener('touchmove', e => {
             e.preventDefault();
-            
+
             if (e.touches.length === 2) {
                 // 处理缩放
                 const distance = Math.hypot(
@@ -98,33 +142,34 @@ export default class Event {
                 const x = (midX - rect.left - this.mindmap.offsetX) / this.mindmap.scale;
                 const y = (midY - rect.top - this.mindmap.offsetY) / this.mindmap.scale;
 
-                const scaleFactor = distance / lastTouchDistance;
+                const scaleFactor = distance / touchState.lastTouchDistance;
                 const newScale = this.mindmap.scale * scaleFactor;
 
-                if (newScale >= this.mindmap.config.map.zoomMin && newScale <= this.mindmap.config.map.zoomMax) {
+                const { zoomMin, zoomMax } = this.config;
+                if (newScale >= zoomMin && newScale <= zoomMax) {
                     this.mindmap.scale = newScale;
                     this.mindmap.offsetX = midX - rect.left - x * this.mindmap.scale;
                     this.mindmap.offsetY = midY - rect.top - y * this.mindmap.scale;
-                    this.mindmap.wrapper.style.transform = 
+                    this.mindmap.wrapper.style.transform =
                         `translate(${this.mindmap.offsetX}px, ${this.mindmap.offsetY}px) scale(${this.mindmap.scale})`;
                 }
 
-                lastTouchDistance = distance;
-            } else if (isDragging) {
+                touchState.lastTouchDistance = distance;
+            } else if (touchState.isDragging) {
                 // 处理拖动
-                const deltaX = e.touches[0].clientX - startX;
-                const deltaY = e.touches[0].clientY - startY;
-                
-                this.mindmap.offsetX = initialOffsetX + deltaX;
-                this.mindmap.offsetY = initialOffsetY + deltaY;
-                
-                this.mindmap.wrapper.style.transform = 
-                    `translate(${this.mindmap.offsetX}px, ${this.mindmap.offsetY}px) scale(${this.mindmap.scale})`;
+                const deltaX = e.touches[0].clientX - touchState.startX;
+                const deltaY = e.touches[0].clientY - touchState.startY;
+
+                this.mindmap.setPosition(
+                    touchState.initialOffsetX + deltaX,
+                    touchState.initialOffsetY + deltaY
+                );
             }
         });
 
         this.mindmap.container.addEventListener('touchend', () => {
-            isDragging = false;
+            touchState.isDragging = false;
         });
     }
-  }
+}
+

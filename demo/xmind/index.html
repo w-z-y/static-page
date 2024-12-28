@@ -1,5 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
+<!-- 
+
+
+
+
+
+历史记录
+拖拽节点
+快捷键（tab,Enter)添加，(delete)删除节点
+点击选中节点，上下左右移动选中节点
+
+
+
+
+
+
+
+
+-->
 
 <head>
     <meta charset="UTF-8">
@@ -17,12 +36,43 @@
             height: 100%;
             overflow: hidden;
         }
+
+        .control-buttons {
+            position: absolute;
+            right: 20px;
+            bottom: 20px;
+            z-index: 100;
+            display: flex;
+            gap: 8px;
+        }
+
+        .control-buttons .zoom-btn {
+            width: 36px;
+            height: 36px;
+            border: none;
+            border-radius: 4px;
+            background: #1a237e;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .control-buttons .zoom-btn:hover {
+            opacity: 0.9;
+        }
     </style>
     <link rel="stylesheet" href="./style/index.css">
 </head>
 
 <body>
     <div id="container">
+        <div class="control-buttons">
+            <button class="zoom-btn" onclick="mindmap.zoom('in')">+</button>
+            <button class="zoom-btn" onclick="mindmap.zoom('out')">-</button>
+        </div>
         <div class="mindmap-wrapper">
             <!-- SVG连线层 -->
             <svg class="lines-layer"></svg>
@@ -34,6 +84,7 @@
         import MindMap from './index.js'
         import mindmapData from './data/index.js'
         const mindmap = new MindMap('#container', mindmapData/* 随机数据 */);
+        window.mindmap = mindmap;
         console.log('mindmap', mindmap);
     </script>
 </body>

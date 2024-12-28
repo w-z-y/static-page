@@ -2,7 +2,7 @@ import { groupNodes } from '../utils/index.js';
 export default class Layout {
     constructor(mindmap) {
         this.mindmap = mindmap;
-        this.config = mindmap.config.layout;
+        this.config = mindmap.config;
     }
 
     calculateNodeHeight(node) {
@@ -20,7 +20,8 @@ export default class Layout {
         const [leftNodes, rightNodes] = groupNodes(node, level);
         const layoutGroup = (nodes, isLeft) => {
             const totalHeight = nodes.reduce((sum, child) => sum + child.calculateHeight(), 0);
-            const baseX = node.x + (isLeft ? -this.config.horizontalGap : node.width + this.config.horizontalGap);
+            const { horizontalGap } = this.config;
+            const baseX = node.x + (isLeft ? - horizontalGap : node.width + horizontalGap);
             let currentY = node.y + node.height / 2 - totalHeight / 2;
 
             nodes.forEach(childNode => {
