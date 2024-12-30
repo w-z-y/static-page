@@ -26,7 +26,8 @@ export default class Node {
     const { offsetWidth, offsetHeight } = this.el;
     this.width = offsetWidth;
     this.height = offsetHeight;
-
+    this.mindmap.eventInstance.setupNodeEvents(this);
+    
     requestAnimationFrame(() => {
       const { transition } = this.config;
       transition && (this.el.style.transition = `transform ${transition}ms`);
@@ -67,40 +68,11 @@ export default class Node {
     el.dataset.level = this.level;
     el.draggable = true;
 
-    el.addEventListener('dblclick', e => this.startEditing(e));
-
     if (this.data.children?.length && !this.isRoot) {
       el.appendChild(this.createExpandBtn());
     }
 
     this.mindmap.nodesLayer.appendChild(el);
-
-    el.addEventListener('click', e => {
-      e.stopPropagation();
-      this.select();
-    });
-
-    el.addEventListener('dragstart', e => {
-      e.stopPropagation();
-      this.select();
-      e.dataTransfer.setData('text/plain', this.id);
-    });
-
-    el.addEventListener('dragover', e => {
-      e.preventDefault();
-      e.stopPropagation();
-    });
-
-    el.addEventListener('drop', e => {
-      e.preventDefault();
-      e.stopPropagation();
-      const draggedNodeId = e.dataTransfer.getData('text/plain');
-      const draggedNode = this.mindmap.nodeMap.get(draggedNodeId);
-
-      if (draggedNode && draggedNode !== this && !this.isDescendantOf(draggedNode)) {
-        draggedNode.moveTo(this);
-      }
-    });
 
     return el;
   }
@@ -139,47 +111,6 @@ export default class Node {
   calculateHeight() {
     return this.mindmap.layoutInstance.calculateNodeHeight(this);
   }
-
-  startEditing(e) {
-    if (this.isEditing) return;
-    e.stopPropagation();
-
-    this.isEditing = true;
-    const textSpan = this.el.querySelector('span');
-    const textarea = document.createElement('textarea');
-    textarea.value = this.topic;
-    textarea.className = 'node node-textarea'
-
-    this.el.appendChild(textarea);
-    textarea.focus();
-    textarea.select();
-
-    const finishEditing = () => {
-      if (!this.isEditing) return;
-      this.isEditing = false;
-      const newTopic = textarea.value.trim();
-      if (newTopic && newTopic !== this.topic) {
-        this.topic = this.data.topic = newTopic;
-        textSpan.textContent = newTopic;
-      }
-      textarea.remove();
-      this.updateSize();
-    };
-
-    textarea.addEventListener('blur', finishEditing);
-    textarea.addEventListener('keydown', e => {
-      if (e.key === 'Enter' && !e.shiftKey || e.key === 'Tab') {
-        e.preventDefault();
-        e.stopPropagation();
-        finishEditing();
-      }
-      if (e.key === 'Escape') {
-        textarea.value = this.topic;
-        textarea.blur();
-      }
-    });
-  }
-
   updateSize() {
     const { offsetWidth, offsetHeight } = this.el;
     const sizeChanged = this.width !== offsetWidth || this.height !== offsetHeight;
@@ -190,7 +121,7 @@ export default class Node {
       this.mindmap.refresh();
     }
   }
-
+  
   select() {
     this.mindmap.selectedNode?.unselect();
     this.isSelected = true;
@@ -259,8 +190,6 @@ export default class Node {
 
     this.data.direction = newParent.data.direction;
 
-    this.mindmap.historyInstance.add(this.mindmap.data);
-    
     this.mindmap.refresh();
   }
 }

@@ -4,7 +4,7 @@ import Node from './Node.js';
 import Line from './Line.js';
 import Layout from './Layout.js';
 import Event from './Event.js';
-import History from './History.js'
+import History from './History.js';
 
 export default class MindMap {
     constructor(container, data, config = {}) {
@@ -17,7 +17,6 @@ export default class MindMap {
         this.data = structuredClone(data);
         this.nodeMap = new Map();
         this.collapsedNodeIds = new Set();
-        this.historyInstance = new History(this);
 
         const { offsetWidth, offsetHeight } = this.container;
         this.centerX = offsetWidth / 2;
@@ -29,15 +28,9 @@ export default class MindMap {
         this.layoutInstance = new Layout(this);
         this.lineInstance = new Line(this);
         this.eventInstance = new Event(this);
+        this.history = new History(this);
 
         this.selectedNode = null;
-
-        // 添加容器点击取消选中事件
-        this.container.addEventListener('click', e => {
-            if (e.target === this.container || e.target === this.wrapper) {
-                this.selectedNode?.unselect();
-            }
-        });
 
         this.init();
     }
@@ -45,13 +38,13 @@ export default class MindMap {
     init() {
         // 清理所有连接线
         this.lineInstance.clear();
-        
+
         // 清理所有节点的连接线引用
         this.nodeMap.forEach(node => {
             node.parentLine = null;
             node.childLines = [];
         });
-        
+
         this.rootNode = this.createNode(this.data, 0);
         this.rootNode.setPosition(this.centerX, this.centerY);
         this.layoutInstance.layoutChildren(this.rootNode, 0);
@@ -78,6 +71,7 @@ export default class MindMap {
                 return childNode;
             });
         }
+        node.data = nodeData
         return node;
     }
 
@@ -132,7 +126,7 @@ export default class MindMap {
         if (typeof y === 'number') this.offsetY = y;
         if (typeof scale === 'number') this.scale = scale;
 
-        this.wrapper.style.transform =  
+        this.wrapper.style.transform =
             `translate(${this.offsetX}px, ${this.offsetY}px) scale(${this.scale})`;
     }
     addChild(node) {
@@ -144,10 +138,13 @@ export default class MindMap {
 
         node.data.children = node.data.children || [];
         node.data.children.push(newNode);
-        this.historyInstance.add(this.data);
+
+        // 添加历史记录
+        this.history.add(structuredClone(this.data));
+
         this.init();
         this.nodeMap.get(newNode.id).select();
-        this.nodeMap.get(newNode.id).startEditing({ stopPropagation: () => {} });
+        this.eventInstance.handleNodeEdit({ stopPropagation: () => { } }, this.nodeMap.get(newNode.id));
     }
 
     addSibling(node) {
@@ -162,12 +159,35 @@ export default class MindMap {
         const siblings = node.parent.data.children;
         const index = siblings.indexOf(node.data);
         siblings.splice(index + 1, 0, newNode);
-        this.historyInstance.add(this.data);
+
+        // 添加历史记录
+        this.history.add(structuredClone(this.data));
 
         this.init();
         this.nodeMap.get(newNode.id).select();
-        this.nodeMap.get(newNode.id).startEditing({ stopPropagation: () => {} });
+        this.eventInstance.handleNodeEdit({ stopPropagation: () => { } }, this.nodeMap.get(newNode.id));
     }
+    removeNodeDOM(node) {
+        // 删除节点元素
+        node.el?.remove();
+        // 删除与父节点的连接线
+        if (node.parentLine) {
+            node.parentLine.path.remove();
+            const index = node.parent.childLines.indexOf(node.parentLine);
+            if (index > -1) {
+                node.parent.childLines.splice(index, 1);
+            }
+            node.parentLine = null;
+        }
+
+        // 递归删除子节点
+        node.children?.forEach(child => {
+            this.removeNodeDOM(child);
+        });
+
+        // 从节点映射中移除
+        this.nodeMap.delete(node.id);
+    };
 
     deleteNode(node) {
         if (node.isRoot) return;
@@ -175,9 +195,12 @@ export default class MindMap {
         const siblings = node.parent.data.children;
         const index = siblings.indexOf(node.data);
         siblings.splice(index, 1);
-        this.historyInstance.add(this.data);
+
+        // 添加历史记录
+        this.history.add(structuredClone(this.data));
 
         this.init();
         node.parent.select();
+        this.removeNodeDOM(node);
     }
 }

@@ -6,24 +6,101 @@ export default class Event {
         this.setupDragEvent();
         this.setupTouchEvent();
         this.setupKeyboardEvent();
+        this.setupContainerEvent();
     }
+
+    // 新增容器事件处理
+    setupContainerEvent() { 
+        // 从 MindMap 类移动过来的容器点击事件
+        this.mindmap.container.addEventListener('click', e => {
+            if (e.target === this.mindmap.container || e.target === this.mindmap.wrapper) {
+                this.mindmap.selectedNode?.unselect();
+            }
+        });
+    }
+
+    // 新增节点事件处理
+    setupNodeEvents(node) {
+        const el = node.el;
+        if(!el) return;
+        // 点击选中
+        el.addEventListener('click', e => {
+            e.stopPropagation();
+            node.select();
+        });
+
+        // 双击编辑
+        el.addEventListener('dblclick', e => this.handleNodeEdit(e, node));
+
+        // 拖拽相关
+        el.addEventListener('dragstart', e => {
+            e.stopPropagation();
+            node.select();
+            e.dataTransfer.setData('text/plain', node.id);
+        });
+
+        el.addEventListener('dragover', e => {
+            e.preventDefault();
+            e.stopPropagation();
+        });
+
+        el.addEventListener('drop', e => {
+            e.preventDefault();
+            e.stopPropagation();
+            const draggedNodeId = e.dataTransfer.getData('text/plain');
+            const draggedNode = this.mindmap.nodeMap.get(draggedNodeId);
+
+            if (draggedNode && draggedNode !== node && !node.isDescendantOf(draggedNode)) {
+                draggedNode.moveTo(node);
+            }
+        });
+    }
+
+    // 新增节点编辑处理
+    handleNodeEdit(e, node) {
+        if (node.isEditing) return;
+        e.stopPropagation();
+
+        node.isEditing = true;
+        const textSpan = node.el.querySelector('span');
+        const textarea = document.createElement('textarea');
+        textarea.value = node.topic;
+        textarea.className = 'node node-textarea';
+
+        node.el.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+
+        const finishEditing = () => {
+            if (!node.isEditing) return;
+            node.isEditing = false;
+            const newTopic = textarea.value.trim();
+            if (newTopic && newTopic !== node.topic) {
+                node.topic = node.data.topic = newTopic;
+                textSpan.textContent = newTopic;
+                this.mindmap.history.add(structuredClone(this.mindmap.data));
+            }
+            textarea.remove();
+            node.updateSize();
+        };
+
+        textarea.addEventListener('blur', finishEditing);
+        textarea.addEventListener('keydown', e => {
+            if (e.key === 'Enter' && !e.shiftKey || e.key === 'Tab') {
+                e.preventDefault();
+                e.stopPropagation();
+                finishEditing();
+            }
+            if (e.key === 'Escape') {
+                textarea.value = node.topic;
+                textarea.blur();
+            }
+        });
+    }
+
     // 键盘事件
     setupKeyboardEvent() {
         document.addEventListener('keydown', e => {
-            // Ctrl+Z 撤销
-            if (e.ctrlKey && e.key.toLowerCase() === 'z' && !e.shiftKey) {
-                e.preventDefault();
-                this.mindmap.historyInstance.undo();
-            }
-
-            // Ctrl+Shift+Z 或 Ctrl+Y 重做
-            if ((e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'z') ||
-                (e.ctrlKey && e.key.toLowerCase() === 'y')) {
-                e.preventDefault();
-                this.mindmap.historyInstance.redo();
-            }
-
-
             if (this.mindmap.selectedNode && !this.mindmap.selectedNode.isEditing) {
                 if (e.key === 'Tab') {
                     e.preventDefault();

@@ -14,6 +14,7 @@ export default class History {
     }
 
     undo() {
+        console.log('this.records', this.records);
         if (this.currentIndex > 0) {
             this.currentIndex--;
             this.restore();
@@ -29,7 +30,23 @@ export default class History {
 
     restore() {
         const data = structuredClone(this.records[this.currentIndex]);
+
+        // 获取新数据中所有节点的ID
+        const getNodeIds = (node, ids = new Set()) => {
+            ids.add(node.id);
+            node.children?.forEach(child => getNodeIds(child, ids));
+            return ids;
+        };
+        const newNodeIds = getNodeIds(data);
+
+        // 删除不在新数据中的节点
+        this.mindmap.nodeMap.forEach((node, id) => {
+            if (!newNodeIds.has(id)) {
+                this.mindmap.removeNodeDOM(node);
+            }
+        });
+
         this.mindmap.data = data;
         this.mindmap.init();
     }
-} 
+}
