@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <input type="file" id="fileInput" placeholder="请选择.xmind文件">
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+    <script type="module">
+        // 解析xmind文件为JSON数据
+        async function parseXmindToJson(file) {
+            // 检查文件类型
+            if (!file || !file.name.endsWith('.xmind')) {
+                throw new Error('请选择.xmind文件');
+            }
+            // 创建JSZip实例解压xmind文件
+            const zip = new JSZip();
+            const zipData = await zip.loadAsync(file);
+            
+            try {
+                // 尝试读取新版content.json文件
+                const contentJson = await zipData.file('content.json').async('string');
+                const content = JSON.parse(contentJson);
+                return content;
+            } catch (err) {
+                // 如果读取失败,尝试读取旧版content.xml文件
+                try {
+                    const contentXml = await zipData.file('content.xml').async('string');
+                    // 这里需要添加XML到JSON的转换逻辑
+                    // 简单示例,实际应根据具体XML结构调整
+                    const parser = new DOMParser();
+                    const xmlDoc = parser.parseFromString(contentXml, "text/xml");
+                    const content = {
+                        rootTopic: {
+                            title: xmlDoc.querySelector("topic").getAttribute("title"),
+                            children: Array.from(xmlDoc.querySelectorAll("topic > topic")).map(topic => ({
+                                title: topic.getAttribute("title")
+                            }))
+                        }
+                    };
+                    return content;
+                } catch (xmlErr) {
+                    throw new Error('无法解析xmind文件内容');
+                }
+            }
+        }
+
+        // 使用示例:
+        /*
+        */
+        const fileInput = document.getElementById('fileInput');
+        fileInput.addEventListener('change', async (e) => {
+            try {
+                const file = e.target.files[0];
+                const jsonData = await parseXmindToJson(file);
+                console.log(jsonData);
+            } catch (err) {
+                console.error('解析失败:', err);
+            }
+        });
+
+    </script>
+</body>
+
+</html>

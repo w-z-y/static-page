@@ -609,6 +609,13 @@
                 }
             },
         });
+
+         function* getId(){
+            let id = 0;
+            while(true){
+                yield id++;
+            }
+         }
     </script>
 </body>
 
