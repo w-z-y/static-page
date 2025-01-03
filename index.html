@@ -25,6 +25,28 @@
             box-shadow: 2px 0 8px rgba(0,0,0,0.05);
             overflow-y: auto;
             padding: 20px;
+            transition: all 0.3s;
+            position: relative;
+        }
+        .sidebar.collapsed {
+            width: 0;
+            padding: 0;
+        }
+        .toggle-btn {
+            position: fixed;
+            left: 300px;
+            top: 20px;
+            z-index: 100;
+            background: #1890ff;
+            color: #fff;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 0 4px 4px 0;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .toggle-btn.collapsed {
+            left: 0;
         }
         .main {
             flex: 1;
@@ -39,6 +61,8 @@
             margin-top: 20px;
         }
         .demo-item {
+            height: 50px;
+            overflow: hidden;
             margin: 10px 0;
             border: 1px solid #eee;
             border-radius: 8px;
@@ -65,6 +89,9 @@
             height: 100%;
             color: #333;
             font-size: 16px;
+            text-overflow: ellipsis;
+            overflow: hidden;
+            white-space: nowrap;
         }
         iframe {
             width: 100%;
@@ -80,12 +107,31 @@
             border-bottom: 2px solid #1890ff;
             padding-bottom: 10px;
         }
+
+        @media screen and (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                left: 0;
+                top: 0;
+                bottom: 0;
+                z-index: 99;
+            }
+            .sidebar.collapsed {
+                transform: translateX(-100%);
+            }
+            .toggle-btn.collapsed {
+                left: 0;
+            }
+            .toggle-btn {
+                left: 300px;
+            }
+        }
     </style>
 </head>
 <body>
     <div id="app">
         <div class="layout">
-            <div class="sidebar">
+            <div :class="['sidebar', { collapsed: isCollapsed }]">
                 <h1>Demo</h1>
                 <ul class="demo-list">
                     <li v-for="demo in demos" 
@@ -96,6 +142,9 @@
                     </li>
                 </ul>
             </div>
+            <button :class="['toggle-btn', { collapsed: isCollapsed }]" @click="toggleSidebar">
+                {{ isCollapsed ? '≫' : '≪' }}
+            </button>
             <div class="main">
                 <iframe :src="iframeSrc" v-if="currentDemo"></iframe>
             </div>
@@ -111,6 +160,7 @@
                 return {
                     currentDemo: hash || '',
                     iframeSrc: hash || '',
+                    isCollapsed: window.innerWidth <= 768,
                     demos: [
                         { name: '生日天数计算器', path: './demo/birthdays/index.html', key: 'bd' },
                         { name: 'XMind布局算法', path: './demo/xmind/index.html', key: 'xm' },
@@ -128,6 +178,12 @@
                     this.iframeSrc = `${path}?t=${new Date().getTime()}`;
                     const demo = this.demos.find(d => d.path === path);
                     window.location.hash = demo ? demo.key : '';
+                    if(window.innerWidth <= 768) {
+                        this.isCollapsed = true;
+                    }
+                },
+                toggleSidebar() {
+                    this.isCollapsed = !this.isCollapsed;
                 }
             },
             mounted() {
@@ -138,6 +194,11 @@
                         this.selectDemo(demo.path);
                     }
                 }
+                window.addEventListener('resize', () => {
+                    if(window.innerWidth <= 768) {
+                        this.isCollapsed = true;
+                    }
+                });
             }
         }).mount('#app')
     </script>
