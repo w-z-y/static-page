@@ -4,13 +4,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>XMind解析</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+        }
+        #app {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .file-input {
+            margin-bottom: 20px;
+        }
+        .content-wrapper {
+            flex: 1;
+            overflow: hidden;
+        }
+        #editor {
+            width: 100%;
+            height: 100%;
+            border: 1px solid #eee;
+            border-radius: 4px;
+        }
+        .theme-switch {
+            margin-bottom: 10px;
+        }
+    </style>
 </head>
 
 <body>
-    <input type="file" id="fileInput" placeholder="请选择.xmind文件">
-    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+    <div id="app">
+        <div>
+            <a href="./test.xmind">下载xmind文件</a>
+        </div>
+        <input type="file" class="file-input" @change="handleFileChange" placeholder="请选择.xmind文件">
+        <div class="theme-switch">
+            <label>主题:</label>
+            <select v-model="currentTheme" @change="handleThemeChange">
+                <option value="vs">浅色</option>
+                <option value="vs-dark">深色</option>
+                <option value="hc-black">高对比度</option>
+            </select>
+        </div>
+        <div class="content-wrapper">
+            <div id="editor"></div>
+        </div>
+    </div>
+
+    <script src="../../lib/jszip.min.js"></script>
+    <script src="../../lib/monaco-editor/min/vs/loader.js"></script>
     <script type="module">
+        import { createApp, ref, onMounted } from '../../lib/vue3.min.js';
+
         // 解析xmind文件为JSON数据
         async function parseXmindToJson(file) {
             // 检查文件类型
@@ -49,20 +99,56 @@
             }
         }
 
-        // 使用示例:
-        /*
-        */
-        const fileInput = document.getElementById('fileInput');
-        fileInput.addEventListener('change', async (e) => {
-            try {
-                const file = e.target.files[0];
-                const jsonData = await parseXmindToJson(file);
-                console.log(jsonData);
-            } catch (err) {
-                console.error('解析失败:', err);
-            }
-        });
+        createApp({
+            setup() {
+                const content = ref({});
+                const currentTheme = ref('vs');
+                let editor = null;
 
+                onMounted(() => {
+                    require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.45.0/min/vs' }});
+                    require(['vs/editor/editor.main'], function() {
+                        editor = monaco.editor.create(document.getElementById('editor'), {
+                            value: JSON.stringify({}, null, 2),
+                            language: 'json',
+                            theme: currentTheme.value,
+                            automaticLayout: true,
+                            minimap: {
+                                enabled: false
+                            },
+                            readOnly: true
+                        });
+                    });
+                });
+
+                const handleThemeChange = () => {
+                    if(editor) {
+                        monaco.editor.setTheme(currentTheme.value);
+                    }
+                };
+
+                const handleFileChange = async (e) => {
+                    try {
+                        const file = e.target.files[0];
+                        content.value = await parseXmindToJson(file);
+                        console.log(content.value);
+                        if(editor) {
+                            editor.setValue(JSON.stringify(content.value, null, 2));
+                        }
+                    } catch (err) {
+                        alert('解析失败: ' + err.message);
+                        console.error('解析失败:', err);
+                    }
+                };
+
+                return {
+                    content,
+                    currentTheme,
+                    handleThemeChange,
+                    handleFileChange
+                };
+            }
+        }).mount('#app');
     </script>
 </body>
 

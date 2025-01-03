@@ -1,622 +1,134 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>宝宝生日计算</title>
-    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Mochiy+Pop+One&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>wzy的Demo</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <style>
-        * {
+        *{
             padding: 0;
             margin: 0;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            background: #f0f2f5;
+        }
+        .layout {
+            display: flex;
+            height: 100vh;
+        }
+        .sidebar {
+            width: 300px;
+            background: #fff;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.05);
+            overflow-y: auto;
+            padding: 20px;
+        }
+        .main {
+            flex: 1;
+            height: 100vh;
+            background: #f0f2f5;
+            padding: 20px;
             box-sizing: border-box;
         }
-
-        html,
-        body {
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-        }
-
-        [v-cloak] {
-            display: none;
-        }
-
-        #app {
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            background-size: contain;
-            background-position: center;
-            background-repeat: no-repeat;
-            position: relative;
-            font-family: 'Mochiy Pop One', "PingFang SC", "Microsoft YaHei", sans-serif;
-            background: linear-gradient(135deg, #E0C3FC 0%, #8EC5FC 100%);
-            animation: gradientBG 15s ease infinite;
-            background-size: 100% 100%;
-        }
-
-        @keyframes gradientBG {
-            0% {
-                background-position: 0% 50%;
-            }
-
-            50% {
-                background-position: 100% 50%;
-            }
-
-            100% {
-                background-position: 0% 50%;
-            }
-        }
-
-        @media screen and (max-width: 768px) {
-            #app {
-                background-size: cover;
-                background-position: center;
-            }
-        }
-
-        .bg-mask {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(255, 255, 255, 0.15);
-            z-index: 0;
-        }
-
-        .content {
-            position: relative;
-            z-index: 1;
-            padding: 40px;
-            background: rgba(255, 255, 255, 0.4);
-            border-radius: 30px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-            backdrop-filter: blur(15px);
-            width: 90%;
-            max-width: 500px;
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            animation: float 6s ease-in-out infinite;
-        }
-
-        @keyframes float {
-            0% {
-                transform: translatey(0px);
-            }
-
-            50% {
-                transform: translatey(-20px);
-            }
-
-            100% {
-                transform: translatey(0px);
-            }
-        }
-
-        .count {
-            font-size: 60px;
-            font-weight: bold;
-            margin-bottom: 25px;
-            background: linear-gradient(45deg, #8EC5FC, #E0C3FC);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-fill-color: transparent;
-            letter-spacing: 2px;
-        }
-
-        .birthday {
-            font-size: 28px;
-            background: linear-gradient(45deg, #8EC5FC, #E0C3FC);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-fill-color: transparent;
-            margin-bottom: 30px;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
-            letter-spacing: 1px;
-        }
-
-        .settings {
-            position: fixed;
-            bottom: 25px;
-            right: 25px;
-            z-index: 100;
-        }
-
-        .settings-btn {
-            width: 60px;
-            height: 60px;
+        .demo-list {
+            list-style: none;
             padding: 0;
-            margin: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(45deg, #E0C3FC, #8EC5FC);
-            color: white;
-            border-radius: 50%;
+            margin-top: 20px;
+        }
+        .demo-item {
+            margin: 10px 0;
+            border: 1px solid #eee;
+            border-radius: 8px;
             cursor: pointer;
-            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 5px 20px rgba(142, 197, 252, 0.4);
-            border: 3px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s;
+            background: #fff;
         }
-
-        .settings-btn:hover {
-            transform: translateY(0) rotate(90deg);
-            box-shadow: 0 8px 25px rgba(142, 197, 252, 0.6);
+        .demo-item:hover {
+            background: #f5f5f5;
+            transform: translateX(5px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.09);
         }
-
-        .settings-btn i {
-            font-size: 28px;
+        .demo-item.active {
+            background: #e6f7ff;
+            border-color: #1890ff;
+            box-shadow: 0 2px 8px rgba(24,144,255,0.15);
         }
-
-        .settings-dialog .el-dialog__body {
-            padding: 25px;
-            max-height: calc(100vh - 10px);
-            overflow-y: auto;
-        }
-
-        .settings-item {
-            margin-bottom: 25px;
-        }
-
-        .settings-item:last-child {
-            margin-bottom: 0;
-        }
-
-        .dialog-footer {
-            text-align: center;
-            margin-top: 25px;
-            display: flex;
-            gap: 15px;
-        }
-
-        .dialog-footer .el-button {
-            flex: 1;
-            height: 50px;
-            font-size: 18px;
-            border-radius: 25px;
-            letter-spacing: 2px;
-            transition: all 0.3s ease;
-        }
-
-        .dialog-footer .el-button--primary {
-            background: linear-gradient(45deg, #E0C3FC, #8EC5FC);
-            border: none;
-        }
-
-        .dialog-footer .el-button--default {
-            border: 2px solid #8EC5FC;
-            color: #8EC5FC;
-        }
-
-        .dialog-footer .el-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(142, 197, 252, 0.4);
-        }
-
-        .cropper-container {
-            width: 100%;
-            height: 400px;
-            margin-top: 15px;
-            border-radius: 15px;
-            overflow: hidden;
-        }
-
-        .cropper-preview {
-            display: block;
-            max-width: 100%;
-            max-height: 400px;
-            border-radius: 15px;
-        }
-
-        /* 添加cropper框选区域样式 */
-        .cropper-face,
-        .cropper-move {
-            aspect-ratio: var(--aspect-ratio);
-        }
-
-        /* 背景图片上传按钮样式 */
-        .upload-demo .el-upload {
-            text-align: left;
-            border: 3px dashed #8EC5FC;
-            border-radius: 15px;
+        .demo-link {
+            box-sizing: border-box;
+            text-decoration: none;
             padding: 15px;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-        }
-
-        .upload-demo:hover {
-            border-color: #E0C3FC;
-            transform: translateY(-2px);
-        }
-
-        .upload-demo i {
-            margin-left: 15px;
-            transition: all 0.3s ease;
-        }
-
-        .upload-demo:hover i {
-            transform: scale(1.1);
-        }
-
-        /* 自定义Message样式 */
-        .el-message {
-            min-width: 320px;
-            padding: 15px 20px;
-            border-radius: 12px;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
-            backdrop-filter: blur(10px);
-            background: linear-gradient(45deg, rgba(224, 195, 252, 0.9), rgba(142, 197, 252, 0.9)) !important;
-            border: none !important;
-        }
-
-        .el-message__content {
-            color: white !important;
+            display: block;
+            width: 100%;
+            height: 100%;
+            color: #333;
             font-size: 16px;
-            font-weight: 500;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
         }
-
-        .el-message .el-icon-success,
-        .el-message .el-icon-error,
-        .el-message .el-icon-info,
-        .el-message .el-icon-warning {
-            color: white !important;
-            font-size: 20px;
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.09);
         }
-
-        @media screen and (max-width: 768px) {
-            .settings-dialog {
-                width: 95% !important;
-                margin: 0 auto !important;
-                position: fixed !important;
-                top: 50% !important;
-                left: 50% !important;
-                transform: translate(-50%, -50%) !important;
-                border-radius: 20px !important;
-            }
-
-            .count {
-                font-size: 42px;
-            }
-
-            .birthday {
-                font-size: 22px;
-            }
+        h1 {
+            color: #1890ff;
+            font-size: 24px;
+            border-bottom: 2px solid #1890ff;
+            padding-bottom: 10px;
         }
     </style>
 </head>
-
 <body>
-    <div id="app" v-cloak :style="bgStyle">
-        <div class="bg-mask"></div>
-        <div class="content">
-            <div class="birthday">宝宝生日: {{birthDate || '-'}}</div>
-            <div class="count">{{birthDate ? totalMonths + '个月' + remainingDays + '天' : '-'}}</div>
-            <div class="count">{{birthDate ? totalDays + '天' : '-'}}</div>
-        </div>
-        <div class="settings">
-            <button class="settings-btn" @click="showSettings = true">
-                <i class="el-icon-setting"></i>
-            </button>
-        </div>
-
-        <el-dialog title="设置" :visible.sync="showSettings" width="90%" :close-on-click-modal="false"
-            @open="initFormData" custom-class="settings-dialog">
-            <el-form :model="formData" label-width="80px" :rules="rules" ref="settingsForm">
-                <el-form-item label="宝宝名字" prop="title">
-                    <el-input v-model="formData.title" placeholder="请输入宝宝名字"></el-input>
-                </el-form-item>
-                <el-form-item label="宝宝生日" prop="birthDate">
-                    <el-date-picker v-model="formData.birthDate" type="date" placeholder="选择宝宝生日" format="yyyy-MM-dd"
-                        value-format="yyyy-MM-dd" :picker-options="{
-                            type: 'date',
-                            firstDayOfWeek: 1
-                        }" style="width: 100%" :editable="false">
-                    </el-date-picker>
-                </el-form-item>
-                <el-form-item label="背景图片">
-                    <el-upload class="upload-demo" action="#" :auto-upload="false" :show-file-list="false"
-                        :on-change="handleBgUpload" :before-upload="beforeUpload">
-                        <i class="el-icon-picture" style="font-size: 28px; color: #8EC5FC; cursor: pointer;"></i>
-                        <span style="margin-left: 15px; color: #666;">上传图片</span>
-                    </el-upload>
-                    <div v-if="tempImageUrl || formData.bgImage" class="cropper-container">
-                        <img :src="tempImageUrl || formData.bgImage" class="cropper-preview" ref="cropperImage"
-                            style="display: block;object-fit: cover;">
-                    </div>
-                </el-form-item>
-            </el-form>
-            <div class="dialog-footer">
-                <el-button @click="showSettings = false">取 消</el-button>
-                <el-button type="primary" @click="handleSaveSettings">保 存</el-button>
+    <div id="app">
+        <div class="layout">
+            <div class="sidebar">
+                <h1>Demo</h1>
+                <ul class="demo-list">
+                    <li v-for="demo in demos" 
+                        :key="demo.path" 
+                        :class="['demo-item', { active: currentDemo === demo.path }]"
+                        @click="selectDemo(demo.path)">
+                        <span class="demo-link">{{ demo.name }}</span>
+                    </li>
+                </ul>
             </div>
-        </el-dialog>
+            <div class="main">
+                <iframe :src="iframeSrc" v-if="currentDemo"></iframe>
+            </div>
+        </div>
     </div>
-    <script src="./lib/vue.min.js"></script>
-    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
-    <script>
-        const APP_VERSION = '1.0.2'; // 添加版本号常量
 
-        const vm = new Vue({
-            el: "#app",
+    <script type="module">
+        import { createApp } from './lib/vue3.min.js';
+        
+        createApp({
             data() {
                 return {
-                    birthDate: '',
-                    year: null,
-                    month: null,
-                    day: null,
-                    totalDays: 0,
-                    totalMonths: 0,
-                    remainingDays: 0,
-                    bgImage: '',
-                    title: '',
-                    showSettings: false,
-                    formData: {
-                        title: '',
-                        birthDate: '',
-                        bgImage: ''
-                    },
-                    rules: {
-                        title: [
-                            { required: true, message: '请输入宝宝名字', trigger: 'blur' }
-                        ],
-                        birthDate: [
-                            { required: true, message: '请选择宝宝生日', trigger: 'change' }
-                        ]
-                    },
-                    tempImageUrl: '',
-                    cropper: null
-                };
-            },
-            computed: {
-                bgStyle() {
-                    return this.bgImage ? {
-                        backgroundImage: `url(${this.bgImage})`
-                    } : {}
+                    currentDemo: localStorage.getItem('currentDemo') || '',
+                    iframeSrc: localStorage.getItem('currentDemo') || '',
+                    demos: [
+                        { name: '生日天数计算器', path: './demo/birthdays/index.html' },
+                        { name: 'XMind布局算法', path: './demo/xmind/index.html' },
+                        { name: 'XMind解析器', path: './demo/xmind/parse.html' },
+                        { name: 'douyin交互', path: './demo/douyin/index.html' },
+                        { name: '翻译', path: './demo/fanyi/index.html' },
+                        { name: '自动表单', path: './demo/autoForm/dist/index.html' },
+                        { name: '看板', path: './demo/kanban/index.html' },
+                    ]
                 }
-            },
-            watch: {
-                showSettings(val) {
-                    if (!val && this.cropper) {
-                        this.cropper.destroy();
-                        this.cropper = null;
-                        this.tempImageUrl = '';
-                    }
-                    if (val && this.formData.bgImage) {
-                        this.$nextTick(() => {
-                            this.initCropper(this.formData.bgImage);
-                        });
-                    }
-                }
-            },
-            created() {
-                // 检查版本号,如果版本不一致则清除缓存
-                const savedVersion = localStorage.getItem('appVersion');
-                if (savedVersion !== APP_VERSION) {
-                    localStorage.clear();
-                    localStorage.setItem('appVersion', APP_VERSION);
-                }
-
-                const savedData = localStorage.getItem('babyBirthday');
-                if (savedData) {
-                    const data = JSON.parse(savedData);
-                    this.year = data.year;
-                    this.month = data.month;
-                    this.day = data.day;
-                    this.birthDate = `${data.year}-${String(data.month).padStart(2, '0')}-${String(data.day).padStart(2, '0')}`;
-                    this.title = data.title || '嘻嘻';
-                    document.title = this.title;
-
-                    // 从IndexedDB加载背景图片
-                    this.loadBgImageFromDB();
-                }
-                this.calcBabyDays();
-                this.initFormData();
-
-                // 设置CSS变量
-                const aspectRatio = window.innerWidth / window.innerHeight;
-                document.documentElement.style.setProperty('--aspect-ratio', aspectRatio);
-
-                // 监听窗口大小变化
-                window.addEventListener('resize', () => {
-                    const newAspectRatio = window.innerWidth / window.innerHeight;
-                    document.documentElement.style.setProperty('--aspect-ratio', newAspectRatio);
-                });
             },
             methods: {
-                initFormData() {
-                    this.formData = {
-                        title: this.title,
-                        birthDate: this.birthDate,
-                        bgImage: this.bgImage
-                    };
-                },
-                handleDateChange(val) {
-                    if (val) {
-                        const [year, month, day] = val.split('-');
-                        this.year = parseInt(year);
-                        this.month = parseInt(month);
-                        this.day = parseInt(day);
-                        this.calcBabyDays();
-                    }
-                },
-                initCropper(imageUrl) {
-                    if (this.cropper) {
-                        this.cropper.destroy();
-                    }
-                    const image = this.$refs.cropperImage;
-                    image.src = imageUrl;
-                    this.cropper = new Cropper(image, {
-                        aspectRatio: window.innerWidth / window.innerHeight,
-                        viewMode: 1,
-                        autoCropArea: 1,
-                        quality: 1, // 设置最高质量
-                        imageSmoothingEnabled: true,
-                        imageSmoothingQuality: 'high',
-                        crop: () => {
-                            const canvas = this.cropper.getCroppedCanvas({
-                                maxWidth: 4096, // 支持更大分辨率
-                                maxHeight: 4096,
-                                imageSmoothingEnabled: true,
-                                imageSmoothingQuality: 'high'
-                            });
-                            this.formData.bgImage = canvas.toDataURL('image/jpeg', 0.9); // 使用较高质量
-                        }
-                    });
-                },
-                beforeUpload(file) {
-                    const isImage = file.type.startsWith('image/');
-                    const isLt20M = file.size / 1024 / 1024 < 20; // 增加到20MB
-
-                    if (!isImage) {
-                        this.$message.error('只能上传图片文件!');
-                        return false;
-                    }
-                    if (!isLt20M) {
-                        this.$message.error('图片大小不能超过 20MB!');
-                        return false;
-                    }
-                    return true;
-                },
-                handleBgUpload(file) {
-                    if (file && this.beforeUpload(file.raw)) {
-                        const reader = new FileReader();
-                        reader.onload = (e) => {
-                            this.tempImageUrl = e.target.result;
-                            this.$nextTick(() => {
-                                this.initCropper(e.target.result);
-                            });
-                        };
-                        reader.readAsDataURL(file.raw);
-                    }
-                },
-                async loadBgImageFromDB() {
-                    try {
-                        const db = await this.openDB();
-                        const transaction = db.transaction(['images'], 'readonly');
-                        const store = transaction.objectStore('images');
-                        const request = store.get('bgImage');
-                        
-                        request.onsuccess = (event) => {
-                            if (event.target.result) {
-                                this.bgImage = event.target.result.data;
-                            }
-                        };
-                    } catch (error) {
-                        console.error('加载背景图片失败:', error);
-                    }
-                },
-                async saveBgImageToDB(imageData) {
-                    try {
-                        const db = await this.openDB();
-                        const transaction = db.transaction(['images'], 'readwrite');
-                        const store = transaction.objectStore('images');
-                        await store.put({id: 'bgImage', data: imageData});
-                    } catch (error) {
-                        console.error('保存背景图片失败:', error);
-                    }
-                },
-                openDB() {
-                    return new Promise((resolve, reject) => {
-                        const request = indexedDB.open('babyBirthdayDB', 1);
-                        
-                        request.onerror = () => reject(request.error);
-                        request.onsuccess = () => resolve(request.result);
-                        
-                        request.onupgradeneeded = (event) => {
-                            const db = event.target.result;
-                            if (!db.objectStoreNames.contains('images')) {
-                                db.createObjectStore('images', { keyPath: 'id' });
-                            }
-                        };
-                    });
-                },
-                handleSaveSettings() {
-                    this.$refs.settingsForm.validate(async (valid) => {
-                        if (!valid) {
-                            return;
-                        }
-
-                        if (!this.formData.title || !this.formData.birthDate) {
-                            this.$message.error('请填写必填项');
-                            return;
-                        }
-
-                        this.title = this.formData.title;
-                        this.birthDate = this.formData.birthDate;
-                        
-                        // 如果有新的背景图片
-                        if (this.formData.bgImage) {
-                            this.bgImage = this.formData.bgImage;
-                            await this.saveBgImageToDB(this.formData.bgImage);
-                        }
-                        
-                        document.title = this.title;
-
-                        if (this.birthDate) {
-                            const [year, month, day] = this.birthDate.split('-');
-                            this.year = parseInt(year);
-                            this.month = parseInt(month);
-                            this.day = parseInt(day);
-                            this.calcBabyDays();
-                        }
-
-                        this.saveToLocalStorage();
-                        this.showSettings = false;
-                    });
-                },
-                calcBabyDays() {
-                    const MILLISECONDS_PER_DAY = 24 * 60 * 60 * 1000;
-                    const birthday = new Date(Date.UTC(this.year, this.month - 1, this.day));
-                    const today = new Date();
-                    const timeDiff = Math.abs(today - birthday);
-                    const totalDays = Math.ceil(timeDiff / MILLISECONDS_PER_DAY);
-                    this.totalDays = totalDays;
-                    this.totalMonths = Math.floor(totalDays / 30);
-                    this.remainingDays = totalDays % 30;
-                    console.log(`🌷 距离宝宝生日还有 ${this.totalMonths}月${this.remainingDays}天 (共${totalDays}天)`);
-                },
-                saveToLocalStorage() {
-                    const data = {
-                        year: this.year,
-                        month: this.month,
-                        day: this.day,
-                        title: this.title
-                    };
-                    localStorage.setItem('babyBirthday', JSON.stringify(data));
-                    this.$message({
-                        message: '保存成功！',
-                        type: 'success',
-                        duration: 2000,
-                        showClose: true,
-                        center: true
-                    });
+                selectDemo(path) {
+                    this.currentDemo = path;
+                    this.iframeSrc = `${path}?t=${new Date().getTime()}`;
+                    localStorage.setItem('currentDemo', path);
                 }
-            },
-        });
-
-         function* getId(){
-            let id = 0;
-            while(true){
-                yield id++;
             }
-         }
+        }).mount('#app')
     </script>
 </body>
-
 </html>

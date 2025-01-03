@@ -12,7 +12,7 @@
 
 <body>
     <div id="app">
-        <Calendar :week-starts-on-sunday="true" style="height: 900px;margin: 100px auto;">
+        <Calendar :date="new Date(2024, 11, 1)" :week-starts-on-sunday="true" style="height: 900px;margin: 100px auto;">
             <!-- <template #day-body="{ dates }">
                 <template v-for="event in eventDistribution[date.dateString]">
                     <div v-if="event.isFirstDay" @mouseenter="handleMouseEnter(event)" @mouseleave="handleMouseLeave"

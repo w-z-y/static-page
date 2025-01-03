@@ -146,7 +146,7 @@
                 }
 
                 &:hover {
-                    background: var(--hover-color);
+                    /* background: var(--hover-color); */
                 }
 
                 .day-header {

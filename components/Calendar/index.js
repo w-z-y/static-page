@@ -8,6 +8,10 @@ Date.prototype.getISODate = function () {
 export default {
     name: 'Calendar',
     props: {
+        date: {
+            type: Date,
+            default: new Date()
+        },
         weekStartsOnSunday: {
             type: Boolean,
             default: true
@@ -49,8 +53,9 @@ export default {
     </div>
     `,
     setup(props) {
+        console.log('props', props);
         // 状态管理
-        const currentDate = ref(new Date());
+        const currentDate = ref(props.date || new Date());
         const viewType = ref('month');
 
         // 工具函数
