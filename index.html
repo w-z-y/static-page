@@ -107,17 +107,18 @@
         
         createApp({
             data() {
+                const hash = window.location.hash.slice(1);
                 return {
-                    currentDemo: localStorage.getItem('currentDemo') || '',
-                    iframeSrc: localStorage.getItem('currentDemo') || '',
+                    currentDemo: hash || '',
+                    iframeSrc: hash || '',
                     demos: [
-                        { name: '生日天数计算器', path: './demo/birthdays/index.html' },
-                        { name: 'XMind布局算法', path: './demo/xmind/index.html' },
-                        { name: 'XMind解析器', path: './demo/xmind/parse.html' },
-                        { name: 'douyin交互', path: './demo/douyin/index.html' },
-                        { name: '翻译', path: './demo/fanyi/index.html' },
-                        { name: '自动表单', path: './demo/autoForm/dist/index.html' },
-                        { name: '看板', path: './demo/kanban/index.html' },
+                        { name: '生日天数计算器', path: './demo/birthdays/index.html', key: 'bd' },
+                        { name: 'XMind布局算法', path: './demo/xmind/index.html', key: 'xm' },
+                        { name: 'XMind解析器', path: './demo/xmind/parse.html', key: 'xp' },
+                        { name: 'douyin交互', path: './demo/douyin/index.html', key: 'dy' },
+                        { name: '翻译', path: './demo/fanyi/index.html', key: 'fy' },
+                        { name: '自动表单', path: './demo/autoForm/dist/index.html', key: 'af' },
+                        { name: '看板', path: './demo/kanban/index.html', key: 'kb' },
                     ]
                 }
             },
@@ -125,7 +126,17 @@
                 selectDemo(path) {
                     this.currentDemo = path;
                     this.iframeSrc = `${path}?t=${new Date().getTime()}`;
-                    localStorage.setItem('currentDemo', path);
+                    const demo = this.demos.find(d => d.path === path);
+                    window.location.hash = demo ? demo.key : '';
+                }
+            },
+            mounted() {
+                const hash = window.location.hash.slice(1);
+                if(hash) {
+                    const demo = this.demos.find(d => d.key === hash);
+                    if(demo) {
+                        this.selectDemo(demo.path);
+                    }
                 }
             }
         }).mount('#app')
