@@ -1,312 +1,352 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
     <title>wzy的Demo</title>
-    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <style>
-        [v-cloak] {
-            display: none;
-        }
-        *{
-            padding: 0;
-            margin: 0;
-        }
-        body {
-            margin: 0;
-            padding: 0;
-            background: #f0f2f5;
-        }
-        #canvas-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: -1;
-        }
-        #canvas {
-            width: 100%;
-            height: 100%;
-        }
-        .layout {
-            display: flex;
-            height: 100vh;
-            position: relative;
-            z-index: 1;
-        }
+      [v-cloak] {
+        display: none;
+      }
+      * {
+        padding: 0;
+        margin: 0;
+      }
+      body {
+        margin: 0;
+        padding: 0;
+        background: #f0f2f5;
+      }
+      #canvas-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: -1;
+      }
+      #canvas {
+        width: 100%;
+        height: 100%;
+      }
+      .layout {
+        display: flex;
+        height: 100vh;
+        position: relative;
+        z-index: 1;
+      }
+      .sidebar {
+        width: 300px;
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        box-shadow: 2px 0 8px rgba(0, 0, 0, 0.05);
+        overflow-y: auto;
+        padding: 20px;
+        transition: all 0.3s;
+        position: relative;
+      }
+      .sidebar.collapsed {
+        width: 0;
+        padding: 0;
+      }
+      .toggle-btn {
+        position: fixed;
+        left: 300px;
+        top: 20px;
+        z-index: 100;
+        background: #1890ff;
+        color: #fff;
+        border: none;
+        padding: 8px 12px;
+        border-radius: 0 4px 4px 0;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
+      .toggle-btn.collapsed {
+        left: 0;
+      }
+      .main {
+        flex: 1;
+        height: 100vh;
+        overflow: hidden;
+        background: transparent;
+        box-sizing: border-box;
+      }
+      .demo-list {
+        list-style: none;
+        padding: 0;
+        margin-top: 20px;
+      }
+      .demo-item {
+        height: 50px;
+        overflow: hidden;
+        margin: 10px 0;
+        border: 1px solid #eee;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s;
+        background: rgba(255, 255, 255, 0.8);
+      }
+      .demo-item:hover {
+        background: #f5f5f5;
+        transform: translateX(5px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.09);
+      }
+      .demo-item.active {
+        background: #e6f7ff;
+        border-color: #1890ff;
+        box-shadow: 0 2px 8px rgba(24, 144, 255, 0.15);
+      }
+      .demo-link {
+        box-sizing: border-box;
+        text-decoration: none;
+        padding: 15px;
+        display: block;
+        width: 100%;
+        height: 100%;
+        color: #333;
+        font-size: 16px;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        white-space: nowrap;
+      }
+      iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.09);
+      }
+      h1 {
+        color: #1890ff;
+        font-size: 24px;
+        border-bottom: 2px solid #1890ff;
+        padding-bottom: 10px;
+        cursor: pointer;
+      }
+
+      @media screen and (max-width: 768px) {
         .sidebar {
-            width: 300px;
-            background: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px);
-            box-shadow: 2px 0 8px rgba(0,0,0,0.05);
-            overflow-y: auto;
-            padding: 20px;
-            transition: all 0.3s;
-            position: relative;
+          position: fixed;
+          left: 0;
+          top: 0;
+          bottom: 0;
+          z-index: 99;
         }
         .sidebar.collapsed {
-            width: 0;
-            padding: 0;
-        }
-        .toggle-btn {
-            position: fixed;
-            left: 300px;
-            top: 20px;
-            z-index: 100;
-            background: #1890ff;
-            color: #fff;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 0 4px 4px 0;
-            cursor: pointer;
-            transition: all 0.3s;
+          transform: translateX(-100%);
         }
         .toggle-btn.collapsed {
-            left: 0;
+          left: 0;
         }
-        .main {
-            flex: 1;
-            height: 100vh;
-            background: transparent;
-            box-sizing: border-box;
+        .toggle-btn {
+          left: 300px;
         }
-        .demo-list {
-            list-style: none;
-            padding: 0;
-            margin-top: 20px;
-        }
-        .demo-item {
-            height: 50px;
-            overflow: hidden;
-            margin: 10px 0;
-            border: 1px solid #eee;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s;
-            background: rgba(255, 255, 255, 0.8);
-        }
-        .demo-item:hover {
-            background: #f5f5f5;
-            transform: translateX(5px);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.09);
-        }
-        .demo-item.active {
-            background: #e6f7ff;
-            border-color: #1890ff;
-            box-shadow: 0 2px 8px rgba(24,144,255,0.15);
-        }
-        .demo-link {
-            box-sizing: border-box;
-            text-decoration: none;
-            padding: 15px;
-            display: block;
-            width: 100%;
-            height: 100%;
-            color: #333;
-            font-size: 16px;
-            text-overflow: ellipsis;
-            overflow: hidden;
-            white-space: nowrap;
-        }
-        iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-            background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.09);
-        }
-        h1 {
-            color: #1890ff;
-            font-size: 24px;
-            border-bottom: 2px solid #1890ff;
-            padding-bottom: 10px;
-            cursor: pointer;
-        }
-
-        @media screen and (max-width: 768px) {
-            .sidebar {
-                position: fixed;
-                left: 0;
-                top: 0;
-                bottom: 0;
-                z-index: 99;
-            }
-            .sidebar.collapsed {
-                transform: translateX(-100%);
-            }
-            .toggle-btn.collapsed {
-                left: 0;
-            }
-            .toggle-btn {
-                left: 300px;
-            }
-        }
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div id="canvas-container">
-        <canvas id="canvas"></canvas>
+      <canvas id="canvas"></canvas>
     </div>
     <div id="app" v-cloak>
-        <div class="layout">
-            <div :class="['sidebar', { collapsed: isCollapsed }]">
-                <h1 @click="backToHome">Demo</h1>
-                <ul class="demo-list">
-                    <li v-for="demo in demos" 
-                        :key="demo.path" 
-                        :class="['demo-item', { active: currentDemo === demo.path }]"
-                        @click="selectDemo(demo.path)">
-                        <span class="demo-link">{{ demo.name }}</span>
-                    </li>
-                </ul>
-            </div>
-            <button :class="['toggle-btn', { collapsed: isCollapsed }]" @click="toggleSidebar">
-                {{ isCollapsed ? '≫' : '≪' }}
-            </button>
-            <div class="main">
-                <iframe :src="iframeSrc" v-if="currentDemo"></iframe>
-            </div>
+      <div class="layout">
+        <div :class="['sidebar', { collapsed: isCollapsed }]">
+          <h1 @click="backToHome">Demo</h1>
+          <ul class="demo-list">
+            <li
+              v-for="demo in demos"
+              :key="demo.path"
+              :class="['demo-item', { active: currentDemo === demo.path }]"
+              @click="selectDemo(demo.path)"
+            >
+              <span class="demo-link">{{ demo.name }}</span>
+            </li>
+          </ul>
         </div>
+        <button
+          :class="['toggle-btn', { collapsed: isCollapsed }]"
+          @click="toggleSidebar"
+        >
+          {{ isCollapsed ? '≫' : '≪' }}
+        </button>
+        <div class="main">
+          <iframe :src="iframeSrc" v-if="currentDemo"></iframe>
+        </div>
+      </div>
     </div>
 
+    <script type="importmap">
+      {
+        "imports": {
+          "vue": "./lib/vue3.min.js"
+        }
+      }
+    </script>
+
     <script type="module">
-        import { createApp } from './lib/vue3.min.js';
-        
-        // Canvas动画
-        function initCanvas() {
-            const canvas = document.getElementById('canvas');
-            const ctx = canvas.getContext('2d');
-            
-            // 设置canvas尺寸为窗口大小
-            function resizeCanvas() {
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
+      import { createApp } from "vue";
+
+      createApp({
+        data() {
+          const hash = window.location.hash.slice(1);
+          return {
+            currentDemo: hash || "",
+            iframeSrc: hash || "",
+            isCollapsed: window.innerWidth <= 768,
+            demos: [
+              {
+                name: "生日天数计算器",
+                path: "./demo/birthdays/index.html",
+                key: "bd",
+              },
+              {
+                name: "XMind布局算法",
+                path: "./demo/xmind/index.html",
+                key: "xm",
+              },
+              {
+                name: "XMind解析器",
+                path: "./demo/xmind/parse.html",
+                key: "xmind",
+              },
+              { name: "翻译", path: "./demo/fanyi/index.html", key: "fanyi" },
+              {
+                name: "自动表单",
+                path: "./demo/autoForm/dist/index.html",
+                key: "autoForm",
+              },
+              { name: "看板", path: "./demo/kanban/index.html", key: "kanban" },
+              {
+                name: "滚动交互",
+                path: "./demo/scroll/index.html",
+                key: "scroll",
+              },
+            ],
+          };
+        },
+        methods: {
+          selectDemo(path) {
+            this.currentDemo = path;
+            this.iframeSrc = `${path}?t=${new Date().getTime()}`;
+            const demo = this.demos.find((d) => d.path === path);
+            window.location.hash = demo ? demo.key : "";
+            if (window.innerWidth <= 768) {
+              this.isCollapsed = true;
             }
-            resizeCanvas();
-            window.addEventListener('resize', resizeCanvas);
-
-            // 粒子类
-            class Particle {
-                constructor() {
-                    this.reset();
-                }
-
-                reset() {
-                    this.x = Math.random() * canvas.width;
-                    this.y = Math.random() * canvas.height;
-                    this.vx = (Math.random() - 0.5) * 2;
-                    this.vy = (Math.random() - 0.5) * 2;
-                    this.radius = Math.random() * 2 + 1;
-                    this.alpha = Math.random() * 0.5 + 0.5;
-                }
-
-                update() {
-                    this.x += this.vx;
-                    this.y += this.vy;
-
-                    if(this.x < 0 || this.x > canvas.width) this.vx *= -1;
-                    if(this.y < 0 || this.y > canvas.height) this.vy *= -1;
-                }
-
-                draw() {
-                    ctx.beginPath();
-                    ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-                    ctx.fillStyle = `rgba(24, 144, 255, ${this.alpha})`;
-                    ctx.fill();
-                }
+          },
+          toggleSidebar() {
+            this.isCollapsed = !this.isCollapsed;
+          },
+          backToHome() {
+            this.currentDemo = "";
+            this.iframeSrc = "";
+            window.location.hash = "";
+          },
+        },
+        mounted() {
+          initCanvas();
+          const hash = window.location.hash.slice(1);
+          if (hash) {
+            const demo = this.demos.find((d) => d.key === hash);
+            if (demo) {
+              this.selectDemo(demo.path);
             }
-
-            // 创建粒子
-            const particles = Array(50).fill().map(() => new Particle());
-
-            // 动画循环
-            function animate() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                
-                particles.forEach(particle => {
-                    particle.update();
-                    particle.draw();
-                });
-
-                // 绘制连线
-                particles.forEach((p1, i) => {
-                    particles.slice(i + 1).forEach(p2 => {
-                        const dx = p1.x - p2.x;
-                        const dy = p1.y - p2.y;
-                        const distance = Math.sqrt(dx * dx + dy * dy);
-                        
-                        if(distance < 150) {
-                            ctx.beginPath();
-                            ctx.moveTo(p1.x, p1.y);
-                            ctx.lineTo(p2.x, p2.y);
-                            ctx.strokeStyle = `rgba(24, 144, 255, ${0.2 * (1 - distance/150)})`;
-                            ctx.stroke();
-                        }
-                    });
-                });
-
-                requestAnimationFrame(animate);
+          }
+          window.addEventListener("resize", () => {
+            if (window.innerWidth <= 768) {
+              this.isCollapsed = true;
             }
+          });
+        },
+      }).mount("#app");
 
-            animate();
+      // Canvas动画
+      function initCanvas() {
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+
+        // 设置canvas尺寸为窗口大小
+        function resizeCanvas() {
+          canvas.width = window.innerWidth;
+          canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener("resize", resizeCanvas);
+
+        // 粒子类
+        class Particle {
+          constructor() {
+            this.reset();
+          }
+
+          reset() {
+            this.x = Math.random() * canvas.width;
+            this.y = Math.random() * canvas.height;
+            this.vx = (Math.random() - 0.5) * 2;
+            this.vy = (Math.random() - 0.5) * 2;
+            this.radius = Math.random() * 2 + 1;
+            this.alpha = Math.random() * 0.5 + 0.5;
+          }
+
+          update() {
+            this.x += this.vx;
+            this.y += this.vy;
+
+            if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+            if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+          }
+
+          draw() {
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(24, 144, 255, ${this.alpha})`;
+            ctx.fill();
+          }
         }
 
-        createApp({
-            data() {
-                const hash = window.location.hash.slice(1);
-                return {
-                    currentDemo: hash || '',
-                    iframeSrc: hash || '',
-                    isCollapsed: window.innerWidth <= 768,
-                    demos: [
-                        { name: '生日天数计算器', path: './demo/birthdays/index.html', key: 'bd' },
-                        { name: 'XMind布局算法', path: './demo/xmind/index.html', key: 'xm' },
-                        { name: 'XMind解析器', path: './demo/xmind/parse.html', key: 'xp' },
-                        { name: 'douyin交互', path: './demo/douyin/index.html', key: 'dy' },
-                        { name: '翻译', path: './demo/fanyi/index.html', key: 'fy' },
-                        { name: '自动表单', path: './demo/autoForm/dist/index.html', key: 'af' },
-                        { name: '看板', path: './demo/kanban/index.html', key: 'kb' },
-                    ]
-                }
-            },
-            methods: {
-                selectDemo(path) {
-                    this.currentDemo = path;
-                    this.iframeSrc = `${path}?t=${new Date().getTime()}`;
-                    const demo = this.demos.find(d => d.path === path);
-                    window.location.hash = demo ? demo.key : '';
-                    if(window.innerWidth <= 768) {
-                        this.isCollapsed = true;
-                    }
-                },
-                toggleSidebar() {
-                    this.isCollapsed = !this.isCollapsed;
-                },
-                backToHome() {
-                    this.currentDemo = '';
-                    this.iframeSrc = '';
-                    window.location.hash = '';
-                }
-            },
-            mounted() {
-                initCanvas();
-                const hash = window.location.hash.slice(1);
-                if(hash) {
-                    const demo = this.demos.find(d => d.key === hash);
-                    if(demo) {
-                        this.selectDemo(demo.path);
-                    }
-                }
-                window.addEventListener('resize', () => {
-                    if(window.innerWidth <= 768) {
-                        this.isCollapsed = true;
-                    }
-                });
-            }
-        }).mount('#app')
+        // 创建粒子
+        const particles = Array(50)
+          .fill()
+          .map(() => new Particle());
+
+        // 动画循环
+        function animate() {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+          particles.forEach((particle) => {
+            particle.update();
+            particle.draw();
+          });
+
+          // 绘制连线
+          particles.forEach((p1, i) => {
+            particles.slice(i + 1).forEach((p2) => {
+              const dx = p1.x - p2.x;
+              const dy = p1.y - p2.y;
+              const distance = Math.sqrt(dx * dx + dy * dy);
+
+              if (distance < 150) {
+                ctx.beginPath();
+                ctx.moveTo(p1.x, p1.y);
+                ctx.lineTo(p2.x, p2.y);
+                ctx.strokeStyle = `rgba(24, 144, 255, ${
+                  0.2 * (1 - distance / 150)
+                })`;
+                ctx.stroke();
+              }
+            });
+          });
+
+          requestAnimationFrame(animate);
+        }
+
+        animate();
+      }
     </script>
-</body>
+  </body>
 </html>

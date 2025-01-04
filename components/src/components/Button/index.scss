@@ -1,0 +1,94 @@
+.btn {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  border: 1px solid transparent;
+  padding: 8px 15px;
+  border-radius: 4px;
+  font-size: 14px;
+  outline: none;
+  transition: 0.1s;
+
+  &:hover {
+    opacity: 0.8;
+  }
+
+  &-default {
+    background: #fff;
+    border-color: #dcdfe6;
+    color: #606266;
+  }
+
+  &-primary {
+    background: #409eff;
+    border-color: #409eff;
+    color: #fff;
+
+    &.is-plain {
+      background: #fff;
+      color: #409eff;
+    }
+  }
+
+  &-success {
+    background: #67c23a;
+    border-color: #67c23a;
+    color: #fff;
+
+    &.is-plain {
+      background: #fff;
+      color: #67c23a;
+    }
+  }
+
+  &-warning {
+    background: #e6a23c;
+    border-color: #e6a23c;
+    color: #fff;
+
+    &.is-plain {
+      background: #fff;
+      color: #e6a23c;
+    }
+  }
+
+  &-danger {
+    background: #f56c6c;
+    border-color: #f56c6c;
+    color: #fff;
+
+    &.is-plain {
+      background: #fff;
+      color: #f56c6c;
+    }
+  }
+
+  &-dark {
+    background: rgba(0, 0, 0, 0.6);
+    border-color: transparent;
+    color: #fff;
+
+    &.is-plain {
+      background: transparent;
+      border-color: rgba(255, 255, 255, 0.6);
+      color: #fff;
+    }
+  }
+
+  &.is-round {
+    border-radius: 20px;
+  }
+
+  &.is-circle {
+    border-radius: 50%;
+    padding: 8px;
+  }
+
+  &.is-disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+}

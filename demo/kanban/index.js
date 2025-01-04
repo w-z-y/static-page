@@ -1,5 +1,5 @@
-import { createApp, ref, computed } from "../../lib/vue3.min.js";
-import Calendar from '../../components/Calendar/index.js';
+import { createApp, ref, computed } from "vue";
+import { Calendar } from "../../components/dist/my-components.es.js";
 import { events } from "./event.js";
 
 // 事件悬浮状态 Hook
@@ -17,8 +17,8 @@ function useEventHover() {
   return {
     hoveredEvent,
     handleMouseEnter,
-    handleMouseLeave
-  }
+    handleMouseLeave,
+  };
 }
 
 // 事件样式 Hook
@@ -36,8 +36,12 @@ function useEventStyle(calendarConfig, hoveredEvent) {
   const positionStyle = computed(() => (event) => {
     const height = calendarConfig.height;
     const top = event.index * (height + calendarConfig.marginY);
-    const marginLeft = event.isCrossingPreviousWeek ? 0 : calendarConfig.marginX;
-    const width = `calc(${event.days * 100}% - ${marginLeft}px - ${event.isCrossingNextWeek ? 0 : calendarConfig.marginX}px)`;
+    const marginLeft = event.isCrossingPreviousWeek
+      ? 0
+      : calendarConfig.marginX;
+    const width = `calc(${event.days * 100}% - ${marginLeft}px - ${
+      event.isCrossingNextWeek ? 0 : calendarConfig.marginX
+    }px)`;
     return {
       top: `${top}px`,
       marginLeft: `${marginLeft}px`,
@@ -48,8 +52,12 @@ function useEventStyle(calendarConfig, hoveredEvent) {
   // 计算事件的边框和圆角样式
   const borderStyle = computed(() => (event) => {
     const borderLeft = event.isStartDay ? `10px solid ${event.color}` : "none";
-    const borderLeftRadius = event.isCrossingPreviousWeek ? 0 : calendarConfig.borderRadius;
-    const borderRightRadius = event.isCrossingNextWeek ? 0 : calendarConfig.borderRadius;
+    const borderLeftRadius = event.isCrossingPreviousWeek
+      ? 0
+      : calendarConfig.borderRadius;
+    const borderRightRadius = event.isCrossingNextWeek
+      ? 0
+      : calendarConfig.borderRadius;
     const borderRadius = `${borderLeftRadius}px ${borderRightRadius}px ${borderRightRadius}px ${borderLeftRadius}px`;
     return {
       borderLeft,
@@ -59,7 +67,8 @@ function useEventStyle(calendarConfig, hoveredEvent) {
 
   // 计算事件的背景颜色
   const backgroundStyle = computed(() => (event) => {
-    const isHighlighted = hoveredEvent.value && event.id === hoveredEvent.value?.id;
+    const isHighlighted =
+      hoveredEvent.value && event.id === hoveredEvent.value?.id;
     return {
       backgroundColor: isHighlighted
         ? handleColorOpacity(event.color, 0.8)
@@ -77,8 +86,8 @@ function useEventStyle(calendarConfig, hoveredEvent) {
   });
 
   return {
-    eventStyle
-  }
+    eventStyle,
+  };
 }
 
 // 事件数据处理 Hook
@@ -123,12 +132,12 @@ function useEventData(events, dates) {
   return {
     splitDateList,
     eventDistribution,
-  }
+  };
 }
 
 const app = createApp({
   components: {
-    Calendar
+    Calendar,
   },
   setup() {
     // 事件配置
@@ -140,7 +149,8 @@ const app = createApp({
       borderRadius: 12, // 事件圆角
     };
 
-    const { hoveredEvent, handleMouseEnter, handleMouseLeave } = useEventHover();
+    const { hoveredEvent, handleMouseEnter, handleMouseLeave } =
+      useEventHover();
     const { eventStyle } = useEventStyle(calendarConfig, hoveredEvent);
     const dates = getMonthDateList(2024, 12);
     const { splitDateList, eventDistribution } = useEventData(events, dates);
@@ -220,7 +230,7 @@ export function splitDatesByWeek(dates) {
 // 获取日期的ISO格式字符串(YYYY-MM-DD)
 function getISODateString(date) {
   return new Date(date).toISOString().split("T")[0];
-};
+}
 
 // 计算两个日期之间的天数
 export function getDaysBetweenDates(startDate, endDate) {
@@ -229,7 +239,7 @@ export function getDaysBetweenDates(startDate, endDate) {
       (new Date(endDate) - new Date(startDate)) / (24 * 60 * 60 * 1000)
     ) + 1
   );
-};
+}
 
 // 获取当天的事件列表
 export function getCurrentDateEvents(
@@ -260,7 +270,7 @@ export function getCurrentDateEvents(
       const days = getDaysBetweenDates(startDate, endDate);
       return { ...event, days };
     });
-};
+}
 
 /**
  * 设置事件的显示属性
@@ -322,7 +332,7 @@ export function setEventDisplayProperties(
   event.isFirstDay = dayIndex === 0 || event.isStartDay; // 是否是本周第一天或事件开始日期
   event.isCrossingPreviousWeek = startDate < weekStart; // 事件是否跨越上一周
   event.isCrossingNextWeek = endDate > weekEnd; // 事件是否跨越下一周
-};
+}
 
 // 处理颜色透明度
 export function handleColorOpacity(color, opacity = 1) {
@@ -347,8 +357,7 @@ export function handleColorOpacity(color, opacity = 1) {
   }
 
   return color;
-};
-
+}
 
 // 获取日期列表
 export function getMonthDateList(year, month) {
@@ -392,4 +401,4 @@ export function getMonthDateList(year, month) {
     );
   }
   return dateList;
-};
+}
