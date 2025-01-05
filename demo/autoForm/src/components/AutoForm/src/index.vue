@@ -177,15 +177,17 @@ onMounted(async () => {
 
 <template>
   <div class="form-container">
-    <FormItem v-for="item in enrichFormConfig" :key="item.key" :item="item" v-model="formData[item.key]"
-      :validate-field="validateField" >
-      <template #default="{ item }">
-        <slot :item="item" />
-      </template>
-      <template #error>
-        {{ formErrors[item.key] }}
-      </template>
-    </FormItem>
+    <div class="form-content">
+      <FormItem v-for="item in enrichFormConfig" :key="item.key" :item="item" v-model="formData[item.key]"
+        :validate-field="validateField">
+        <template #default="{ item }">
+          <slot :item="item" />
+        </template>
+        <template #error>
+          {{ formErrors[item.key] }}
+        </template>
+      </FormItem>
+    </div>
 
     <div class="button-group">
       <button class="submit-btn" @click="submitForm">提交</button>
@@ -195,5 +197,24 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-@import './index.css'
+@import './index.css';
+
+.form-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  box-sizing: border-box;
+}
+
+.form-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.button-group {
+  padding: 20px;
+  border-top: 1px solid #eee;
+  background: #fff;
+}
 </style>
