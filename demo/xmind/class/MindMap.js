@@ -148,7 +148,7 @@ export default class MindMap {
     }
 
     addSibling(node) {
-        if (node.isRoot) return;
+        if (node?.isRoot) return;
 
         const newNode = {
             id: Math.random().toString(36).substring(2),
