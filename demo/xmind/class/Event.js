@@ -65,7 +65,7 @@ export default class Event {
         const textSpan = node.el.querySelector('span');
         const textarea = document.createElement('textarea');
         textarea.value = node.topic;
-        textarea.className = 'node node-textarea';
+        textarea.className = `node node-textarea ${node.isRoot ? 'is-root' : ''}`;
 
         node.el.appendChild(textarea);
         textarea.focus();

@@ -75,6 +75,9 @@
             <div class="control-buttons">
                 <!-- <button class="control-btn" onclick="mindmap.history.undo()" id="undoBtn">撤销</button>
                 <button class="control-btn" onclick="mindmap.history.redo()" id="redoBtn">重做</button> -->
+                <button class="control-btn" onclick="mindmap.addChild(mindmap.selectedNode || mindmap.rootNode)">添加子节点</button>
+                <button class="control-btn" onclick="mindmap.addSibling(mindmap.selectedNode)">添加同级节点</button>
+                <button class="control-btn" onclick="mindmap.deleteNode(mindmap.selectedNode)">删除节点</button>
                 <button class="zoom-btn" onclick="mindmap.zoom('in')">+</button>
                 <button class="zoom-btn" onclick="mindmap.zoom('out')">-</button>
             </div>

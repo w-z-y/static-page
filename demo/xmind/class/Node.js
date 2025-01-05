@@ -190,6 +190,14 @@ export default class Node {
 
     this.data.direction = newParent.data.direction;
 
+    // 更新当前节点及其所有子节点的level
+    const updateNodeLevel = (node, level) => {
+        node.level = level;
+        node.el.dataset.level = level;
+        node.children?.forEach(child => updateNodeLevel(child, level + 1));
+    };
+    updateNodeLevel(this, newParent.level + 1);
+
     this.mindmap.refresh();
   }
 }
