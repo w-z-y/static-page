@@ -1,6 +1,6 @@
 const config = {
-  maxDepth: 3,
-  maxLeftChildren: 3,
+  maxDepth: 4,
+  maxLeftChildren: 2,
   maxRightChildren: 3,
 };
 
@@ -79,45 +79,47 @@ for (let i = 0; i < randomRightChildren; i++) {
 // 添加一个自由主题
 mindmapData.children.push(generateFreeNode());
 
-export default {
-  id: "0",
-  topic: "中心主题",
-  children: [
-    {
-      id: "1",
-      topic:
-        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-      direction: "right",
-      children: [
-        {
-          id: "2",
-          topic: "主题2",
-          direction: "right",
-          children: [
-            {
-              id: "3",
-              topic: "主题3",
-            },
-          ],
-        },
-      ],
-    },
-    {
-      id: "4",
-      topic:
-        "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-      direction: "right",
-      children: [
-        { id: "5", topic: "包含<特殊>字符&的#主题", direction: "right" },
-      ],
-    },
-    {
-      id: "6",
-      topic: "a",
-      direction: "right",
-      children: [
-        { id: "7", topic: "包含<特殊>字符&的#主题", direction: "right" },
-      ],
-    },
-  ],
-};
+export default mindmapData;
+
+// export default {
+//   id: "0",
+//   topic: "中心主题",
+//   children: [
+//     {
+//       id: "1",
+//       topic:
+//         "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+//       direction: "right",
+//       children: [
+//         {
+//           id: "2",
+//           topic: "主题2",
+//           direction: "right",
+//           children: [
+//             {
+//               id: "3",
+//               topic: "主题3",
+//             },
+//           ],
+//         },
+//       ],
+//     },
+//     {
+//       id: "4",
+//       topic:
+//         "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+//       direction: "right",
+//       children: [
+//         { id: "5", topic: "包含<特殊>字符&的#主题", direction: "right" },
+//       ],
+//     },
+//     {
+//       id: "6",
+//       topic: "a",
+//       direction: "right",
+//       children: [
+//         { id: "7", topic: "包含<特殊>字符&的#主题", direction: "right" },
+//       ],
+//     },
+//   ],
+// };

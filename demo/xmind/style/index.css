@@ -1,28 +1,37 @@
 #container {
-    width: 100%;
-    height: 100%;
-    min-width: 400px;
-    min-height: 400px;
-    position: relative;
-    overflow: hidden;
-    border: 1px solid #eee;
-    box-sizing: border-box;
-    cursor: grab;
+  width: 100%;
+  height: 100%;
+  min-width: 400px;
+  min-height: 400px;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #eee;
+  box-sizing: border-box;
+  cursor: grab;
+  font-family: system-ui, -apple-system, "PingFang SC", BlinkMacSystemFont,
+    "Segoe UI", Roboto, "Helvetica Neue", "Microsoft YaHei", 微软雅黑, 黑体,
+    Arial, sans-serif;
+  --root-node-bg: var(--root-bg, #191959);
+  --root-node-text: var(--root-text, #ffffff);
+  --level1-node-bg: var(--level1-bg, #eacfb5);
+  --normal-node-bg: var(--normal-bg, #f3eeea);
+  --level1-node-text: var(--level1-text, #333333);
+  --normal-node-text: var(--normal-text, #666666);
 }
 
 #container:active {
-    cursor: grabbing;
+  cursor: grabbing;
 }
 
 #container .lines-layer {
-    width: 100%;
-    height: 100%;
-    overflow: visible;
-    pointer-events: none;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
 }
 
 #container .mindmap-wrapper {
-    transform-origin: 0 0;
+  transform-origin: 0 0;
 }
 
 /* 
@@ -35,47 +44,50 @@
 
 */
 .node {
-    position: absolute;
-    left: 0;
-    top: 0;
-    cursor: pointer;
-    max-width: 300px;
-    word-wrap: break-word;
-    white-space: pre-wrap;
-    width: max-content;
-    padding: 10px 20px;
-    text-align: center;
-    line-height: 1.5;
-    border-radius: 8px;
-    box-sizing: border-box;
-    background-color: #f3eeea;
-    /* 提前渲染 */
-    /* will-change: transform; */
-    /* 元素背面是否展示 */
-    backface-visibility: hidden;
-    /* 字体抗锯齿 */
-    -webkit-font-smoothing: antialiased;
+  position: absolute;
+  left: 0;
+  top: 0;
+  cursor: pointer;
+  max-width: 300px;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  width: max-content;
+  padding: 10px 20px;
+  text-align: center;
+  line-height: 1.5;
+  font-size: 16px;
+  border-radius: 8px;
+  box-sizing: border-box;
+  background-color: var(--normal-node-bg);
+  /* 提前渲染 */
+  /* will-change: transform; */
+  /* 元素背面是否展示 */
+  backface-visibility: hidden;
+  /* 字体抗锯齿 */
+  -webkit-font-smoothing: antialiased;
+  color: var(--normal-node-text);
 }
 
 .node.is-root {
-    padding: 20px 40px;
-    font-size: 50px;
-    background-color: #191959;
-    font-weight: bolder;
-    color: #fff;
+  padding: 20px 40px;
+  font-size: 50px;
+  background-color: var(--root-node-bg);
+  color: var(--root-node-text);
+  font-weight: bolder;
 }
 
 .node[data-level="1"] {
-    background-color: #eacfb5;
+  background-color: var(--level1-node-bg);
+  color: var(--level1-node-text);
 }
 
 .node:hover {
-    outline: 2px solid #cfcfcf;
-    outline-offset: 2px;
+  outline: 2px solid #cfcfcf;
+  outline-offset: 2px;
 }
 .node.is-selected {
-    outline: 2px solid #2ebdff;
-    outline-offset: 2px;
+  outline: 2px solid #2ebdff;
+  outline-offset: 2px;
 }
 /* 
 
@@ -89,42 +101,49 @@
 
 */
 .node .expand-btn {
-    color: #1a237e;
-    border: 1px solid #1a237e;
-    background-color: #fff;
-    cursor: pointer;
-    transition: transform 0.2s;
-    position: absolute;
-    top: 50%;
-    font-weight: bolder;
-    transform: translateY(-50%);
-    cursor: pointer;
-    border-radius: 50%;
-    width: 14px;
-    height: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
-    line-height: 1;
-    visibility: hidden;
-    z-index: 1;
+  min-width: 14px;
+  color: var(--line-stroke);
+  border: 1px solid var(--line-stroke);
+  background-color: #fff;
+  cursor: pointer;
+  transition: transform 0.2s;
+  position: absolute;
+  top: 50%;
+  font-weight: bolder;
+  cursor: pointer;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  line-height: 1;
+  opacity: 0;
+  z-index: 1;
+  aspect-ratio: 1/1;
+  padding: 4px;
 }
+
+.node.is-collapsed .expand-btn {
+  opacity: 1;
+}
+
 .node.is-selected .expand-btn,
 .node:hover .expand-btn {
-    visibility: visible;
+  opacity: 1;
 }
 
 .node .expand-btn:hover {
-    transform: translateY(-50%) scale(1.2);
+  background-color: #fbf6f6
 }
 
 .node[data-direction="left"] .expand-btn {
-    left: -10px;
+  left: 0;
+  transform: translate(calc(-50% - 12px), -50%);
 }
 
 .node[data-direction="right"] .expand-btn {
-    right: -10px;
+  right: 0;
+  transform: translate(calc(50% + 12px), -50%);
 }
 
 /* 
@@ -147,10 +166,10 @@
 
 */
 .node-textarea {
-    width: 100%;
-    height: 100%;
-    font: inherit;
-    border: none;
-    outline: none;
-    resize: none;
+  width: 100%;
+  height: 100%;
+  font: inherit;
+  border: none;
+  outline: none;
+  resize: none;
 }

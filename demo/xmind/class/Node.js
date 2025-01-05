@@ -23,6 +23,11 @@ export default class Node {
   render(level) {
     this.level = level;
     this.el = this.createElement();
+    
+    if (this.mindmap.collapsedNodeIds.has(this.id)) {
+      this.el.classList.add('is-collapsed');
+    }
+    
     const { offsetWidth, offsetHeight } = this.el;
     this.width = offsetWidth;
     this.height = offsetHeight;
@@ -34,27 +39,73 @@ export default class Node {
     });
   }
 
-  handleExpandBtnClick(e, btn) {
-    e.stopPropagation();
+  /**
+   * 切换节点展开/收起状态
+   * @param {boolean} [force] - 可选,强制设置展开/收起状态
+   */
+  toggleExpand(force) {
     const isCollapsed = this.mindmap.collapsedNodeIds.has(this.id);
-    if (isCollapsed) {
+    // 如果传入force参数,则使用force的值,否则切换当前状态
+    const willExpand = force !== undefined ? force : isCollapsed;
+    
+    if (willExpand) {
+      // 展开节点
       this.mindmap.collapsedNodeIds.delete(this.id);
-      btn.textContent = '-';
       this.toggleChildren(true);
+      this.el.classList.remove('is-collapsed');
     } else {
+      // 收起节点
       this.mindmap.collapsedNodeIds.add(this.id);
-      btn.textContent = '+';
-      this.toggleChildren(false);
+      this.toggleChildren(false); 
+      this.el.classList.add('is-collapsed');
     }
+
+    // 更新展开按钮文本
+    if (this.el) {
+      const btn = this.el.querySelector('.expand-btn');
+      if (btn) {
+        const childCount = this.getChildCount();
+        btn.textContent = willExpand ? '-' : `+${childCount}`;
+      }
+    }
+
     this.mindmap.refresh();
   }
 
+  /**
+   * 获取所有子节点数量(包括深层子节点)
+   */
+  getChildCount() {
+    let count = 0;
+    if (this.children) {
+      count += this.children.length;
+      this.children.forEach(child => {
+        count += child.getChildCount();
+      });
+    }
+    return count;
+  }
+
+  /**
+   * 创建展开/收起按钮
+   */
   createExpandBtn() {
     const btn = document.createElement('div');
     btn.className = 'expand-btn';
-    btn.textContent = '-';
-    btn.onclick = e => this.handleExpandBtnClick(e, btn);
+    
+    // 初始化按钮文本
+    const isCollapsed = this.mindmap.collapsedNodeIds.has(this.id);
+    const childCount = this.getChildCount();
+    btn.textContent = isCollapsed ? `+${childCount}` : '-';
+
+    // 点击事件改为调用 toggleExpand
+    btn.onclick = e => {
+      e.stopPropagation();
+      this.toggleExpand();
+    };
+
     btn.ondblclick = e => e.stopPropagation();
+    
     return btn;
   }
 
@@ -201,4 +252,3 @@ export default class Node {
     this.mindmap.refresh();
   }
 }
-

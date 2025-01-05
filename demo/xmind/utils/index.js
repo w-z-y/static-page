@@ -1,24 +1,3 @@
-// 获取连接线路径
-export function getLinePath(startX, startY, endX, endY, isLeft, cornerRadius) {
-    const midX = startX + (isLeft ? -1 : 1) * Math.abs(endX - startX) / 2;
-    let d = `M ${startX} ${startY}`;
-
-    if (startY !== endY) {
-        d += ` L ${midX} ${startY}`;
-
-        if (endY > startY) {
-            d += ` L ${midX} ${endY - cornerRadius}`;
-            d += ` Q ${midX} ${endY} ${midX + (isLeft ? -cornerRadius : cornerRadius)} ${endY}`;
-        } else {
-            d += ` L ${midX} ${endY + cornerRadius}`;
-            d += ` Q ${midX} ${endY} ${midX + (isLeft ? -cornerRadius : cornerRadius)} ${endY}`;
-        }
-    }
-
-    d += ` L ${endX} ${endY}`;
-    return d;
-}
-
 // 分组节点
 export function groupNodes(node, level) {
     const [leftNodes, rightNodes] = [[], []];

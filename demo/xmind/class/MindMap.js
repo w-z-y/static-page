@@ -33,6 +33,23 @@ export default class MindMap {
         this.selectedNode = null;
 
         this.init();
+        this.setThemeVariables();
+    }
+
+    setThemeVariables() {
+        const variables = {
+            '--root-bg': this.config.rootNodeBgColor,
+            '--root-text': this.config.rootNodeTextColor,
+            '--level1-bg': this.config.level1NodeBgColor,
+            '--normal-bg': this.config.normalNodeBgColor,
+            '--level1-text': this.config.level1NodeTextColor,
+            '--normal-text': this.config.normalNodeTextColor,
+            '--line-stroke': this.config.lineStroke,
+        };
+
+        Object.entries(variables).forEach(([key, value]) => {
+            this.container.style.setProperty(key, value);
+        });
     }
 
     init() {
@@ -203,4 +220,50 @@ export default class MindMap {
         node.parent.select();
         this.removeNodeDOM(node);
     }
+
+    toggleCollapseAll() {
+        // 检查是否所有非根节点都已收起
+        const isAllCollapsed = Array.from(this.nodeMap.values()).every(node => 
+            node.isRoot || this.collapsedNodeIds.has(node.id)
+        );
+
+        // 获取所有非根节点
+        const nonRootNodes = Array.from(this.nodeMap.values()).filter(node => !node.isRoot);
+
+        if (isAllCollapsed) {
+            // 如果所有节点都已收起，则展开所有节点
+            nonRootNodes.forEach(node => {
+                if (this.collapsedNodeIds.has(node.id)) {
+                    this.collapsedNodeIds.delete(node.id);
+                    node.el.classList.remove('is-collapsed');
+                    // 显示子节点
+                    node.toggleChildren(true);
+                    // 更新展开按钮文本
+                    const btn = node.el.querySelector('.expand-btn');
+                    if (btn) {
+                        btn.textContent = '-';
+                    }
+                }
+            });
+        } else {
+            // 收起所有非根节点
+            nonRootNodes.forEach(node => {
+                if (!this.collapsedNodeIds.has(node.id)) {
+                    this.collapsedNodeIds.add(node.id);
+                    node.el.classList.add('is-collapsed');
+                    // 隐藏子节点
+                    node.toggleChildren(false);
+                    // 更新展开按钮文本
+                    const btn = node.el.querySelector('.expand-btn');
+                    if (btn) {
+                        btn.textContent = `+${node.getChildCount()}`;
+                    }
+                }
+            });
+        }
+
+        // 刷新视图
+        this.refresh();
+    }
 }
+
