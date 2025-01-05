@@ -4,6 +4,9 @@
     @mouseenter="stopAutoPlay"
     @mouseleave="startAutoPlay"
     @wheel="handleWheel"
+    @touchstart="handleTouchStart"
+    @touchmove="handleTouchMove"
+    @touchend="handleTouchEnd"
     :class="{ vertical: vertical }"
   >
     <div class="carousel-wrapper" :style="wrapperStyle">
@@ -166,7 +169,7 @@ const stopAutoPlay = () => {
   }
 };
 
-const { handleWheel } = useWheel({
+const { handleWheel, handleTouchStart, handleTouchMove, handleTouchEnd } = useWheel({
   vertical: props.vertical,
   onNext: slideNext,
   onPrev: slidePrev,

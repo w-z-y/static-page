@@ -229,7 +229,8 @@ export function splitDatesByWeek(dates) {
 */
 // 获取日期的ISO格式字符串(YYYY-MM-DD)
 function getISODateString(date) {
-  return new Date(date).toISOString().split("T")[0];
+  console.log('date', date);
+  return date && new Date(date).toISOString().split("T")[0];
 }
 
 // 计算两个日期之间的天数
@@ -258,6 +259,7 @@ export function getCurrentDateEvents(
 
   return sortList
     .filter((event) => {
+      console.log('event.start', event,event.start,event.end);
       const eventStartDate = getISODate(event.start);
       const eventEndDate = getISODate(event.end);
       return eventStartDate <= currentDate && eventEndDate >= currentDate;

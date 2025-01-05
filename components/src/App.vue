@@ -1,18 +1,23 @@
 <template>
   <div class="app-container">
-    <div class="sidebar">
+    <div class="menu-button" @click="showMenu = !showMenu" v-if="isMobile">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+    <div class="sidebar" :class="{ 'sidebar-mobile': isMobile, 'show': showMenu }">
       <ul class="menu">
         <li
           v-for="item in menuItems"
           :key="item.component"
           :class="{ active: currentComponent === item.component }"
-          @click="currentComponent = item.component"
+          @click="handleMenuClick(item.component)"
         >
           {{ item.title }}
         </li>
       </ul>
     </div>
-    <div class="content">
+    <div class="content" :class="{ 'content-mobile': isMobile }">
       <template v-if="currentComponent === 'Button'">
         <Space wrap>
           <Button>按钮</Button>
@@ -86,6 +91,7 @@ import Calendar from "./components/Calendar/index.vue";
 import Button from "./components/Button/index.vue";
 import Space from "./components/Space/index.vue";
 import Swiper from "./components/Swiper/index.vue";
+
 const menuItems = [
   {
     title: "按钮(Button)",
@@ -111,28 +117,23 @@ const items = [
   { src: "linear-gradient(45deg, #43e97b, #38f9d7)", alt: "图片3" },
 ];
 const items2 = [1, 2, 3];
-/* 
 
+const isMobile = ref(false);
+const showMenu = ref(false);
 
+// 检测是否为移动设备
+const checkMobile = () => {
+  isMobile.value = window.innerWidth <= 768;
+};
 
+// 处理菜单点击
+const handleMenuClick = (component) => {
+  currentComponent.value = component;
+  if (isMobile.value) {
+    showMenu.value = false;
+  }
+};
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-*/
 // 从URL hash中获取初始组件
 const getInitialComponent = () => {
   const hash = window.location.hash.slice(1);
@@ -150,6 +151,8 @@ watch(currentComponent, (newComponent) => {
 
 // 监听URL hash变化,更新当前组件
 onMounted(() => {
+  checkMobile();
+  window.addEventListener("resize", checkMobile);
   window.addEventListener("hashchange", () => {
     const hash = window.location.hash.slice(1);
     if (menuItems.find((item) => item.component === hash)) {
@@ -158,6 +161,7 @@ onMounted(() => {
   });
 });
 </script>
+
 <style scoped lang="scss">
 .app-container {
   display: flex;
@@ -165,6 +169,27 @@ onMounted(() => {
   background: #ffffff;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     "Helvetica Neue", Arial, sans-serif;
+  position: relative;
+}
+
+.menu-button {
+  display: none;
+  position: fixed;
+  top: 16px;
+  left: 30px;
+  z-index: 1000;
+  width: 30px;
+  height: 24px;
+  cursor: pointer;
+  
+  span {
+    display: block;
+    width: 100%;
+    height: 3px;
+    background-color: #1890ff;
+    margin: 5px 0;
+    transition: 0.3s;
+  }
 }
 
 .sidebar {
@@ -172,11 +197,24 @@ onMounted(() => {
   background: #fafafa;
   border-right: 1px solid #f0f0f0;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  
+  &.sidebar-mobile {
+    position: fixed;
+    left: -240px;
+    top: 0;
+    bottom: 0;
+    z-index: 999;
+    
+    &.show {
+      left: 0;
+    }
+  }
 }
 
 .menu {
   list-style: none;
-  padding: 16px 0;
+  padding: 50px 0 16px;
   margin: 0;
 }
 
@@ -207,6 +245,10 @@ onMounted(() => {
   padding: 24px 32px;
   background: #fff;
 
+  &.content-mobile {
+    padding: 60px 16px 16px;
+  }
+
   &::-webkit-scrollbar {
     width: 6px;
     height: 6px;
@@ -219,6 +261,16 @@ onMounted(() => {
 
   &::-webkit-scrollbar-track {
     background: #f5f5f5;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .menu-button {
+    display: block;
+  }
+  
+  .content {
+    width: 100%;
   }
 }
 </style>
