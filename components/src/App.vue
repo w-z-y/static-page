@@ -14,7 +14,7 @@
     </div>
     <div class="content">
       <template v-if="currentComponent === 'Button'">
-        <Space>
+        <Space wrap>
           <Button>按钮</Button>
           <Button type="primary">按钮</Button>
           <Button type="success">按钮</Button>

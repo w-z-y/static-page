@@ -1,5 +1,5 @@
 import { createApp, ref, computed } from "vue";
-import { Calendar } from "../../components/dist/my-components.es.js";
+import { Calendar } from "../../components/lib/my-components.es.js";
 import { events } from "./event.js";
 
 // 事件悬浮状态 Hook
