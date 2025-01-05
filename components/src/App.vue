@@ -32,7 +32,7 @@
         </Space>
       </template>
       <template v-else-if="currentComponent === 'Swiper'">
-        <Space>
+        <Space wrap>
           <Swiper
             :items="items2"
             :controls="['arrows', 'dots']"

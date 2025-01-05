@@ -4,10 +4,10 @@ import { resolve } from "path";
 
 export default defineConfig(({ command, mode }) => {
   // npm run build:lib
-  const isLib = mode === 'lib';
-  
+  const isLib = mode === "lib";
+
   const baseConfig = {
-    base: './',
+    base: "./",
     plugins: [vue()],
     resolve: {
       alias: {
@@ -17,28 +17,33 @@ export default defineConfig(({ command, mode }) => {
     css: {
       preprocessorOptions: {
         scss: {
-          additionalData: `@use "@/styles/variables.scss" as *;`
-        }
-      }
-    }
+          additionalData: `@use "@/styles/variables.scss" as *;`,
+        },
+      },
+    },
   };
 
   if (isLib) {
     return {
       ...baseConfig,
       build: {
+        outDir: "lib",
         lib: {
           entry: resolve(__dirname, "index.js"),
           name: "MyComponents",
           fileName: (format) => `my-components.${format}.js`,
-          formats: ['es', 'umd'],
-          cssFileName: 'my-components',
+          formats: ["es", "umd"],
+          cssFileName: "my-components",
         },
         rollupOptions: {
           external: ["vue"],
           output: {
             globals: {
               vue: "Vue",
+            },
+            paths: {
+              // 注意此配置只能在当前项目中使用，
+              vue: "../../lib/vue3.min.js",
             },
           },
         },
@@ -48,11 +53,5 @@ export default defineConfig(({ command, mode }) => {
 
   return {
     ...baseConfig,
-    build: {
-      outDir: 'dist',
-      assetsDir: 'assets',
-      emptyOutDir: true,
-      copyPublicDir: true,
-    },
   };
 });

@@ -1,4 +1,4 @@
-import { createApp, ref, computed } from "vue";
+import { createApp, ref, computed } from "../../lib/vue3.min.js";
 import { Calendar } from "../../components/lib/my-components.es.js";
 import { events } from "./event.js";
 
