@@ -5,35 +5,51 @@ import Line from './Line.js';
 import Layout from './Layout.js';
 import Event from './Event.js';
 import History from './History.js';
+import Renderer from './Renderer.js';
 
 export default class MindMap {
     constructor(container, data, config = {}) {
+        // 基础配置初始化
+        this.initializeBasics(container, data, config);
+        
+        // 创建各个功能实例
+        this.initializeInstances();
+        
+        this.setThemeVariables();
+        // 初始化视图
+        this.init();
+    }
+
+    initializeBasics(container, data, config) {
         this.config = { ...defaultConfig, ...config };
-        this.container = typeof container === 'string' ? document.querySelector(container) : container;
+        this.container = typeof container === 'string' ? 
+            document.querySelector(container) : container;
         this.wrapper = this.container.querySelector('.mindmap-wrapper');
         this.linesLayer = this.container.querySelector('.lines-layer');
         this.nodesLayer = this.container.querySelector('.nodes-layer');
-
+        
         this.data = structuredClone(data);
         this.nodeMap = new Map();
         this.collapsedNodeIds = new Set();
-
+        
+        // 视图相关属性初始化
         const { offsetWidth, offsetHeight } = this.container;
         this.centerX = offsetWidth / 2;
         this.centerY = offsetHeight / 2;
         this.scale = 1;
         this.offsetX = 0;
         this.offsetY = 0;
+        
+        this.selectedNode = null;
+    }
 
+    initializeInstances() {
+        // 各个功能模块实例化
+        this.renderer = new Renderer(this);
         this.layoutInstance = new Layout(this);
         this.lineInstance = new Line(this);
         this.eventInstance = new Event(this);
-        this.history = new History(this);
-
-        this.selectedNode = null;
-
-        this.init();
-        this.setThemeVariables();
+        this.historyInstance = new History(this);
     }
 
     setThemeVariables() {
@@ -172,7 +188,7 @@ export default class MindMap {
         }
 
         // 添加历史记录
-        this.history.add(structuredClone(this.data));
+        this.historyInstance.add(structuredClone(this.data));
 
         this.init();
         this.nodeMap.get(newNode.id).select();
@@ -193,7 +209,7 @@ export default class MindMap {
         siblings.splice(index + 1, 0, newNode);
 
         // 添加历史记录
-        this.history.add(structuredClone(this.data));
+        this.historyInstance.add(structuredClone(this.data));
 
         this.init();
         this.nodeMap.get(newNode.id).select();
@@ -267,7 +283,7 @@ export default class MindMap {
         deleteNodeAndChildren(node);
 
         // 添加历史记录
-        this.history.add(structuredClone(this.data));
+        this.historyInstance.add(structuredClone(this.data));
 
         // 重新渲染并选中父节点
         this.init();

@@ -31,6 +31,8 @@ export default class Node {
     const { offsetWidth, offsetHeight } = this.el;
     this.width = offsetWidth;
     this.height = offsetHeight;
+
+    console.log('this.mindmap.eventInstance', this.mindmap.eventInstance);
     this.mindmap.eventInstance.setupNodeEvents(this);
     
     requestAnimationFrame(() => {
@@ -295,7 +297,7 @@ export default class Node {
 
     this.mindmap.refresh();
     // 添加历史记录
-    this.mindmap.history.add(structuredClone(this.mindmap.data));
+    this.mindmap.historyInstance.add(structuredClone(this.mindmap.data));
   }
 
   addExpandBtn() {
