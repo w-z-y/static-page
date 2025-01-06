@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      #app {
+        font-family: "Avenir", Helvetica, Arial, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-align: center;
+        color: #2c3e50;
+        margin: 0 auto;
+      }
+      [v-cloak] { 
+        display: none
+      }
+      .container {
+        height: 600px;
+        overflow: auto;
+      }
+      .item {
+        color: #fff;
+        display: flex;
+        font-size: 20px;
+        justify-content: center;
+        align-items: center;
+      }
+      button {
+        margin: 0 20px;
+        background: #0000;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        padding: 10px 20px;
+        cursor: pointer;
+        transition: background-color 200ms;
+      }
+      button:hover {
+        color: #fff;
+        background-color: pink;
+      }
+    </style>
+    <style>
+      .waterfall-flow-container {
+        position: relative;
+      }
+      .waterfall-flow-container .waterfall-flow-item {
+        opacity: 0;
+        position: absolute;
+        left: 0;
+        top: 0;
+        border-radius: 4px;
+        margin: 20px;
+        box-shadow: 0 0 10px #ccc;
+        transform-origin: center;
+        transform: var(--transform-property);
+      }
+      .waterfall-flow-container .waterfall-flow-item > * {
+        height: 100%;
+      }
+      .animation {
+        animation: fadeIn 200ms ease-in-out forwards;
+      }
+      @keyframes fadeIn {
+        0% {
+          transform: var(--transform-property) scale(0);
+        }
+        100% {
+          transform: var(--transform-property) scale(1);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app" v-cloak>
+      <button @click="onChangeVisible">{{show?'隐藏':'显示'}}</button>
+      <button @click="onPushItem">首位添加节点</button>
+      <button @click="onDeleteItem">删除首个节点</button>
+      <div class="container">
+        <waterfall-flow
+          v-if="show"
+          #default="{ item }"
+          item-key="text"
+          :item-width="40"
+          :transition-time="400"
+          :list="list"
+          :gap="20"
+        >
+          <div class="item" :style="{ background: item.color }">
+            <span style="background-color: #0003">{{ item.text }}</span>
+          </div>
+        </waterfall-flow>
+      </div>
+    </div>
+    <script src="https://cdn.bootcdn.net/ajax/libs/vue/2.7.9/vue.min.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
+
+    <script>
+      Vue.component("waterfall-flow", {
+        template: `
+          <div ref="waterfallFlowContainer" :style="boxStyle" class="waterfall-flow-container">
+              <template v-for="item in list">
+                  <div
+                      :ref="'itemRef'+item[itemKey]"
+                      :key="item[itemKey]"
+                      :style="{
+                      height: item.height+'px',
+                      }"
+                      class="waterfall-flow-item"
+                  >
+                      <slot :item="item" />
+                  </div>
+              </template>
+          </div>
+                `,
+        props: {
+          // 展示列表
+          list: {
+            type: Array,
+            default: () => [],
+          },
+          // 间距
+          gap: {
+            type: Number,
+            default: 10,
+            validator: (val) => val > 0,
+          },
+          // 列宽
+          "item-width": {
+            type: Number,
+            default: 200,
+          },
+          // key 不能绑下标，否则动画过度会有问题
+          "item-key": {
+            type: [Number, String],
+            default: "",
+            require: true,
+          },
+          // 过渡时间
+          "transition-time": {
+            type: [Number, String],
+            default: 200,
+          },
+        },
+        data() {
+          return {
+            columns: 1,
+            boxHeight: 0,
+            isMounted: false,
+          };
+        },
+        computed: {
+          boxStyle() {
+            return {
+              height: `${this.boxHeight}px`,
+            };
+          },
+        },
+        async updated() {
+          await this.$nextTick();
+          this.layout();
+        },
+        mounted() {
+          window.layout = this.layout;
+          this.layout();
+
+          window.onresize = () => {
+            this.layout();
+          };
+        },
+        methods: {
+          calcItemWidth() {
+            const container = this.$refs.waterfallFlowContainer;
+            this.columns = Math.floor(
+              container.offsetWidth / (this.itemWidth + this.gap)
+            );
+            container.style.paddingRight = this.gap + "px";
+          },
+          layout: _.debounce(function () {
+            this.calcItemWidth();
+            const containerHeight = [];
+            this.list.reduce((last, everyItem) => {
+              const item = this.$refs[`itemRef${everyItem[this.itemKey]}`][0];
+              const { offsetWidth, offsetHeight } = item;
+              // 找出当前最小的top值，用来插入当前节点
+              let minTop = Math.min(...last);
+              // 最小top的列数
+              const minIndex = last.indexOf(minTop);
+              // 找出当前最大的top值，用来插入下一个节点
+              const maxTop = Math.max(...last);
+              // 最大top的列数 ----- lastIndexOf: 防止出现相等的情况，导致下标 === minIndex
+              const maxIndex = last.lastIndexOf(maxTop);
+
+              const offset = offsetHeight + this.gap;
+
+              item.style.transition = `${this.transitionTime || 0}ms`;
+
+
+              item.style.width = this.itemWidth + "px";
+
+              item.style.setProperty(
+                "--transform-property",
+                `translate3d(${
+                  minIndex * (offsetWidth + this.gap)
+                }px, ${minTop}px, 0px)`
+              );
+              minTop += offset;
+
+              setTimeout(() => {
+                item.style.opacity = 1;
+                this.addAnimationByItem(item);
+              }, this.transitionTime)
+              // 边缘场景： 一定要先给maxIndex赋值，再给minIndex赋值，不然当只有一列时，minTop永远为0。
+              last[maxIndex] = maxTop;
+              last[minIndex] = minTop;
+              containerHeight.push(...last);
+              return last;
+            }, new Array(this.columns).fill(0));
+            this.boxHeight = Math.max(...containerHeight);
+          }, 200),
+          addAnimationByItem(item) {
+            if (this.isMounted) return;
+            item.classList.add("animation");
+            setTimeout(() => {
+              item.classList.remove("animation");
+              this.isMounted = true;
+            }, this.transitionTime);
+          },
+        },
+      });
+      new Vue({
+        el: "#app",
+        data() {
+          return {
+            name: "wzy",
+            list: [],
+            show: true,
+          };
+        },
+        created() {
+          this.list = new Array(100).fill(1).map((_, idx) => {
+            return {
+              key: idx + 1,
+              text: idx + 1,
+              height: Math.floor(Math.random() * 400) + 40,
+              color: randomColor(),
+            };
+          });
+        },
+        methods: {
+          onChangeVisible() {
+            this.show = !this.show;
+          },
+          onPushItem() {
+            const random = Math.floor(10000 * Math.random()) + 40;
+            this.list.unshift({
+              key: random,
+              text: random,
+              height: Math.floor(Math.random() * 400) + 40,
+              color: randomColor(),
+            });
+          },
+          onDeleteItem() {
+            if (!this.show) return;
+            this.list.splice(0, 1);
+          },
+        },
+      });
+      function randomColor() {
+        // 生成红色、绿色和蓝色的随机值
+        var r = Math.floor(Math.random() * 55 + 150);
+        var g = Math.floor(Math.random() * 55 + 140);
+        var b = Math.floor(Math.random() * 55 + 200);
+        // 将RGB值转换为十六进制表示
+        var hexR = r.toString(16).padStart(2, "0");
+        var hexG = g.toString(16).padStart(2, "0");
+        var hexB = b.toString(16).padStart(2, "0");
+        // 返回十六进制颜色值
+        return "#" + hexR + hexG + hexB;
+      }
+    </script>
+  </body>
+</html>
