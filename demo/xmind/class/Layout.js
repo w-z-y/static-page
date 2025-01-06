@@ -22,7 +22,7 @@ export default class Layout {
   }
 
   layoutChildren(node, level) {
-    if (!node.children?.length) return;
+    if (!node.data.children?.length) return;
     const [leftNodes, rightNodes] = groupNodes(node, level);
     const layoutGroup = (nodes, isLeft) => {
       if (!nodes.length) return;

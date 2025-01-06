@@ -119,8 +119,8 @@ export default class Node {
     el.dataset.level = this.level;
     el.draggable = true;
 
-    if (this.data.children?.length && !this.isRoot) {
-      el.appendChild(this.createExpandBtn());
+    if (this.data.children?.length > 0 && !this.isRoot) {
+        el.appendChild(this.createExpandBtn());
     }
 
     this.mindmap.nodesLayer.appendChild(el);
@@ -130,26 +130,57 @@ export default class Node {
 
   toggleChildren(show) {
     this.children?.forEach(child => {
-      if (!child) return;
-      child.el.style.display = show ? '' : 'none';
-      if (show) {
-        if (!this.mindmap.collapsedNodeIds.has(child.id)) {
-          child.toggleChildren(true);
+        if (!child) return;
+        
+        // 删除/添加节点元素，而不是使用 display 属性
+        if (show) {
+            if (!child.el.parentNode) {
+                this.mindmap.nodesLayer.appendChild(child.el);
+                // 重新计算节点高度
+                const { offsetHeight, offsetWidth } = child.el;
+                child.height = offsetHeight;
+                child.width = offsetWidth;
+                child.totalHeight = child.calculateHeight();
+
+                // 重新计算x位置
+                const { horizontalGap } = this.mindmap.config;
+                const isLeft = child.data.direction === 'left';
+                const parentX = this.x + (this.isRoot ? this.width / 2 : this.width);
+                child.x = isLeft ? 
+                    parentX - horizontalGap - child.width : 
+                    parentX + horizontalGap;
+                
+                // 应用新位置
+                child.setPosition(child.x, child.y);
+            }
+            if (!this.mindmap.collapsedNodeIds.has(child.id)) {
+                child.toggleChildren(true);
+            }
+        } else {
+            child.el.remove();
+            child.toggleChildren(false);
         }
-      } else {
-        child.toggleChildren(false);
-      }
     });
+    
+    // 展开/收起后重新计算当前节点的总高度
+    this.totalHeight = this.calculateHeight();
+    
     this.toggleChildrenLines(show);
   }
 
   toggleChildrenLines(show) {
     this.children?.forEach(child => {
-      const line = this.childLines.find(l => l.childNode === child);
-      if (line) {
-        line.path.style.display = show ? '' : 'none';
-        child.toggleChildrenLines(show);
-      }
+        const line = this.childLines.find(l => l.childNode === child);
+        if (line) {
+            if (show) {
+                if (!line.path.parentNode) {
+                    this.mindmap.linesLayer.appendChild(line.path);
+                }
+            } else {
+                line.path.remove();
+            }
+            child.toggleChildrenLines(show);
+        }
     });
   }
 
@@ -233,6 +264,14 @@ export default class Node {
         }
     }
 
+    // 检查原父节点是否还有其他子节点
+    if (this.parent && this.parent.data.children.length === 0) {
+        delete this.parent.data.children;
+        // 移除原父节点的展开按钮
+        const expandBtn = this.parent.el.querySelector('.expand-btn');
+        expandBtn?.remove();
+    }
+
     newParent.children = newParent.children || [];
     newParent.data.children = newParent.data.children || [];
     newParent.children.push(this);
@@ -249,6 +288,46 @@ export default class Node {
     };
     updateNodeLevel(this, newParent.level + 1);
 
+    // 确保新父节点有展开按钮
+    if (newParent.data.children?.length > 0 && !newParent.el.querySelector('.expand-btn') && !newParent.isRoot) {
+        newParent.el.appendChild(this.createExpandBtn());
+    }
+
     this.mindmap.refresh();
+    // 添加历史记录
+    this.mindmap.history.add(structuredClone(this.mindmap.data));
+  }
+
+  addExpandBtn() {
+    if (!this.el.querySelector('.expand-btn') && !this.isRoot) {
+        this.el.appendChild(this.createExpandBtn());
+    }
+  }
+
+  /**
+   * 更新节点内容
+   */
+  updateContent() {
+    // 更新节点文本内容
+    const textSpan = this.el.querySelector('span');
+    if (textSpan && this.topic !== this.data.topic) {
+      this.topic = this.data.topic;
+      textSpan.textContent = this.topic;
+      this.updateSize(); // 更新节点尺寸
+    }
+
+    // 更新方向
+    if (this.data.direction) {
+      this.el.dataset.direction = this.data.direction;
+    }
+
+    // 更新子节点状态
+    if (!this.data.children?.length && this.el.querySelector('.expand-btn')) {
+      // 如果没有子节点但有展开按钮,移除按钮
+      this.el.querySelector('.expand-btn').remove();
+    } else if (this.data.children?.length && !this.el.querySelector('.expand-btn')) {
+      // 如果有子节点但没有展开按钮,添加按钮
+      this.addExpandBtn();
+    }
   }
 }

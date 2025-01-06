@@ -3,21 +3,28 @@ export default class History {
         this.mindmap = mindmap;
         this.records = [structuredClone(mindmap.data)];
         this.currentIndex = 0;
+        this.maxLength = 50;
+        this.updateButtons();
     }
 
     add(data) {
-        // 删除当前位置之后的所有记录
         this.records.splice(this.currentIndex + 1);
-        // 添加新记录
         this.records.push(structuredClone(data));
         this.currentIndex++;
+
+        if (this.records.length > this.maxLength) {
+            this.records.shift();
+            this.currentIndex--;
+        }
+
+        this.updateButtons();
     }
 
     undo() {
-        console.log('this.records', this.records);
         if (this.currentIndex > 0) {
             this.currentIndex--;
             this.restore();
+            this.updateButtons();
         }
     }
 
@@ -25,13 +32,13 @@ export default class History {
         if (this.currentIndex < this.records.length - 1) {
             this.currentIndex++;
             this.restore();
+            this.updateButtons();
         }
     }
 
     restore() {
         const data = structuredClone(this.records[this.currentIndex]);
 
-        // 获取新数据中所有节点的ID
         const getNodeIds = (node, ids = new Set()) => {
             ids.add(node.id);
             node.children?.forEach(child => getNodeIds(child, ids));
@@ -39,14 +46,42 @@ export default class History {
         };
         const newNodeIds = getNodeIds(data);
 
-        // 删除不在新数据中的节点
         this.mindmap.nodeMap.forEach((node, id) => {
             if (!newNodeIds.has(id)) {
                 this.mindmap.removeNodeDOM(node);
             }
         });
 
+        const collapsedNodeIds = new Set(this.mindmap.collapsedNodeIds);
+
         this.mindmap.data = data;
         this.mindmap.init();
+
+        collapsedNodeIds.forEach(nodeId => {
+            const node = this.mindmap.nodeMap.get(nodeId);
+            if (node) {
+                this.mindmap.collapsedNodeIds.add(nodeId);
+                node.el.classList.add('is-collapsed');
+                node.toggleChildren(false);
+                const btn = node.el.querySelector('.expand-btn');
+                if (btn) {
+                    btn.textContent = `+${node.getChildCount()}`;
+                }
+            }
+        });
+
+        this.mindmap.refresh();
+    }
+
+    updateButtons() {
+        const undoBtn = document.getElementById('undoBtn');
+        const redoBtn = document.getElementById('redoBtn');
+        
+        if (undoBtn) {
+            undoBtn.disabled = this.currentIndex === 0;
+        }
+        if (redoBtn) {
+            redoBtn.disabled = this.currentIndex === this.records.length - 1;
+        }
     }
 }

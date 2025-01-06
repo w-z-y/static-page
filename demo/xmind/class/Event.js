@@ -101,6 +101,17 @@ export default class Event {
     // 键盘事件
     setupKeyboardEvent() {
         document.addEventListener('keydown', e => {
+            // 添加 Ctrl+Z 和 Ctrl+Y 的快捷键支持
+            if (e.ctrlKey) {
+                if (e.key === 'z') {
+                    e.preventDefault();
+                    this.mindmap.history.undo();
+                } else if (e.key === 'y') {
+                    e.preventDefault();
+                    this.mindmap.history.redo();
+                }
+            }
+
             if (this.mindmap.selectedNode && !this.mindmap.selectedNode.isEditing) {
                 if (e.key === 'Tab') {
                     e.preventDefault();

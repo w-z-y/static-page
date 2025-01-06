@@ -106,7 +106,6 @@
   border: 1px solid var(--line-stroke);
   background-color: #fff;
   cursor: pointer;
-  transition: transform 0.2s;
   position: absolute;
   top: 50%;
   font-weight: bolder;

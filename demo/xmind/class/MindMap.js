@@ -60,10 +60,14 @@ export default class MindMap {
         this.nodeMap.forEach(node => {
             node.parentLine = null;
             node.childLines = [];
+            node.children = null;
         });
 
         this.rootNode = this.createNode(this.data, 0);
         this.rootNode.setPosition(this.centerX, this.centerY);
+        this.nodeMap.forEach(node => {
+            node.updateContent();
+        });
         this.layoutInstance.layoutChildren(this.rootNode, 0);
     }
 
@@ -96,6 +100,7 @@ export default class MindMap {
         this.linesLayer.querySelectorAll('path').forEach(path => path.style.display = '');
         this.rootNode.calculateHeight();
         this.layoutInstance.layoutChildren(this.rootNode, 0);
+      
         this.collapsedNodeIds.forEach(nodeId => {
             const node = this.nodeMap.get(nodeId);
             node?.toggleChildrenLines(false);
@@ -147,6 +152,11 @@ export default class MindMap {
             `translate(${this.offsetX}px, ${this.offsetY}px) scale(${this.scale})`;
     }
     addChild(node) {
+        // 如果节点被收起，先展开它
+        if (this.collapsedNodeIds.has(node.id)) {
+            node.toggleExpand(true); // 强制展开节点
+        }
+
         const newNode = {
             id: Math.random().toString(36).substring(2),
             topic: '新主题',
@@ -155,6 +165,11 @@ export default class MindMap {
 
         node.data.children = node.data.children || [];
         node.data.children.push(newNode);
+
+        // 如果是叶子节点添加子节点,需要添加展开按钮
+        if (node.data.children.length === 1) {
+            node.addExpandBtn();
+        }
 
         // 添加历史记录
         this.history.add(structuredClone(this.data));
@@ -207,18 +222,56 @@ export default class MindMap {
     };
 
     deleteNode(node) {
-        if (node.isRoot) return;
+        if (!node || node.isRoot) return;
 
+        // 递归删除所有子节点
+        const deleteNodeAndChildren = (node) => {
+            // 删除子节点
+            if (node.children?.length) {
+                node.children.forEach(child => {
+                    deleteNodeAndChildren(child);
+                });
+            }
+            
+            // 从节点映射中移除
+            this.nodeMap.delete(node.id);
+            
+            // 从 DOM 中移除节点元素
+            node.el?.remove();
+            
+            // 删除与父节点的连接线
+            if (node.parentLine) {
+                node.parentLine.path.remove();
+                const index = node.parent.childLines.indexOf(node.parentLine);
+                if (index > -1) {
+                    node.parent.childLines.splice(index, 1);
+                }
+                node.parentLine = null;
+            }
+        };
+
+        // 从父节点的 children 数组中移除
         const siblings = node.parent.data.children;
         const index = siblings.indexOf(node.data);
         siblings.splice(index, 1);
 
+        // 如果删除后父节点没有子节点了，删除父节点的 children 属性
+        if (siblings.length === 0) {
+            delete node.parent.data.children;
+            // 移除父节点的展开按钮
+            const expandBtn = node.parent.el.querySelector('.expand-btn');
+            expandBtn?.remove();
+        }
+
+        // 递归删除节点及其所有子节点
+        deleteNodeAndChildren(node);
+
         // 添加历史记录
         this.history.add(structuredClone(this.data));
 
+        // 重新渲染并选中父节点
         this.init();
         node.parent.select();
-        this.removeNodeDOM(node);
     }
 
     toggleCollapseAll() {
