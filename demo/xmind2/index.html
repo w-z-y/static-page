@@ -8,6 +8,8 @@
   <body>
     <div id="app">
       <div>{{ data }}</div>
+
+      <template-node></template-node>
     </div>
     <script type="module">
       import { createApp, ref } from "../../lib/vue3.min.js";
@@ -15,6 +17,7 @@
       class MindMap {
         constructor(data) {
           this.data = data;
+       
         }
       }
       const app = createApp({

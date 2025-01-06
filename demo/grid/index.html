@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div id="app" v-cloak>
+      【24 x 24】
+      <div class="wrapper" v-for="layoutItem in layoutList">
+        <div class="title">{{ layoutItem.name }}</div>
+        <div class="container" v-for="layout in layoutItem.list">
+          <div
+            class="item"
+            v-for="item in layout"
+            :style="{ 'grid-area': item }"
+          ></div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module">
+      import { createApp, defineComponent, ref } from "../../lib/vue3.min.js";
+      const app = createApp({
+        setup() {
+          // 4个元素的布局
+          const layout4 = [
+            [
+              "1 / 1 / 13 / 13",
+              "1 / 13 / 13 / 25",
+              "13 / 1 / 25 / 13",
+              "13 / 13 / 25 / 25",
+            ],
+            [
+              "1 / 1 / 13 / 9",
+              "1 / 9 / 13 / 17",
+              "1 / 17 / 13 / 25",
+              "13 / 1 / 25 / 25",
+            ],
+            [
+              "1 / 1 / 25 / 7",
+              "1 / 7 / 9 / 25",
+              "9 / 7 / 17 / 25",
+              "17 / 7 / 25 / 25",
+            ],
+            [
+              "1 / 1 / 9 / 25",
+              "9 / 1 / 17 / 13",
+              "9 / 13 / 17 / 25",
+              "17 / 1 / 25 / 25",
+            ],
+            [
+              "1 / 1 / 13 / 13",
+              "1 / 13 / 7 / 25",
+              "7 / 13 / 13 / 25",
+              "13 / 1 / 25 / 25",
+            ],
+            [
+              "1 / 1 / 9 / 13",
+              "1 / 13 / 9 / 25",
+              "9 / 1 / 17 / 25",
+              "17 / 1 / 25 / 25",
+            ],
+            [
+              "1 / 1 / 25 / 13",
+              "1 / 13 / 9 / 25",
+              "9 / 13 / 17 / 25",
+              "17 / 13 / 25 / 25",
+            ],
+          ];
+
+          // 5个元素的布局
+          const layout5 = [
+            [
+              "1 / 1 / 25 / 7",
+              "1 / 7 / 13 / 19",
+              "1 / 19 / 13 / 25",
+              "13 / 7 / 25 / 19",
+              "13 / 19 / 25 / 25",
+            ],
+            [
+              "1 / 1 / 13 / 7",
+              "1 / 7 / 13 / 19",
+              "1 / 19 / 13 / 25",
+              "13 / 1 / 25 / 13",
+              "13 / 13 / 25 / 25",
+            ],
+          ];
+
+          // 6个元素的布局
+          const layout6 = [
+            [
+              "1 / 1 / 9 / 13",
+              "1 / 13 / 9 / 25",
+              "9 / 1 / 17 / 13",
+              "9 / 13 / 17 / 25",
+              "17 / 1 / 25 / 13",
+              "17 / 13 / 25 / 25",
+            ],
+
+            [
+              "1 / 1 / 13 / 9",
+              "1 / 9 / 13 / 17",
+              "1 / 17 / 13 / 25",
+              "13 / 1 / 25 / 9",
+              "13 / 9 / 25 / 17",
+              "13 / 17 / 25 / 25",
+            ],
+            [
+              "1 / 1 / 9 / 9",
+              "1 / 9 / 9 / 17",
+              "1 / 17 / 9 / 25",
+              "9 / 1 / 17 / 13",
+              "9 / 13 / 17 / 25",
+              "17 / 1 / 25 / 25",
+            ],
+            [
+              "1 / 1 / 9 / 25",
+              "9 / 1 / 17 / 9",
+              "9 / 9 / 17 / 17",
+              "9 / 17 / 17 / 25",
+              "17 / 1 / 25 / 13",
+              "17 / 13 / 25 / 25",
+            ],
+          ];
+
+          // 7个元素的布局
+          const layout7 = [
+            [
+              "1 / 1 / 9 / 8",
+              "1 / 8 / 17 / 17",
+              "9 / 1 / 17 / 8",
+              "1 / 17 / 9 / 25",
+              "17 / 1 / 25 / 13",
+              "9 / 17 / 17 / 25",
+              "17 / 13 / 25 / 25",
+            ],
+            [
+              "1 / 1 / 19 / 13",
+              "1 / 13 / 10 / 25",
+              "10 / 13 / 19 / 25",
+              "19 / 1 / 25 / 7",
+              "19 / 7 / 25 / 13",
+              "19 / 13/ 25 / 19",
+              "19 / 19 / 25 / 25",
+            ],
+            [
+              "1 / 1 / 9 / 13",
+              "1 / 13 / 9 / 25",
+              "9 / 1 / 17 / 13",
+              "9 / 13 / 17 / 25",
+              "17 / 1 / 25 / 9",
+              "17 / 9 / 25 / 17",
+              "17 / 17 / 25 / 25",
+            ],
+          ];
+
+          const layoutList = [
+            {
+              list: layout4,
+              name: "4个元素",
+            },
+            {
+              list: layout5,
+              name: "5个元素",
+            },
+            {
+              list: layout6,
+              name: "6个元素",
+            },
+            {
+              list: layout7,
+              name: "7个元素",
+            },
+          ];
+
+          return { layoutList };
+        },
+      });
+      app.mount("#app");
+    </script>
+
+    <style>
+      [v-cloak] {
+        display: none;
+      }
+      .title {
+        padding: 20px;
+        color: #333;
+      }
+      /* grid-area: <row-start> / <column-start> / <row-end> / <column-end> */
+      .container {
+        display: inline-grid;
+        vertical-align: top;
+        margin: 10px;
+        width: 200px;
+        height: 200px;
+        grid-template-columns: repeat(24, 1fr);
+        grid-template-rows: repeat(24, 1fr);
+        gap: 4px;
+      }
+
+      .container .item {
+        border: 1px solid #ccc;
+        height: 100%;
+        border-radius: 4px;
+        width: 100%;
+        cursor: pointer;
+      }
+
+      .container .item:hover {
+        background: #f0f2f5;
+      }
+    </style>
+  </body>
+</html>
