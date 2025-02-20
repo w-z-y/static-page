@@ -1,61 +1,22 @@
 <template>
   <div id="app">
-    <EditorContent v-model="defaultContent" />
-    <!-- <div>
+    <MyEditor v-model="defaultContent" />
       {{ defaultContent }}
-    </div> -->
   </div>
 </template>
 
 <script>
-import EditorContent from './components/EditorContent.vue'
+import MyEditor from './components/MyEditor.vue'
 
 export default {
   name: 'App',
   components: {
-    EditorContent
+    MyEditor
   },
   data() {
     return {
       defaultContent: `
-        <p>I'm running Tiptap with Vue.js. 🎉</p>
-        <img src="https://placehold.co/200x100" />
-        <h3>
-          Have you seen our tables? They are amazing!
-        </h3>
-        <ul>
-          <li>Tables with rows, cells and headers (optional)</li>
-          <li>Support for <code>colgroup</code> and <code>rowspan</code></li>
-          <li>And even resizable columns (optional)</li>
-        </ul>
-        <p>
-          Here is an example:
-        </p>
-        <table>
-          <tbody>
-            <tr>
-              <th>Name</th>
-              <th colspan="3">Description</th>
-            </tr>
-            <tr>
-              <td>Cyndi Lauper</td>
-              <td>Singer</td>
-              <td>Songwriter</td>
-              <td>Actress</td>
-            </tr>
-            <tr>
-              <td>Marie Curie</td>
-              <td>Scientist</td>
-              <td>Chemist</td>
-              <td>Physicist</td>
-            </tr>
-            <tr>
-              <td>Indira Gandhi</td>
-              <td>Prime minister</td>
-              <td colspan="2">Politician</td>
-            </tr>
-          </tbody>
-        </table>
+       <p>I'm running Tiptap with Vue.js. 🎉</p><img src="https://placehold.co/200x100"><h3>Have you seen our tables? They are amazing!</h3><ul><li><p>Tables with rows, cells and headers (optional)</p></li><li><p>Support for <code>colgroup</code> and <code>rowspan</code></p></li><li><p>And even resizable columns (optional)</p><pre><code class="language-js">const a = 1</code></pre></li></ul><p>Here is an example:</p><table style="min-width: 100px"><colgroup><col style="min-width: 25px"><col style="min-width: 25px"><col style="min-width: 25px"><col style="min-width: 25px"></colgroup><tbody><tr><th colspan="1" rowspan="1"><p>Name</p></th><th colspan="3" rowspan="1"><p>Description</p></th></tr><tr><td colspan="1" rowspan="1" style="background-color: null"><p>Cyndi Lauper</p></td><td colspan="1" rowspan="1" style="background-color: null"><p>Singer</p></td><td colspan="1" rowspan="1" style="background-color: null"><p>Songwriter</p></td><td colspan="1" rowspan="1" style="background-color: null"><p>Actress</p></td></tr><tr><td colspan="1" rowspan="1" style="background-color: null"><p>Marie Curie</p></td><td colspan="1" rowspan="1" style="background-color: null"><p>Scientist</p></td><td colspan="1" rowspan="1" style="background-color: null"><p>Chemist</p></td><td colspan="1" rowspan="1" style="background-color: null"><p>Physicist</p></td></tr><tr><td colspan="1" rowspan="1" style="background-color: null"><p>Indira Gandhi</p></td><td colspan="1" rowspan="1" style="background-color: null"><p>Prime minister</p></td><td colspan="2" rowspan="1" style="background-color: null"><p>Politician</p></td></tr></tbody></table>
       `
     }
   }

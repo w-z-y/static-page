@@ -115,12 +115,28 @@
         </button>
       </div>
     </div>
+
+
+    <bubble-menu class="bubble-menu" :tippy-options="{ duration: 100 }" :editor="editor">
+      <button @click="editor.chain().focus().toggleBold().run()" :class="{ 'is-active': editor.isActive('bold') }">
+        Bold
+      </button>
+      <button @click="editor.chain().focus().toggleItalic().run()" :class="{ 'is-active': editor.isActive('italic') }">
+        Italic
+      </button>
+      <button @click="editor.chain().focus().toggleStrike().run()" :class="{ 'is-active': editor.isActive('strike') }">
+        Strike
+      </button>
+    </bubble-menu>
+
     <editor-content :editor="editor" />
   </div>
 </template>
 
 <script>
 import Table from '@tiptap/extension-table'
+// import BubbleMenu from '@tiptap/extension-bubble-menu'
+// import BubbleMenu from '@tiptap/extension-bubble-menu'
 import TableCell from '@tiptap/extension-table-cell'
 import TableHeader from '@tiptap/extension-table-header'
 import TableRow from '@tiptap/extension-table-row'
@@ -128,7 +144,7 @@ import Highlight from '@tiptap/extension-highlight'
 import TextAlign from '@tiptap/extension-text-align'
 import Image from '@tiptap/extension-image'
 import StarterKit from '@tiptap/starter-kit'
-import { Editor, EditorContent } from '@tiptap/vue-2'
+import { BubbleMenu, Editor, EditorContent } from '@tiptap/vue-2'
 
 const CustomTableCell = TableCell.extend({
   addAttributes() {
@@ -160,6 +176,7 @@ export default {
   },
   components: {
     EditorContent,
+    BubbleMenu
   },
   data() {
     return {
@@ -223,6 +240,10 @@ export default {
         TextAlign.configure({
           types: ['heading', 'paragraph'],
         }),
+
+        // BubbleMenu.configure({
+        //   element: document.querySelector('.menu'),
+        // })
       ],
       // 编辑状态(用于禁用)
       editable: true,
@@ -340,66 +361,36 @@ export default {
     border-top: 1px solid var(--gray-2);
     margin: 2rem 0;
   }
+}
 
-  /* Table-specific styling */
-  table {
-    border-collapse: collapse;
-    margin: 0;
-    overflow: hidden;
-    table-layout: fixed;
-    width: 100%;
+/* Bubble menu */
+.bubble-menu {
+  background-color: var(--white);
+  border: 1px solid var(--gray-1);
+  border-radius: 0.7rem;
+  box-shadow: var(--shadow);
+  display: flex;
+  padding: 0.2rem;
 
-    td,
-    th {
-      border: 1px solid var(--gray-3);
-      box-sizing: border-box;
-      min-width: 1em;
-      padding: 6px 8px;
-      position: relative;
-      vertical-align: top;
+  button {
+    background-color: unset;
 
-      >* {
-        margin-bottom: 0;
+    &:hover {
+      background-color: var(--gray-3);
+    }
+
+    &.is-active {
+      background-color: var(--purple);
+
+      &:hover {
+        background-color: var(--purple-contrast);
       }
     }
-
-    th {
-      background-color: var(--gray-1);
-      font-weight: bold;
-      text-align: left;
-    }
-
-    .selectedCell:after {
-      background: var(--gray-2);
-      content: "";
-      left: 0;
-      right: 0;
-      top: 0;
-      bottom: 0;
-      pointer-events: none;
-      position: absolute;
-      z-index: 2;
-    }
-
-    .column-resize-handle {
-      background-color: var(--purple);
-      bottom: -2px;
-      pointer-events: none;
-      position: absolute;
-      right: -2px;
-      top: 0;
-      width: 4px;
-    }
   }
+}
 
-  .tableWrapper {
-    margin: 1.5rem 0;
-    overflow-x: auto;
-  }
 
-  &.resize-cursor {
-    cursor: ew-resize;
-    cursor: col-resize;
-  }
+.bubble-menu {
+  visibility: visible !important;
 }
 </style>
