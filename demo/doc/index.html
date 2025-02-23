@@ -1,0 +1,49 @@
+<!-- Start of Selection -->
+<!DOCTYPE html>
+<html lang="zh">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Word文件预览</title>
+    <style>
+      #preview {
+        border: 1px solid #ccc;
+        padding: 10px;
+        margin-top: 20px;
+        height: 500px;
+        overflow: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <input type="file" id="fileInput" accept=".docx" />
+    <div id="style"></div>
+    <div id="preview"></div>
+    <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/docx-preview@0.1.8/dist/docx-preview.min.js"></script>
+    <script>
+      const option = {
+        breakPages: true, // 禁用分页符
+      };
+      document
+        .getElementById("fileInput")
+        .addEventListener("change", function (event) {
+          const file = event.target.files[0];
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+              const arrayBuffer = e.target.result;
+              const previewDiv = document.getElementById("preview");
+              const styleDiv = document.getElementById("style");
+
+              docx
+                .renderAsync(arrayBuffer, previewDiv)
+                .then((x) => console.log("docx: finished"));
+            };
+            reader.readAsArrayBuffer(file);
+          }
+        });
+    </script>
+  </body>
+</html>
+<!-- End of Selection -->
