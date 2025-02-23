@@ -1,0 +1,55 @@
+<!-- Start of Selection -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PDF Preview</title>
+
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.js"></script> <!-- 修改为pdf.min.js -->
+  <style>
+    #pdf-canvas {
+      border: 1px solid black;
+      width: 100%;
+      height: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>PDF 预览</h1>
+  <canvas id="pdf-canvas"></canvas>
+  <script>
+    const url = '1.pdf'; // 替换为你的PDF文件路径
+
+    const loadingTask = pdfjsLib.getDocument(url);
+    loadingTask.promise.then(pdf => {
+      console.log('PDF loaded');
+
+      // 获取第一页
+      pdf.getPage(1).then(page => {
+        console.log('Page loaded');
+
+        const scale = 1.5;
+        const viewport = page.getViewport({ scale: scale });
+
+        // 准备canvas元素
+        const canvas = document.getElementById('pdf-canvas');
+        const context = canvas.getContext('2d');
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+
+        // 渲染PDF页面到canvas
+        const renderContext = {
+          canvasContext: context,
+          viewport: viewport
+        };
+        page.render(renderContext);
+      });
+    }, reason => {
+      console.error(reason);
+    });
+  </script>
+</body>
+</html>
+<!-- End of Selection -->
