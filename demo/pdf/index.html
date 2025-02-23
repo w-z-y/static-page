@@ -1,55 +1,89 @@
-<!-- Start of Selection -->
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PDF Preview</title>
+<html lang="zh">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>文档</title>
+    <style>
+      /* CSS初始化 */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        height: 100%;
+        overflow: hidden;
+      }
+      iframe {
+        border: none;
+      }
+    </style>
+  </head>
+  <body>
+    <iframe width="100%" height="100%" id="pdf"></iframe>
+    <script>
+      function isModernBrowser() {
+        const userAgent = navigator.userAgent;
+        const isChrome =
+          /Chrome/.test(userAgent) && !/Edge|Edg/.test(userAgent);
+        const isFirefox = /Firefox/.test(userAgent);
+        const isSafari = /Safari/.test(userAgent) && !/Chrome/.test(userAgent);
+        const isEdge = /Edg/.test(userAgent);
+        const isOpera = /OPR/.test(userAgent);
+
+        return isChrome || isFirefox || isSafari || isEdge || isOpera;
+      }
+
+      const iframeSelector = document.querySelector("iframe#pdf");
+
+      let pdfDistUrl = "";
+      if (isModernBrowser()) {
+        pdfDistUrl = `./pdfjs-4.10.38-dist/web/viewer.html`;
+      } else {
+        pdfDistUrl = `./pdfjs-4.10.38-legacy-dist/web/viewer.html`;
+      }
+
+      const filePath = "../../demo.pdf";
+      iframeSelector.src = `${pdfDistUrl}?file=${filePath}`;
+
+      iframeSelector.onload = () => {
+        const iframeDocument = iframeSelector.contentDocument;
+        // 修改 iframe 中的样式
+        const style = document.createElement("style");
+
+        // 暗黑主题
+        style.textContent = `
+          :root {
+          --sidebar-width: 200px;
+          --body-bg-color: #525659; /* 背景色 */
+          --thumbnail-selected-color: #8ab4f8; /* 缩略图选中框颜色 */
 
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.10.38/pdf.min.js"></script> <!-- 修改为pdf.min.js -->
-  <style>
-    #pdf-canvas {
-      border: 1px solid black;
-      width: 100%;
-      height: auto;
-    }
-  </style>
-</head>
-<body>
-  <h1>PDF 预览</h1>
-  <canvas id="pdf-canvas"></canvas>
-  <script>
-    const url = '1.pdf'; // 替换为你的PDF文件路径
+          --main-color: #fff;
+          --field-color: #fff;
+          --toolbar-icon-bg-color: #fff;
+          --toolbar-icon-hover-bg-color: #fff;
+          --toggled-btn-color: #fff;
+          --doorhanger-hover-color: #fff;
 
-    const loadingTask = pdfjsLib.getDocument(url);
-    loadingTask.promise.then(pdf => {
-      console.log('PDF loaded');
+          --sidebar-toolbar-bg-color: #323639;
+          --toolbar-bg-color: #323639;
 
-      // 获取第一页
-      pdf.getPage(1).then(page => {
-        console.log('Page loaded');
+          --toolbar-border-color: #000;
 
-        const scale = 1.5;
-        const viewport = page.getViewport({ scale: scale });
+          --field-bg-color: #191b1c;
+          --dropdown-btn-bg-color: #191b1c;
+          --button-hover-color: #191b1c;
+          --doorhanger-hover-bg-color:#5f6368;
+          --doorhanger-bg-color: #202124;
 
-        // 准备canvas元素
-        const canvas = document.getElementById('pdf-canvas');
-        const context = canvas.getContext('2d');
-        canvas.height = viewport.height;
-        canvas.width = viewport.width;
-
-        // 渲染PDF页面到canvas
-        const renderContext = {
-          canvasContext: context,
-          viewport: viewport
-        };
-        page.render(renderContext);
-      });
-    }, reason => {
-      console.error(reason);
-    });
-  </script>
-</body>
+          --doorhanger-separator-color: #37383a;
+          }
+          `;
+        iframeDocument.head.appendChild(style);
+      };
+    </script>
+  </body>
 </html>
-<!-- End of Selection -->
