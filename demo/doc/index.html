@@ -7,11 +7,11 @@
     <title>Word文件预览</title>
     <style>
       #preview {
-        border: 1px solid #ccc;
+        /* border: 1px solid #ccc;
         padding: 10px;
         margin-top: 20px;
-        height: 500px;
-        overflow: auto;
+        height: 800px;
+        overflow: auto; */
       }
     </style>
   </head>
@@ -20,10 +20,26 @@
     <div id="style"></div>
     <div id="preview"></div>
     <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/docx-preview@0.1.8/dist/docx-preview.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/docx-preview@0.1.6/dist/docx-preview.min.js"></script>
     <script>
       const option = {
-        breakPages: true, // 禁用分页符
+        className: "docx", //class name/prefix for default and document style classes
+        inWrapper: true, //enables rendering of wrapper around document content
+        ignoreWidth: false, //disables rendering width of page
+        ignoreHeight: false, //disables rendering height of page
+        ignoreFonts: false, //disables fonts rendering
+        breakPages: true, //enables page breaking on page breaks
+        ignoreLastRenderedPageBreak: true, //disables page breaking on lastRenderedPageBreak elements
+        experimental: false, //enables experimental features (tab stops calculation)
+        trimXmlDeclaration: true, //if true, xml declaration will be removed from xml documents before parsing
+        useBase64URL: false, //if true, images, fonts, etc. will be converted to base 64 URL, otherwise URL.createObjectURL is used
+        renderChanges: false, //enables experimental rendering of document changes (inserions/deletions)
+        renderHeaders: true, //enables headers rendering
+        renderFooters: true, //enables footers rendering
+        renderFootnotes: true, //enables footnotes rendering
+        renderEndnotes: true, //enables endnotes rendering
+        renderComments: false, //enables experimental comments rendering
+        debug: false, //enables additional logging
       };
       document
         .getElementById("fileInput")
@@ -35,14 +51,23 @@
               const arrayBuffer = e.target.result;
               const previewDiv = document.getElementById("preview");
               const styleDiv = document.getElementById("style");
-
               docx
-                .renderAsync(arrayBuffer, previewDiv)
+                .renderAsync(arrayBuffer, previewDiv, styleDiv, option)
                 .then((x) => console.log("docx: finished"));
             };
             reader.readAsArrayBuffer(file);
           }
         });
+
+      // setTimeout(() => {
+      //   fetch("./王子杨.doc").then((res) => {
+      //     const template = res.arrayBuffer();
+      //     docx
+      //       .renderAsync(template, document.getElementById("preview"))
+      //       .then((x) => console.log("docx: finished"));
+      //     console.log("buffer: ", template);
+      //   });
+      // }, 100);
     </script>
   </body>
 </html>
