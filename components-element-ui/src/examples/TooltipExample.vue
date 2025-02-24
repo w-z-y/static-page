@@ -2,7 +2,10 @@
     <div style="width:100px;">
         <h3>一行</h3>
         <MyTooltip>
-            <span>鼠标悬停在这里查看提示鼠标悬停在这里查看提示</span>
+            <span>未超出</span>
+        </MyTooltip>
+        <MyTooltip>
+            <span>超出：鼠标悬停在这里查看提示鼠标悬停在这里查看提示</span>
         </MyTooltip>
         <h3>多行</h3>
         <MyTooltip :lines="2">

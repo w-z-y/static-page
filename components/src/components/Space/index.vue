@@ -4,6 +4,12 @@
   </div>
 </template>
 
+<script>
+export default {
+  name: "MySpace"
+}
+</script>
+
 <script setup>
 import { computed, useSlots } from "vue";
 

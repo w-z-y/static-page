@@ -1,19 +1,41 @@
 <template>
     <div>
         <h2>Resizable Table 示例</h2>
-        <ResizableTable :columns="tableColumns" :tableData="tableData" @row-click="handleRowClick" />
+        <MyResizableTable v-model="filter" :columns="tableColumns" :tableData="tableData"
+            @filter-change="handleFilterChange" @row-click="handleRowClick">
+        </MyResizableTable>
     </div>
 </template>
 
 <script>
-import ResizableTable from '../components/ResizableTable/index.vue';
+import MyResizableTable from '../components/ResizableTable/index.vue';
 
 export default {
-    components: { ResizableTable },
+    model: {
+        prop: 'filter',
+        event: 'filter-change'
+    },
+    components: { MyResizableTable },
     data() {
         return {
+            filter: {
+                name: 'option2'
+            },
             tableColumns: [
-                { label: '名称', value: 'name' },
+                {
+                    label: '名称',
+                    value: 'name',
+                    options: [
+                        {
+                            label: 'option1',
+                            value: 'option1'
+                        },
+                        {
+                            label: 'option2',
+                            value: 'option2'
+                        }
+                    ]
+                },
                 { label: '年龄', value: 'age' }
             ],
             tableData: [
@@ -25,6 +47,9 @@ export default {
     methods: {
         handleRowClick(row, index) {
             console.log('点击的行:', row, '索引:', index);
+        },
+        handleFilterChange(filter) {
+            console.log('filter', filter)
         }
     }
 }

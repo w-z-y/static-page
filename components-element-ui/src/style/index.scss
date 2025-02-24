@@ -1,0 +1,98 @@
+// Flex 布局快捷类
+.flex {
+    display: flex;
+}
+
+.flex-column {
+    display: flex;
+    flex-direction: column;
+}
+
+.flex-wrap {
+    flex-wrap: wrap;
+}
+
+.flex-nowrap {
+    flex-wrap: nowrap;
+}
+
+// 主轴对齐方式
+.flex-justify-start {
+    justify-content: flex-start;
+}
+
+.flex-justify-end {
+    justify-content: flex-end;
+}
+
+.flex-justify-center {
+    justify-content: center;
+}
+
+.flex-justify-between {
+    justify-content: space-between;
+}
+
+.flex-justify-around {
+    justify-content: space-around;
+}
+
+// 交叉轴对齐方式
+.flex-align-start {
+    align-items: flex-start;
+}
+
+.flex-align-end {
+    align-items: flex-end;
+}
+
+.flex-align-center {
+    align-items: center;
+}
+
+.flex-align-baseline {
+    align-items: baseline;
+}
+
+.flex-align-stretch {
+    align-items: stretch;
+}
+
+// 组合快捷类
+.flex-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+// flex 增长和收缩
+.flex-1 {
+    flex: 1;
+}
+
+.flex-auto {
+    flex: auto;
+}
+
+.flex-none {
+    flex: none;
+}
+
+// flex 收缩
+.flex-shrink-0 {
+    flex-shrink: 0;
+}
+
+.flex-shrink-1 {
+    flex-shrink: 1;
+}
+
+.active-bg {
+    background-color: #e4e6e6;
+}
+
+.hover-bg {
+    &:hover {
+        background-color: #e4e6e6;
+    }
+}

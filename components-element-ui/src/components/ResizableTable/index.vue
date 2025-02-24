@@ -9,8 +9,8 @@
                 <th v-for="col in columns" :key="col.value">
                     <slot name="header" :column="col">
                         <template v-if="col.options && col.options.length">
-                            <MyDropdown :value="filter[col.filterValue || col.value]" :options="col.options"
-                                @change="emitFilterChange">
+                            <MyDropdown :value="filter[col.filterValue || col.value]"
+                                @command="(value) => emitFilterChange(value, col)" :options="col.options">
                             </MyDropdown>
                         </template>
                         <template v-else>
@@ -39,10 +39,14 @@
 import MyDropdown from '../Dropdown'
 export default {
     name: "MyResizableTable",
+    model: {
+        prop: 'filter',
+        event: 'filter-change'
+    },
     props: {
         filter: {
             type: Object,
-            default: () => { }
+            default: () => { return {} }
         },
         columns: {
             type: Array,
@@ -78,8 +82,15 @@ export default {
         onRowClick(row, index) {
             this.$emit('row-click', row, index)
         },
-        emitFilterChange() {
-            this.$emit('filter-change', this.filter);
+        emitFilterChange(value, col) {
+            this.$emit('filter-change', {
+                ...this.filter,
+                [col.filterValue || col.value]: value
+            });
+            console.log('this.filter', this.filter, {
+                ...this.filter,
+                [col.filterValue || col.value]: value
+            })
         }
     },
 }
