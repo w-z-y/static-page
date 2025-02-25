@@ -1,22 +1,64 @@
 <template>
-  <el-tree v-bind="$attrs" v-on="$listeners">
-    <template slot="default" slot-scope="{data}">
-      <!-- {{ node }} -->
+  <el-tree ref="myTree" v-bind="$attrs" v-on="$listeners" :node-key="nodeKey || defaultProps.value" :props="defaultProps">
+    <template slot="default" slot-scope="{ data }">
       <div class="flex flex-1 flex-align-center flex-justify-between">
         <span class="flex flex-align-center">
-          <img :src="require('@/assets/file/folder.png')" width="20" style="margin-right: 10px">
-          {{ data.label }}
+          <slot name="node-left"></slot>
+          <!-- <img :src="require('@/assets/file/folder.png')" width="20" style="margin-right: 10px"> -->
+          <MyTooltip>{{ data[defaultProps.label] }}</MyTooltip>
         </span>
-        <span>option</span>
+        <span>
+          <slot name="node-right"></slot>
+        </span>
       </div>
     </template>
   </el-tree>
 </template>
 
 <script>
+import MyTooltip from '../Tooltip'
+import merge from '@/utils/merge'
+import { DEFAULT_PROPS } from '@/config/constant'
+
 export default {
-  name: "MyTree"
+  name: "MyTree",
+  components: { MyTooltip },
+  props: {
+    nodeKey: {
+      type: String,
+      default: ''
+    },
+    props: {
+      type: Object,
+      default: () => DEFAULT_PROPS
+    }
+  },
+  computed: {
+    defaultProps() {
+      return merge({ ...DEFAULT_PROPS }, this.props || {})
+    }
+  }
 }
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.el-tree {
+  font-weight: normal; // 节点高亮色
+
+  ::v-deep .el-tree-node {
+
+    &[aria-disabled="true"] {
+      &>.el-tree-node__content {
+        color: #ccc;
+        cursor: not-allowed;
+      }
+    }
+
+    &.is-checked {
+      &>.el-tree-node__content {
+        color: #1890ff
+      }
+    }
+  }
+}
+</style>
