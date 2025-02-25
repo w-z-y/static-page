@@ -19,13 +19,42 @@
         <MyTooltip alwaysShow content="xxx">
             <span>alwaysShow</span>
         </MyTooltip>
+        <h3>placement</h3>
+        <div>
+            <MyTooltip alwaysShow content="xxx">
+                <MyButton>alwaysShow</MyButton>
+            </MyTooltip>
+        </div>
     </div>
 </template>
 
 <script>
+import MyButton from '../components/Button/index.vue';
 import MyTooltip from '../components/Tooltip/index.vue';
 
 export default {
-    components: { MyTooltip }
+    components: { MyButton, MyTooltip },
+    data() {
+        return {
+            placementList: {
+                top: [
+                    {
+                        label: '上左',
+                        placement: 'top-start'
+                    },
+                    {
+
+                        label: '上',
+                        topRight: 'top',
+                    },
+                    {
+
+                        label: '上右',
+                        topRight: 'top-end',
+                    },
+                ]
+            }
+        }
+    }
 }
 </script>
