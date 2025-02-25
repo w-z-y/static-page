@@ -1,6 +1,6 @@
 <template>
   <el-tooltip v-bind="$attrs" v-on="$listeners" :content="content || internalContent"
-    :disabled="!isOverflow && !alwaysShow" placement="top" popper-class="custom-tooltip" effect="dark"
+    :disabled="!isOverflow && !alwaysShow" :placement="placement" popper-class="custom-tooltip" effect="dark"
     :visible-arrow="false">
     <div ref="textRef" class="tooltip-text" :style="{
       '-webkit-line-clamp': lines,
@@ -28,6 +28,10 @@ export default {
     content: {
       type: String,
       default: ''
+    },
+    placement: {
+      type: String,
+      default: 'top'
     }
   },
   data() {
