@@ -24,7 +24,7 @@ export default {
     // 对齐方式
     alignment: {
       type: String,
-      default: "center",
+      default: "start",
       validator: function (val) {
         return ["start", "end", "center", "baseline"].indexOf(val) !== -1;
       },
@@ -32,7 +32,7 @@ export default {
     // 是否自动换行
     wrap: {
       type: Boolean,
-      default: false,
+      default: true,
     },
   },
   computed: {

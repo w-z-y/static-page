@@ -3,7 +3,7 @@
         <h2>Dropdown 示例</h2>
         <MySpace>
 
-            <el-card>
+            <MyCard>
                 <h4>普通</h4>
                 <MySpace>
                     <MyDropdown :options="dropdownOptions" @change="handleDropdownChange">
@@ -13,22 +13,22 @@
                         <MyButton>悬浮 bottom-end</MyButton>
                     </MyDropdown>
                 </MySpace>
-            </el-card>
+            </MyCard>
 
-            <el-card>
+            <MyCard>
                 <h4>v-model (支持勾选回显，选中打勾)</h4>
                 <MyDropdown v-model="selectedOption.value" :options="dropdownOptions" @change="handleDropdownChange">
                 </MyDropdown>
-            </el-card>
+            </MyCard>
 
-            <el-card>
+            <MyCard>
                 <h4>Contextmenu</h4>
                 <MyDropdown :options="dropdownOptions" trigger="contextmenu" @change="handleDropdownChange">
                     <div class="container flex flex-center">
                         Right Click on here
                     </div>
                 </MyDropdown>
-            </el-card>
+            </MyCard>
         </MySpace>
     </div>
 </template>

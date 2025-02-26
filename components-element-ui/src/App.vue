@@ -40,7 +40,7 @@ export default {
 
 <style>
 #app {
-  background-color: #f0f0f0;
+  background-color: #fff;
   font-family: Arial, sans-serif;
   color: #333;
   min-height: 100vh;
@@ -56,10 +56,6 @@ export default {
   .el-menu {
     border: none;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
-  }
-
-  .view-container {
-    background-color: #333;
   }
 }
 </style>
