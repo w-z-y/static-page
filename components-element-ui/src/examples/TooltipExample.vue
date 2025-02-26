@@ -29,11 +29,7 @@
 </template>
 
 <script>
-import MyButton from '../components/Button/index.vue';
-import MyTooltip from '../components/Tooltip/index.vue';
-
 export default {
-    components: { MyButton, MyTooltip },
     data() {
         return {
             placementList: {

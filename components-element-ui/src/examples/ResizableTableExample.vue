@@ -8,14 +8,11 @@
 </template>
 
 <script>
-import MyResizableTable from '../components/ResizableTable/index.vue';
-
 export default {
     model: {
         prop: 'filter',
         event: 'filter-change'
     },
-    components: { MyResizableTable },
     data() {
         return {
             filter: {

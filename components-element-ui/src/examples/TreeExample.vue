@@ -15,10 +15,7 @@
 </template>
 
 <script>
-import MyTree from '../components/Tree/index.vue';
-
 export default {
-    components: { MyTree },
     data() {
         const data = [{
             id: 1,

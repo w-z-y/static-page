@@ -1,5 +1,6 @@
 <template>
-  <el-tree ref="myTree" v-bind="$attrs" v-on="$listeners" :node-key="nodeKey || defaultProps.value" :props="defaultProps">
+  <el-tree ref="myTree" v-bind="$attrs" v-on="$listeners" :node-key="nodeKey || defaultProps.value"
+    :props="defaultProps">
     <template slot="default" slot-scope="{ data }">
       <div class="flex flex-1 flex-align-center flex-justify-between">
         <span class="flex flex-align-center">
@@ -17,25 +18,16 @@
 
 <script>
 import MyTooltip from '../Tooltip'
-import merge from '@/utils/merge'
-import { DEFAULT_PROPS } from '@/config/constant'
+import propsMixin from '@/mixins/props'
 
 export default {
   name: "MyTree",
+  mixins: [propsMixin],
   components: { MyTooltip },
   props: {
     nodeKey: {
       type: String,
       default: ''
-    },
-    props: {
-      type: Object,
-      default: () => DEFAULT_PROPS
-    }
-  },
-  computed: {
-    defaultProps() {
-      return merge({ ...DEFAULT_PROPS }, this.props || {})
     }
   }
 }

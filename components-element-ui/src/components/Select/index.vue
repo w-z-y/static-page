@@ -1,6 +1,6 @@
 <template>
     <el-select ref="mySelect" :class="['my-select', { 'hover-bg': type === 'text' }]" v-bind="$attrs"
-        :multiple="multiple" :popper-append-to-body="false" clearable collapse-tags v-model="selectedValue"
+        :multiple="multiple" :popper-append-to-body="false" clearable collapse-tags v-model="internalValue"
         @change="handleChangeValue" @visible-change="handleVisibleChange">
         <template v-if="type === 'tree'">
             <el-option v-show="false" :label="selectedNode[defaultProps.label]"
@@ -23,16 +23,14 @@
 <script>
 import MyTooltip from '../Tooltip'
 import MyTree from '../Tree'
-import merge from '@/utils/merge'
-import { DEFAULT_PROPS } from '@/config/constant'
+
+import propsMixin from '@/mixins/props'
+import modelMixin from '@/mixins/model'
 export default {
     name: 'MySelect',
+    mixins: [propsMixin, modelMixin],
     components: { MyTooltip, MyTree },
     props: {
-        value: {
-            type: [String, Number, Array/* multiple 为 true时传入数组 */],
-            default: ''
-        },
         options: {
             type: Array,
             required: true
@@ -44,23 +42,18 @@ export default {
                 return ['default', 'text', 'tree'].includes(value)
             },
         },
-        props: {
-            type: Object,
-            default: () => DEFAULT_PROPS
-        },
         multiple: {
             type: Boolean,
             default: false
         }
     },
     watch: {
-        selectedValue: {
+        internalValue: {
             handler() {
                 this.$nextTick(() => {
                     if (this.isTree && this.value.length) {
                         const myTreeRef = this.$refs.tree.$refs.myTree
                         this.selectedNode = myTreeRef.getNode(this.value)?.data
-                        console.log('-------', this.selectedNode)
                         if (!this.selectedNode) return
                         this.$refs.tree.$refs.myTree.setCheckedKeys([this.selectedNode[this.defaultProps.value]])
                     }
@@ -70,24 +63,12 @@ export default {
         }
     },
     computed: {
-        selectedValue: {
-            get() {
-                return this.value;
-            },
-            set(value) {
-                this.$emit('input', value);
-            }
-        },
         isTree() {
             return this.type === 'tree'
-        },
-        defaultProps() {
-            return merge({ ...DEFAULT_PROPS }, this.props || {})
         }
     },
     data() {
         return {
-            internalValue: null,
             defaultCheckedKeys: [],
             selectedNode: {}
         }

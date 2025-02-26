@@ -5,14 +5,7 @@
 </template>
 
 <script>
-import MySpace from '../components/Space'
-import MyButton from '../components/Button'
 export default {
-    components: {
-        MySpace,
-        MyButton
-    }
-
 }
 </script>
 

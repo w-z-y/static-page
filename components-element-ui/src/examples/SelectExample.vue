@@ -15,18 +15,24 @@
 </template>
 
 <script>
-import MySelect from '../components/Select/index.vue';
-
 export default {
-    components: { MySelect, },
     data() {
         return {
+            /* 
+            
+            */
             value: "option1",
             options: [
                 { label: '选项1', value: 'option1' },
                 { label: '选项2选项2选项2选项2选项2选项2选项2选项2选项2选项2选项2选项2选项2选项2', value: 'option2', showLabel: '选项showLabel' },
                 { label: '选项3', value: 'option3' }
             ],
+            /* 
+            
+            
+            
+            */
+            value2: "option1",
             options2: [
                 {
                     label: '选项1', value: 'option1', disabled: true, children: [{

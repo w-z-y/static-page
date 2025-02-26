@@ -14,17 +14,17 @@
             @contextmenu.native.prevent>
             <slot name="dropdown">
                 <el-dropdown-item class="option-item" :divided="option.divided" v-for="option in optionsFilter"
-                    :key="option.value" :disabled="option.disabled" :command="option">
+                    :key="option[defaultProps.value]" :disabled="option.disabled" :command="option">
                     <div class="flex flex-justify-between flex-align-center">
                         <span>
                             <i :class="option.icon"></i>
-                            {{ option.label }}
+                            {{ option[defaultProps.label] }}
                         </span>
-                        <template v-if="value">
+                        <template v-if="internalValue">
                             <i class="el-icon-check" :class="[
                                 'el-icon-check',
                                 {
-                                    'visible': value === option.value
+                                    'visible': internalValue === option.value
                                 }
                             ]"></i>
                         </template>
@@ -37,19 +37,14 @@
 
 <script>
 import MyButton from '../Button'
+import propsMixin from '@/mixins/props'
+import modelMixin from '@/mixins/model'
 
 let dot = null
 export default {
     name: "MyDropdown",
-    model: {
-        prop: 'value',
-        event: 'change'
-    },
+    mixins: [propsMixin, modelMixin],
     props: {
-        value: {
-            type: [String, Number],
-            default: ''
-        },
         options: {
             type: Array,
             default: () => []
@@ -73,10 +68,10 @@ export default {
             return this.options.filter(option => option.visible !== false)
         },
         showLabel() {
-            if (!this.value) return ''
-            const findOption = this.optionsFilter.find(option => option.value === this.value)
+            if (!this.internalValue) return ''
+            const findOption = this.optionsFilter.find(option => option.value === this.internalValue)
             if (findOption) {
-                return findOption.showLabel || findOption.label
+                return findOption.showLabel || findOption[this.defaultProps.value]
             }
             return ''
         },
@@ -95,7 +90,7 @@ export default {
     },
     methods: {
         handleCommand(option) {
-            this.$emit('change', option.value) // 实现 v-model
+            this.$emit('input', option.value) // 实现 v-model
             // 扩展了option参数，方便获取内容
             this.$emit('command', option.value/*command*/, option)
         },
