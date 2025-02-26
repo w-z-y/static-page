@@ -1,6 +1,5 @@
 <template>
     <MyCalendar />
-
 </template>
 
 <script>
