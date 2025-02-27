@@ -91,12 +91,12 @@
                     :row-height="rowHeight" :max-rows="gridLayoutRows" is-draggable is-bounded is-resizable
                     :vertical-compact="false" :auto-size="false">
                     <grid-item  is-bounded v-for="item in layout" :key="item.i" :x="item.x" :y="item.y" :w="item.w" :h="item.h"
-                        :i="item.i" :class="['grid-item',{'highlight': item.i == -1}]" drag-allow-from=".vue-draggable-handle" drag-ignore-from=".no-drag" @click="handleClick(item)">
+                        :i="item.i" :class="['grid-item',{'highlight': item.i == -1}]" drag-allow-from=".vue-draggable-handle" drag-ignore-from=".no-drag" @click.native="handleClick(item)">
                         <div class="content">
                             <i class="vue-draggable-handle el-icon-rank">
                             </i>
                             <div class="no-drag">
-                             {{gridLayoutRows}} x   {{gridLayoutCols}}
+                             {{gridLayoutRows}} x {{gridLayoutCols}}
                                 <span>{{item.i}}</span>
                                 <br />
                                 <button @click="$emit('add-item', item.data)"><i class="el-icon-plus"></i> click</button>
@@ -137,8 +137,9 @@
                         }
                     }
                 },
-                handleClick() {
-
+                handleClick(data) {
+                    console.log(data)
+                    this.$emit('click', data)
                 }
             },
             mounted() {
