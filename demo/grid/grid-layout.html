@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vue Grid Layout Demo</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue-grid-layout@2.4.0/dist/vue-grid-layout.umd.min.js"></script>
+    <style>
+        .grid-layout {
+            height: 297mm;
+            width: 420mm;
+            border: 1px solid;
+            /* overflow: hidden; */
+        }
+
+        .grid-item {
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        .add-btn {
+            margin: 10px;
+            padding: 8px 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <button class="add-btn" @click="addItem">添加新节点</button>
+        {{maxRows}}x{{colNum}}
+        <grid-layout class="grid-layout" prevent-collision :margin="margin" :layout="layout" preventCollision
+            :col-num="colNum" :row-height="rowHeight" :max-rows="maxRows" is-draggable is-bounded is-resizable
+            :vertical-compact="false" :auto-size="false">
+            <grid-item @moved="movedEvent" is-bounded @resize="resizedEvent" v-for="item in layout" :key="item.i"
+                :x="item.x" :y="item.y" :w="item.w" :h="item.h" :i="item.i" class="grid-item">
+                {{ item.i }}<br />
+                x:{{item.x}}<br />
+                y:{{item.y}}<br />
+                w:{{item.w}}<br />
+                h:{{item.h}}
+            </grid-item>
+        </grid-layout>
+    </div>
+
+    <script>
+        const layout = [
+            { x: 0, y: 0, w: 1, h: 1, i: '0' },
+            { x: 4, y: 0, w: 4, h: 4, i: '1' },
+            { x: 20, y: 13, w: 4, h: 4, i: '2' },
+            { x: 0, y: 8, w: 14, h: 8, i: '3' },
+        ]
+        new Vue({
+            el: '#app',
+            data: {
+                colNum: 24,
+                rowHeight: 50, // 一行高度
+                maxRows: Infinity,
+                margin: [10, 10],
+
+                layout,
+                newCounter: layout.length,
+
+                newItem: {
+                    w: 12,
+                    h: 4
+                }
+            },
+            methods: {
+                movedEvent: function (i, newX, newY) {
+                    // 找到被移动的元素
+                },
+                resizedEvent(i, newX, newY, newHPx, newWPx) {
+                },
+
+                layoutFill() {
+                    const grid = Array.from({ length: this.maxRows }, () => Array(this.colNum).fill(false));
+                    this.layout.forEach(({ x, y, w, h }) => {
+                        for (let i = y; i < y + h; i++) {
+                            for (let j = x; j < x + w; j++) {
+                                if (i < this.maxRows && j < this.colNum) {
+                                    grid[i][j] = true;
+                                }
+                            }
+                        }
+                    });
+                    return grid;
+                },
+                // 查找最大空白区域
+                findMaxEmptyRegion(grid) {
+                    let found = false;
+                    for (let x = 0; x <= this.colNum - this.newItem.w; x++) {
+                        for (let y = 0; y < this.maxRows - this.newItem.h; y++) {
+                            let canPlace = true;
+                            for (let i = 0; i < this.newItem.h; i++) {
+                                for (let j = 0; j < this.newItem.w; j++) {
+                                    if (grid[y + i] && grid[y + i][x + j]) {
+                                        canPlace = false;
+                                        break;
+                                    }
+                                }
+                                if (!canPlace) break;
+                            }
+                            if (canPlace) {
+                                this.layout.push({ x: x, y: y, w: this.newItem.w, h: this.newItem.h, i: this.newCounter.toString() });
+                                this.newCounter++;
+                                found = true;
+                                break;
+                            }
+                        }
+                        if (found) break;
+                    }
+                    return found
+                },
+                // 查找空白区域
+                findEmptyRegion(grid) {
+                    for (let x = 0; x < this.colNum; x++) {
+                        for (let y = 0; y < this.maxRows; y++) {
+                            if (!grid[y][x]) {
+                                let width = 0;
+                                let height = 0;
+
+                                // 计算宽度
+                                while (x + width < this.colNum && !grid[y][x + width]) {
+                                    width++;
+                                }
+
+                                // 计算高度
+                                while (y + height < this.maxRows && !grid[y + height].slice(x, x + width).some(cell => cell)) {
+                                    height++;
+                                }
+
+                                // 添加新节点
+                                this.layout.push({ x: x, y: y, w: width, h: height, i: this.newCounter.toString() });
+                                this.newCounter++;
+                                return true; // 找到一个空白区域后立即返回
+                            }
+                        }
+                    }
+                    return false
+                },
+                addItem() {
+                    const grid = this.layoutFill();
+                    const foundMaxEmpty = this.findMaxEmptyRegion(grid)
+                    if (!foundMaxEmpty) {
+                        const foundEmpty = this.findEmptyRegion(grid)
+                        if (!foundEmpty) {
+                            console.warn('无法找到合适的空白位置');
+                        }
+                    }
+                }
+            },
+            mounted() {
+                this.maxRows = Math.floor((document.querySelector('.grid-layout').clientHeight) / (this.rowHeight + this.margin[1]))
+            }
+        });
+    </script>
+</body>
+
+</html>
