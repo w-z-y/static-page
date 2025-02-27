@@ -7,19 +7,12 @@
     <title>Vue Grid Layout Demo</title>
     <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue-grid-layout@2.4.0/dist/vue-grid-layout.umd.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/element-ui@2.15.6/lib/theme-chalk/index.css">
+    <script src="https://cdn.jsdelivr.net/npm/element-ui@2.15.6/lib/index.js"></script>
     <style>
-        .grid-layout {
-            height: 297mm;
-            width: 420mm;
-            border: 1px solid;
-            /* overflow: hidden; */
-        }
-
-        .grid-item {
-            background-color: #f0f0f0;
-            border: 1px solid #ccc;
-            padding: 10px;
-            box-sizing: border-box;
+        .grid-item.highlight {
+            background-color: #ffeb3b;
+            border: 1px solid #fbc02d;
         }
 
         .add-btn {
@@ -30,138 +23,209 @@
             border: none;
             cursor: pointer;
         }
+
+        .grid-layout {
+            height: 297mm;
+            width: 420mm;
+            border: 1px solid;
+        }
+
+        .grid-item {
+            background-color: #f0f0f0;
+            border: 1px solid #ccc;
+            padding: 10px;
+            touch-action: none;
+            box-sizing: border-box;
+        }
+
+        .grid-item .content {
+            font-size: 24px;
+            text-align: center;
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            margin: auto;
+            height: 100%;
+            width: 100%;
+        }
+
+        .grid-item .content .vue-draggable-handle {
+            display: none;
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            top: 0;
+            left: 0;
+            padding: 0 8px 8px 0;
+            background-origin: content-box;
+            box-sizing: border-box;
+            border-radius: 10px;
+            cursor: move;
+        }
+
+        .grid-item:hover .content .vue-draggable-handle {
+            display: block;
+        }
+
+        .grid-item .content .no-drag {
+            height: 100%;
+            width: 100%;
+        }
     </style>
 </head>
 
 <body>
     <div id="app">
-        <button class="add-btn" @click="addItem">添加新节点</button>
-        {{maxRows}}x{{colNum}}
-        <grid-layout class="grid-layout" prevent-collision :margin="margin" :layout="layout" preventCollision
-            :col-num="colNum" :row-height="rowHeight" :max-rows="maxRows" is-draggable is-bounded is-resizable
-            :vertical-compact="false" :auto-size="false">
-            <grid-item @moved="movedEvent" is-bounded @resize="resizedEvent" v-for="item in layout" :key="item.i"
-                :x="item.x" :y="item.y" :w="item.w" :h="item.h" :i="item.i" class="grid-item">
-                {{ item.i }}<br />
-                x:{{item.x}}<br />
-                y:{{item.y}}<br />
-                w:{{item.w}}<br />
-                h:{{item.h}}
-            </grid-item>
-        </grid-layout>
+        <button class="add-btn" @click="handleAddNode">添加新节点</button>
+        <grid-layout-component ref="myGridLayoutRef" :layout="layout"></grid-layout-component>
     </div>
 
     <script>
-        const layout = [
-            { x: 0, y: 0, w: 1, h: 1, i: '0' },
-            { x: 4, y: 0, w: 4, h: 4, i: '1' },
-            { x: 20, y: 13, w: 4, h: 4, i: '2' },
-            { x: 0, y: 8, w: 14, h: 8, i: '3' },
-        ]
+        Vue.component('grid-layout-component', {
+            props: ['layout'],
+            template: `
+                <grid-layout class="grid-layout"
+                    prevent-collision :margin="margin" :layout="layout" :col-num="gridLayoutCols"
+                    :row-height="rowHeight" :max-rows="gridLayoutRows" is-draggable is-bounded is-resizable
+                    :vertical-compact="false" :auto-size="false">
+                    <grid-item  is-bounded v-for="item in layout" :key="item.i" :x="item.x" :y="item.y" :w="item.w" :h="item.h"
+                        :i="item.i" :class="['grid-item',{'highlight': item.i == -1}]" drag-allow-from=".vue-draggable-handle" drag-ignore-from=".no-drag" @click="handleClick(item)">
+                        <div class="content">
+                            <i class="vue-draggable-handle el-icon-rank">
+                            </i>
+                            <div class="no-drag">
+                             {{gridLayoutRows}} x   {{gridLayoutCols}}
+                                <span>{{item.i}}</span>
+                                <br />
+                                <button @click="$emit('add-item', item.data)"><i class="el-icon-plus"></i> click</button>
+                            </div>
+                        </div>
+                    </grid-item>
+                </grid-layout>
+            `,
+            data() {
+                return {
+                    rowHeight: 0,
+                    gridLayoutCols: 24,
+                    gridLayoutRows: Infinity,
+                    margin: [10, 10],
+                    newItem: {
+                        w: 12,
+                        h: 4
+                    }
+                }
+            },
+            methods: {
+                addItem(data = {}) {
+                    const grid = layoutFill(this.layout, this.gridLayoutRows, this.gridLayoutCols);
+                    const foundMaxEmpty = findItemEmptyRegion(grid, this.gridLayoutRows, this.gridLayoutCols, this.newItem)
+                    if (foundMaxEmpty) {
+                        const { x, y, w, h } = foundMaxEmpty
+                        this.layout.push({ x, y, w, h, i: this.layout.length, data });
+                        return true
+                    } else {
+                        const foundEmpty = findEmptyRegion(grid, this.gridLayoutRows, this.gridLayoutCols,)
+                        if (foundEmpty) {
+                            const { x, y, w, h } = foundEmpty
+                            this.layout.push({ x, y, w, h, i: this.layout.length, data });
+                            return true
+                        } else {
+                            console.warn('无法找到合适的空白位置');
+                            return false
+                        }
+                    }
+                },
+                handleClick() {
+
+                }
+            },
+            mounted() {
+                this.rowHeight = Math.floor(document.querySelector('.grid-layout').clientWidth / this.gridLayoutCols) - this.margin[0]
+                this.gridLayoutRows = Math.floor((document.querySelector('.grid-layout').clientHeight) / (this.rowHeight + this.margin[1]))
+            }
+        });
+
         new Vue({
             el: '#app',
             data: {
-                colNum: 24,
-                rowHeight: 50, // 一行高度
-                maxRows: Infinity,
-                margin: [10, 10],
-
-                layout,
-                newCounter: layout.length,
-
+                layout: [
+                    { x: 0, y: 0, w: 1, h: 1, i: '0', data: {} },
+                    { x: 4, y: 0, w: 4, h: 4, i: '1', data: {} },
+                    { x: 20, y: 13, w: 4, h: 4, i: '2', data: {} },
+                    { x: 0, y: 8, w: 14, h: 8, i: '3', data: {} },
+                ],
                 newItem: {
                     w: 12,
                     h: 4
                 }
             },
             methods: {
-                movedEvent: function (i, newX, newY) {
-                    // 找到被移动的元素
-                },
-                resizedEvent(i, newX, newY, newHPx, newWPx) {
-                },
+                handleAddNode() {
+                    this.$refs.myGridLayoutRef.addItem({})
+                }
+            }
 
-                layoutFill() {
-                    const grid = Array.from({ length: this.maxRows }, () => Array(this.colNum).fill(false));
-                    this.layout.forEach(({ x, y, w, h }) => {
-                        for (let i = y; i < y + h; i++) {
-                            for (let j = x; j < x + w; j++) {
-                                if (i < this.maxRows && j < this.colNum) {
-                                    grid[i][j] = true;
-                                }
-                            }
-                        }
-                    });
-                    return grid;
-                },
-                // 查找最大空白区域
-                findMaxEmptyRegion(grid) {
-                    let found = false;
-                    for (let x = 0; x <= this.colNum - this.newItem.w; x++) {
-                        for (let y = 0; y < this.maxRows - this.newItem.h; y++) {
-                            let canPlace = true;
-                            for (let i = 0; i < this.newItem.h; i++) {
-                                for (let j = 0; j < this.newItem.w; j++) {
-                                    if (grid[y + i] && grid[y + i][x + j]) {
-                                        canPlace = false;
-                                        break;
-                                    }
-                                }
-                                if (!canPlace) break;
-                            }
-                            if (canPlace) {
-                                this.layout.push({ x: x, y: y, w: this.newItem.w, h: this.newItem.h, i: this.newCounter.toString() });
-                                this.newCounter++;
-                                found = true;
-                                break;
-                            }
-                        }
-                        if (found) break;
-                    }
-                    return found
-                },
-                // 查找空白区域
-                findEmptyRegion(grid) {
-                    for (let x = 0; x < this.colNum; x++) {
-                        for (let y = 0; y < this.maxRows; y++) {
-                            if (!grid[y][x]) {
-                                let width = 0;
-                                let height = 0;
+        });
 
-                                // 计算宽度
-                                while (x + width < this.colNum && !grid[y][x + width]) {
-                                    width++;
-                                }
-
-                                // 计算高度
-                                while (y + height < this.maxRows && !grid[y + height].slice(x, x + width).some(cell => cell)) {
-                                    height++;
-                                }
-
-                                // 添加新节点
-                                this.layout.push({ x: x, y: y, w: width, h: height, i: this.newCounter.toString() });
-                                this.newCounter++;
-                                return true; // 找到一个空白区域后立即返回
-                            }
-                        }
-                    }
-                    return false
-                },
-                addItem() {
-                    const grid = this.layoutFill();
-                    const foundMaxEmpty = this.findMaxEmptyRegion(grid)
-                    if (!foundMaxEmpty) {
-                        const foundEmpty = this.findEmptyRegion(grid)
-                        if (!foundEmpty) {
-                            console.warn('无法找到合适的空白位置');
+        function layoutFill(layout, rows, cols) {
+            const grid = Array.from({ length: rows }, () => Array(cols).fill(false));
+            layout.forEach(({ x, y, w, h }) => {
+                for (let i = y; i < y + h; i++) {
+                    for (let j = x; j < x + w; j++) {
+                        if (i < rows && j < cols) {
+                            grid[i][j] = true;
                         }
                     }
                 }
-            },
-            mounted() {
-                this.maxRows = Math.floor((document.querySelector('.grid-layout').clientHeight) / (this.rowHeight + this.margin[1]))
+            });
+            return grid;
+        }
+
+        function findItemEmptyRegion(grid, rows, cols, item) {
+            console.log(item)
+            for (let x = 0; x <= cols - item.w; x++) {
+                for (let y = 0; y < rows - item.h; y++) {
+                    let canPlace = true;
+                    let i = 0;
+                    while (i < item.h && canPlace) {
+                        let j = 0;
+                        while (j < item.w) {
+                            if (grid[y + i] && grid[y + i][x + j]) {
+                                canPlace = false;
+                                break;
+                            }
+                            j++;
+                        }
+                        i++;
+                    }
+                    if (canPlace) {
+                        return { x: x, y: y, w: item.w, h: item.h };
+                    }
+                }
             }
-        });
+            return null;
+        }
+
+        function findEmptyRegion(grid, rows, cols) {
+            for (let x = 0; x < cols; x++) {
+                for (let y = 0; y < rows; y++) {
+                    if (!grid[y][x]) {
+                        let width = 0;
+                        let height = 0;
+                        while (x + width < cols && !grid[y][x + width]) {
+                            width++;
+                        }
+                        while (y + height < rows && !grid[y + height].slice(x, x + width).some(cell => cell)) {
+                            height++;
+                        }
+                        return { x, y, w: width, h: height };
+                    }
+                }
+            }
+            return null;
+        }
     </script>
 </body>
 

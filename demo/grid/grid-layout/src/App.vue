@@ -1,7 +1,6 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <HelloWorld :layout="layout" />
   </div>
 </template>
 
@@ -12,6 +11,16 @@ export default {
   name: 'App',
   components: {
     HelloWorld
+  },
+  data() {
+    return {
+      layout: [
+        { x: 0, y: 0, w: 1, h: 1, i: '0', data: {} },
+        { x: 4, y: 0, w: 4, h: 4, i: '1', data: {} },
+        { x: 20, y: 13, w: 4, h: 4, i: '2', data: {} },
+        { x: 0, y: 8, w: 14, h: 8, i: '3', data: {} },
+      ],
+    }
   }
 }
 </script>
