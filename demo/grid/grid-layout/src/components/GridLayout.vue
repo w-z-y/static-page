@@ -5,12 +5,12 @@
     <grid-item is-bounded v-for="item in layout" :key="item.i" :x="item.x" :y="item.y" :w="item.w" :h="item.h"
       :i="item.i" :class="['grid-item', { 'highlight': item.i == -1 }]" drag-allow-from=".vue-draggable-handle"
       drag-ignore-from=".no-drag" @click.native="handleClick(item)">
+      <!-- {{ gridLayoutCols }} x {{ gridLayoutRows }} -->
       <div class="content">
         <i class="vue-draggable-handle el-icon-rank">
         </i>
         <div class="no-drag">
-          <slot :data="item"></slot>
-          {{ gridLayoutCols }} x {{ gridLayoutRows }}
+          <slot :data="item.data"></slot>
         </div>
       </div>
     </grid-item>
