@@ -29,10 +29,13 @@
             <el-input v-model="formData.content" type="textarea"></el-input>
           </el-form-item>
           <el-form-item>
-            <el-button @click="handleAddNode" type="primary">添加节点</el-button>
+            <MyInsertTableSelect @select="handleInsertTableSelect">
+              <el-button type="primary">添加节点</el-button>
+            </MyInsertTableSelect>
             <el-button @click="printPDF" type="success">打印PDF</el-button>
           </el-form-item>
         </el-form>
+        <MyInsertTableSelect />
       </div>
       <div class="right">
         A3
@@ -59,13 +62,15 @@
 </template>
 
 <script>
-import MyGridLayout from './components/GridLayout.vue'
+import MyGridLayout from './components/GridLayout'
+import MyInsertTableSelect from './components/InsertTableSelect'
 import html2pdf from 'html2pdf.js'
 
 export default {
   name: 'App',
   components: {
-    MyGridLayout
+    MyGridLayout,
+    MyInsertTableSelect
   },
   data() {
     return {
@@ -75,9 +80,6 @@ export default {
       },
 
       formData: {
-        maxNum: 12,
-        w: 12,
-        h: 4,
         title: "这是一个标题",
         content: "这是一段文字内容..."
       },
@@ -87,6 +89,10 @@ export default {
     }
   },
   methods: {
+    handleInsertTableSelect(data) {
+      console.log(data, { ...this.formData, w: data.w, h: data.h })
+      // this.handleAddNode({ ...this.formData, w: data.w, h: data.h })
+    },
     handleAddNode() {
       if (this.layout.length < this.formData.maxNum) {
         this.$refs.myGridLayoutRef.addItem({ ...this.formData })
@@ -160,7 +166,7 @@ body,
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
 
   /* 包含padding和border */
-  overflow: hidden;
+  /* overflow: hidden; */
   /* 防止内容溢出 */
 }
 </style>

@@ -1,0 +1,64 @@
+.grid-layout {
+    display: grid;
+
+    .grid-item {
+        background-color: #fff;
+        border: 1px solid #ccc;
+        padding: 10px;
+        touch-action: none;
+        box-sizing: border-box;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+
+        // 顶部操作按钮
+        .left-move-icon,
+        .right-more-icon {
+            opacity: 0;
+            position: absolute;
+            height: 20px;
+            top: 2px;
+            z-index: 999;
+        }
+
+        &:hover {
+
+            .left-move-icon,
+            .right-more-icon {
+                opacity: 1;
+            }
+        }
+
+        // 左
+        .left-move-icon {
+            width: 20px;
+            left: 2px;
+            cursor: move;
+        }
+
+        // 右
+        .right-more-icon {
+            width: max-content;
+            display: flex;
+            right: 2px;
+            gap: 4px;
+
+            i {
+                cursor: pointer;
+            }
+
+            // 删除
+            .delete-icon {
+                color: red;
+            }
+
+        }
+
+    }
+
+    // placeholder
+    :deep() .vue-grid-item.vue-grid-placeholder {
+        background: #409eff;
+        opacity: 0.2;
+    }
+}

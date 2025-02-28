@@ -1,31 +1,96 @@
-<!-- Start of Selection -->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>插入表格</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
     <style>
-        body {
-            margin: 0;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+        #table-popup {
+            position: absolute;
+            border: 1px solid #ccc;
+            background-color: white;
+            z-index: 1000;
         }
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(10, 1fr); /* 10列 */
-            grid-template-rows: repeat(10, 1fr); /* 10行 */
-            width: 100vmin; /* 适应视口最小边 */
-            height: 100vmin; /* 适应视口最小边 */
-            background: radial-gradient(circle at 0 0, #333 1px, transparent 1px); /* 修改起始位置为左上角0 0 */
-            background-size: 10% 10%; /* 每个点的大小 */
+        .table-cell {
+            width: 16px;
+            height: 16px;
+            border: 1px solid #000;
+            display: inline-block;
+            text-align: center;
+            line-height: 30px;
+            cursor: pointer;
+        }
+        .table-cell:hover {
+            background-color: #f0f0f0;
         }
     </style>
 </head>
 <body>
-    <div class="grid"></div>
+    <div id="app">
+        <table-selector></table-selector>
+    </div>
+
+    <script>
+        Vue.component('table-selector', {
+            template: `
+                <div>
+                    <button @click="togglePopup" ref="button">插入表格</button>
+                    <div id="table-popup" v-show="showPopup" :style="popupStyle">
+                        <template v-for="i in 10">
+                            <div v-for="j in 10" :key="i + '-' + j"
+                                class="table-cell"
+                                @click="selectCell(i, j)">
+                            </div>
+                            <br>
+                        </template>
+                    </div>
+                </div>
+            `,
+            data() {
+                return {
+                    showPopup: false,
+                    popupStyle: {
+                        left: '0px',
+                        top: '0px'
+                    }
+                }
+            },
+            methods: {
+                togglePopup() {
+                    this.showPopup = !this.showPopup;
+                    if(this.showPopup) {
+                        this.$nextTick(() => {
+                            const rect = this.$refs.button.getBoundingClientRect();
+                            this.popupStyle.left = `${rect.left}px`;
+                            this.popupStyle.top = `${rect.bottom}px`;
+                        });
+                    }
+                },
+                selectCell(i, j) {
+                    console.log(`选中单元格: ${i}, ${j}`);
+                    this.showPopup = false;
+                },
+                handleClickOutside(event) {
+                    const popup = document.getElementById('table-popup');
+                    if (this.showPopup && 
+                        !popup.contains(event.target) && 
+                        event.target !== this.$refs.button) {
+                        this.showPopup = false;
+                    }
+                }
+            },
+            mounted() {
+                document.addEventListener('click', this.handleClickOutside);
+            },
+            beforeDestroy() {
+                document.removeEventListener('click', this.handleClickOutside);
+            }
+        });
+
+        new Vue({
+            el: '#app'
+        });
+    </script>
 </body>
 </html>
-<!-- End of Selection -->
