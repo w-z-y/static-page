@@ -1,17 +1,15 @@
 <template>
-  <grid-layout class="grid-layout" prevent-collision :margin="margin" :layout="layout" :col-num="gridLayoutCols"
-    :row-height="rowHeight" :max-rows="gridLayoutRows" is-draggable is-bounded is-resizable :vertical-compact="false"
-    :auto-size="false">
+  <grid-layout class="grid-layout" :use-css-transforms="false" prevent-collision :margin="margin" :layout="layout"
+    :col-num="colNum" :row-height="rowHeight" :max-rows="rowNum" is-draggable is-bounded is-resizable
+    :vertical-compact="false" :auto-size="false">
     <grid-item is-bounded v-for="item in layout" :key="item.i" :x="item.x" :y="item.y" :w="item.w" :h="item.h"
       :i="item.i" :class="['grid-item', { 'highlight': item.i == -1 }]" drag-allow-from=".vue-draggable-handle"
       drag-ignore-from=".no-drag" @click.native="handleClick(item)">
-      <!-- {{ gridLayoutCols }} x {{ gridLayoutRows }} -->
-      <div class="content">
-        <i class="vue-draggable-handle el-icon-rank">
-        </i>
-        <div class="no-drag">
-          <slot :data="item.data"></slot>
-        </div>
+      <i class="vue-draggable-handle el-icon-rank">
+      </i>
+      <div>
+        1111
+        <el-button>click</el-button>
       </div>
     </grid-item>
   </grid-layout>
@@ -29,7 +27,11 @@ export default {
     layout: {
       type: Array,
       defualt: () => []
-    }
+    },
+    colNum: {
+      type: Number,
+      default: 24
+    },
   },
   components: {
     'grid-layout': GridLayout,
@@ -38,33 +40,25 @@ export default {
   data() {
     return {
       rowHeight: 0,
-      gridLayoutCols: 24,
-      gridLayoutRows: Infinity,
+      rowNum: Infinity,
       margin: [10, 10],
-    }
-  },
-  computed: {
-    newItem() {
-      return {
-        w: this.gridLayoutCols / 2,
-        h: this.gridLayoutCols / 6
-      }
     }
   },
   methods: {
     addItem(data = {}) {
-      const grid = layoutFill(this.layout, this.gridLayoutRows, this.gridLayoutCols);
-      const foundMaxEmpty = findItemEmptyRegion(grid, this.gridLayoutRows, this.gridLayoutCols, this.newItem)
+      const { w = 1, h = 1 } = data
+      const grid = layoutFill(this.layout, this.rowNum, this.colNum);
+      const foundMaxEmpty = findItemEmptyRegion(grid, this.rowNum, this.colNum, { w, h })
       if (foundMaxEmpty) {
         const { x, y, w, h } = foundMaxEmpty
         this.$emit('change', [...this.layout, { x, y, w: data.w || w, h: data.h || h, i: this.layout.length, data }])
         // this.layout.push({ x, y, w, h, i: this.layout.length, data });
         return true
       } else {
-        const foundEmpty = findEmptyRegion(grid, this.gridLayoutRows, this.gridLayoutCols,)
+        const foundEmpty = findEmptyRegion(grid, this.rowNum, this.colNum,)
         if (foundEmpty) {
           const { x, y, w, h } = foundEmpty
-          this.$emit('change', [...this.layout, { x, y, w: data.w || w, h: data.h || h, i: this.layout.length, data }])
+          this.$emit('change', [...this.layout, { x, y, w, h, i: this.layout.length, data }])
           // this.layout.push({ x, y, w, h, i: this.layout.length, data });
           return true
         } else {
@@ -74,13 +68,12 @@ export default {
       }
     },
     handleClick(data) {
-      console.log(data)
-      this.$emit('click', data)
+      this.$emit('item-click', data)
     }
   },
   mounted() {
-    this.rowHeight = Math.floor(document.querySelector('.grid-layout').clientWidth / this.gridLayoutCols) - this.margin[0]
-    this.gridLayoutRows = Math.floor((document.querySelector('.grid-layout').clientHeight) / (this.rowHeight + this.margin[1]))
+    this.rowHeight = Math.floor(document.querySelector('.grid-layout').clientWidth / this.colNum) - this.margin[0]
+    this.rowNum = Math.floor((document.querySelector('.grid-layout').clientHeight) / (this.rowHeight + this.margin[1]))
   }
 }
 
@@ -99,7 +92,6 @@ function layoutFill(layout, rows, cols) {
 }
 
 function findItemEmptyRegion(grid, rows, cols, item) {
-  console.log(item)
   for (let x = 0; x <= cols - item.w; x++) {
     for (let y = 0; y < rows - item.h; y++) {
       let canPlace = true;
@@ -146,27 +138,30 @@ function findEmptyRegion(grid, rows, cols) {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
-// .grid-layout{
-// }
+.grid-layout {
+  display: grid;
+}
+
 .grid-item {
   background-color: #f0f0f0;
   border: 1px solid #ccc;
   padding: 10px;
   touch-action: none;
   box-sizing: border-box;
+  overflow: hidden;
 }
 
 .grid-item .content {
-  font-size: 24px;
-  text-align: center;
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  margin: auto;
-  height: 100%;
-  width: 100%;
+  // font-size: 24px;
+  // text-align: center;
+  // position: absolute;
+  // top: 0;
+  // bottom: 0;
+  // left: 0;
+  // right: 0;
+  // margin: auto;
+  // height: 100%;
+  // width: 100%;
 }
 
 .grid-item .content .vue-draggable-handle {

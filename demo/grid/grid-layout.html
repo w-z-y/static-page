@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh">
 
 <head>
     <meta charset="UTF-8">
@@ -9,7 +9,15 @@
     <script src="https://cdn.jsdelivr.net/npm/vue-grid-layout@2.4.0/dist/vue-grid-layout.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/element-ui@2.15.6/lib/theme-chalk/index.css">
     <script src="https://cdn.jsdelivr.net/npm/element-ui@2.15.6/lib/index.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"
+        integrity="sha512-GsLlZN/3F2ErC5ifS5QtgpiJtWd43JWSuIgh7mbzZ8zBps+dvLusV+eNQATqgA/HdeKFVgA5v3S/cIrLF7QnIg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <style>
+        * {
+            padding: 0;
+            margin: 0;
+        }
+
         .grid-item.highlight {
             background-color: #ffeb3b;
             border: 1px solid #fbc02d;
@@ -25,9 +33,17 @@
         }
 
         .grid-layout {
-            height: 297mm;
+            margin: 0;
             width: 420mm;
-            border: 1px solid;
+            /* A3横向宽度 */
+            height: 297mm;
+            /* A3横向高度 */
+
+            width: 1587px;
+            height: 1122px;
+            border: 1px solid #000;
+            box-sizing: border-box;
+            overflow: hidden;
         }
 
         .grid-item {
@@ -79,14 +95,18 @@
 <body>
     <div id="app">
         <button class="add-btn" @click="handleAddNode">添加新节点</button>
-        <grid-layout-component ref="myGridLayoutRef" :layout="layout"></grid-layout-component>
+        <button class="add-btn" @click="exportPDF">导出为PDF</button>
+        <grid-layout-component ref="myGridLayoutRef" :layout="layout">
+            <el-button>click</el-button>
+
+        </grid-layout-component>
     </div>
 
     <script>
         Vue.component('grid-layout-component', {
             props: ['layout'],
             template: `
-                <grid-layout class="grid-layout"
+                <grid-layout class="grid-layout" :use-css-transforms="false"
                     prevent-collision :margin="margin" :layout="layout" :col-num="gridLayoutCols"
                     :row-height="rowHeight" :max-rows="gridLayoutRows" is-draggable is-bounded is-resizable
                     :vertical-compact="false" :auto-size="false">
@@ -99,7 +119,7 @@
                              {{gridLayoutRows}} x {{gridLayoutCols}}
                                 <span>{{item.i}}</span>
                                 <br />
-                                <button @click="$emit('add-item', item.data)"><i class="el-icon-plus"></i> click</button>
+                                <el-button @click="$emit('add-item', item.data)"><i class="el-icon-plus"></i> click</el-button>
                             </div>
                         </div>
                     </grid-item>
@@ -140,7 +160,7 @@
                 handleClick(data) {
                     console.log(data)
                     this.$emit('click', data)
-                }
+                },
             },
             mounted() {
                 this.rowHeight = Math.floor(document.querySelector('.grid-layout').clientWidth / this.gridLayoutCols) - this.margin[0]
@@ -154,7 +174,7 @@
                 layout: [
                     { x: 0, y: 0, w: 1, h: 1, i: '0', data: {} },
                     { x: 4, y: 0, w: 4, h: 4, i: '1', data: {} },
-                    { x: 20, y: 13, w: 4, h: 4, i: '2', data: {} },
+                    { x: 20, y: 12, w: 4, h: 4, i: '2', data: {} },
                     { x: 0, y: 8, w: 14, h: 8, i: '3', data: {} },
                 ],
                 newItem: {
@@ -162,12 +182,26 @@
                     h: 4
                 }
             },
+            mounted() {
+                window.exportPDF = this.exportPDF
+            },
             methods: {
                 handleAddNode() {
                     this.$refs.myGridLayoutRef.addItem({})
+                },
+
+                exportPDF() {
+                    const element = document.querySelector('.grid-layout');
+                    const opt = {
+                        margin: 0,
+                        filename: 'grid-layout.pdf',
+                        image: { type: 'jpeg', quality: 0.98 },
+                        html2canvas: { scale: 2 },
+                        jsPDF: { unit: 'mm', format: 'a3', orientation: 'landscape' }
+                    };
+                    html2pdf().from(element).set(opt).save();
                 }
             }
-
         });
 
         function layoutFill(layout, rows, cols) {
