@@ -80,6 +80,7 @@ export default {
       },
 
       formData: {
+        maxNum: 12,
         title: "这是一个标题",
         content: "这是一段文字内容..."
       },
@@ -90,12 +91,13 @@ export default {
   },
   methods: {
     handleInsertTableSelect(data) {
-      console.log(data, { ...this.formData, w: data.w, h: data.h })
-      // this.handleAddNode({ ...this.formData, w: data.w, h: data.h })
+      const { w, h } = data
+      console.log(w, h)
+      this.handleAddNode({ ...this.formData, w, h })
     },
-    handleAddNode() {
+    handleAddNode(data) {
       if (this.layout.length < this.formData.maxNum) {
-        this.$refs.myGridLayoutRef.addItem({ ...this.formData })
+        this.$refs.myGridLayoutRef.addItem(data)
       } else {
         this.$message.warning('已超出最大创建数量! 无法继续创建');
       }

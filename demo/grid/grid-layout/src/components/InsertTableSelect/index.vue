@@ -2,9 +2,10 @@
   <div>
     <el-popover placement="bottom-start" width="512" v-model="visible" :visible-arrow="false" transition="0">
       <div @mouseleave="handleMouseleave" @click="handleClick">
+        {{ hoverCell }}
         <div class="table-row" v-for="i in 8" :key="i">
           <div class="table-cell" v-for="j in 24" :key="i + '-' + j" @mouseenter="handleMouseenter(i, j)" :class="{
-            'is-active': i <= hoverCell.x && j <= hoverCell.y
+            'is-active': i <= hoverCell.y && j <= hoverCell.x
           }">
           </div>
         </div>
@@ -23,15 +24,15 @@ export default {
     return {
       visible: false,
       hoverCell: {
-        w: 0,
-        h: 0
+        x: 0,
+        y: 0
       }
     }
   },
   methods: {
     handleMouseenter(i, j) {
-      this.hoverCell.x = i
-      this.hoverCell.y = j
+      this.hoverCell.x = j
+      this.hoverCell.y = i
     },
     handleMouseleave() {
       this.hoverCell.x = 0
@@ -39,8 +40,8 @@ export default {
     },
     handleClick() {
       this.visible = false
-      const { w, h } = this.hoverCell
-      this.$emit('select', { w, h })
+      const { x, y } = this.hoverCell
+      this.$emit('select', { w: x, h: y })
     }
   }
 }

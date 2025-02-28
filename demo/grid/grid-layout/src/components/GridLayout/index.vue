@@ -56,6 +56,7 @@ export default {
     methods: {
         addItem(data = {}) {
             const { w = 1, h = 1 } = data
+            console.log(this.layout, data, w, h)
             const grid = layoutFill(this.layout, this.rowNum, this.colNum);
             const foundMaxEmpty = findItemEmptyRegion(grid, this.rowNum, this.colNum, { w, h })
             if (foundMaxEmpty) {
