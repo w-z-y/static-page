@@ -2,18 +2,31 @@
   <div id="app">
     <div class="container">
       <div class="left">
+        <h1>页面配置</h1>
+        <el-form :model="pageConfig" label-width="100px">
+          <el-form-item label="paddingX">
+            <el-input-number v-model="pageConfig.paddingX"></el-input-number>
+          </el-form-item>
+          <el-form-item label="paddingY">
+            <el-input-number v-model="pageConfig.paddingY"></el-input-number>
+          </el-form-item>
+        </el-form>
+        <h1>节点</h1>
         <el-form :model="formData" label-width="100px">
-          <el-form-item label="左右边距">
-            <el-input v-model="formData.paddingX"></el-input>
+          <el-form-item label="节点最大数量">
+            <el-input-number v-model="formData.maxNum"></el-input-number>
           </el-form-item>
-          <el-form-item label="上下边距">
-            <el-input v-model="formData.paddingY"></el-input>
+          <el-form-item label="width">
+            <el-input-number v-model="formData.w"></el-input-number>
           </el-form-item>
-          <el-form-item label="添加节点-宽">
-            <el-input v-model="formData.w"></el-input>
+          <el-form-item label="height">
+            <el-input-number v-model="formData.h"></el-input-number>
           </el-form-item>
-          <el-form-item label="添加节点-高">
-            <el-input v-model="formData.h"></el-input>
+          <el-form-item label="标题">
+            <el-input v-model="formData.title"></el-input>
+          </el-form-item>
+          <el-form-item label="内容">
+            <el-input v-model="formData.content" type="textarea"></el-input>
           </el-form-item>
           <el-form-item>
             <el-button @click="handleAddNode" type="primary">添加节点</el-button>
@@ -24,10 +37,20 @@
       <div class="right">
         A3
         <div class="a3-paper" ref="a3Paper" :style="{
-          padding: `${formData.paddingX}px ${formData.paddingY}px`
+          padding: `${pageConfig.paddingX}px ${pageConfig.paddingY}px`
         }">
           <MyGridLayout :col-num="24" style="flex:1" v-model="layout" ref="myGridLayoutRef"
             @item-click="handleItemClick">
+            <template #default="{ data }">
+              <el-form :mode="data" label-width="60px">
+                <el-form-item label="标题">
+                  <el-input v-model="data.title" placeholder="请输入标题"></el-input>
+                </el-form-item>
+                <el-form-item label="内容">
+                  <el-input v-model="data.content" type="textarea" placeholder="请输入内容"></el-input>
+                </el-form-item>
+              </el-form>
+            </template>
           </MyGridLayout>
         </div>
       </div>
@@ -46,22 +69,30 @@ export default {
   },
   data() {
     return {
-      formData: {
+      pageConfig: {
         paddingX: 94,
         paddingY: 75,
+      },
+
+      formData: {
+        maxNum: 12,
         w: 12,
-        h: 4
+        h: 4,
+        title: "这是一个标题",
+        content: "这是一段文字内容..."
       },
       layout: [
         { x: 0, y: 0, w: 12, h: 4, i: '0', data: {} },
-        { x: 0, y: 4, w: 12, h: 4, i: '1', data: {} },
-        { x: 0, y: 8, w: 12, h: 4, i: '2', data: {} },
       ],
     }
   },
   methods: {
     handleAddNode() {
-      this.$refs.myGridLayoutRef.addItem({ ...this.formData })
+      if (this.layout.length < this.formData.maxNum) {
+        this.$refs.myGridLayoutRef.addItem({ ...this.formData })
+      } else {
+        this.$message.warning('已超出最大创建数量! 无法继续创建');
+      }
     },
     handleItemClick(data) {
       console.log(data)
@@ -101,8 +132,10 @@ body,
 
 .left {
   flex-shrink: 0;
+  z-index: 1;
   width: 340px;
-  padding-right: 20px;
+  padding: 20px 20px 0 0;
+  box-shadow: 0 0 10px #ccc;
 }
 
 .right {

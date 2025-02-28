@@ -1,16 +1,19 @@
 <template>
   <grid-layout class="grid-layout" :use-css-transforms="false" prevent-collision :margin="margin" :layout="layout"
     :col-num="colNum" :row-height="rowHeight" :max-rows="rowNum" is-draggable is-bounded is-resizable
-    :vertical-compact="false" :auto-size="false">
+    :vertical-compact="false" :auto-size="false" :style="{
+      background: `radial-gradient(circle at ${margin[0] / 2}px ${margin[1] / 2}px, #333 0px, transparent 1px)`,
+      'background-size': `${rowHeight + margin[0] + 0.5}px ${rowHeight + margin[1]}px`,
+    }">
+    <!-- {{ colNum }} x {{ rowNum }} -->
     <grid-item is-bounded v-for="item in layout" :key="item.i" :x="item.x" :y="item.y" :w="item.w" :h="item.h"
       :i="item.i" :class="['grid-item', { 'highlight': item.i == -1 }]" drag-allow-from=".vue-draggable-handle"
-      drag-ignore-from=".no-drag" @click.native="handleClick(item)">
-      <i class="vue-draggable-handle el-icon-rank">
+      @click.native="handleClick(item)">
+      <i class="move-icon vue-draggable-handle el-icon-rank">
       </i>
-      <div>
-        1111
-        <el-button>click</el-button>
-      </div>
+      <i class="delete-icon el-icon-delete" @click.stop="removeItem(item.i)">
+      </i>
+      <slot :data="item.data"></slot>
     </grid-item>
   </grid-layout>
 </template>
@@ -52,23 +55,24 @@ export default {
       if (foundMaxEmpty) {
         const { x, y, w, h } = foundMaxEmpty
         this.$emit('change', [...this.layout, { x, y, w: data.w || w, h: data.h || h, i: this.layout.length, data }])
-        // this.layout.push({ x, y, w, h, i: this.layout.length, data });
         return true
       } else {
         const foundEmpty = findEmptyRegion(grid, this.rowNum, this.colNum,)
         if (foundEmpty) {
           const { x, y, w, h } = foundEmpty
           this.$emit('change', [...this.layout, { x, y, w, h, i: this.layout.length, data }])
-          // this.layout.push({ x, y, w, h, i: this.layout.length, data });
           return true
         } else {
-          console.warn('无法找到合适的空白位置');
+          this.$message.warning('无法找到合适的空白位置');
           return false
         }
       }
     },
     handleClick(data) {
       this.$emit('item-click', data)
+    },
+    removeItem(itemId) {
+      this.$emit('change', this.layout.filter(item => item.i !== itemId));
     }
   },
   mounted() {
@@ -140,50 +144,50 @@ function findEmptyRegion(grid, rows, cols) {
 <style scoped lang="scss">
 .grid-layout {
   display: grid;
+  background: radial-gradient(circle at 0 0, #333 2px, transparent 1px);
 }
 
 .grid-item {
-  background-color: #f0f0f0;
+  background-color: #fff;
   border: 1px solid #ccc;
   padding: 10px;
   touch-action: none;
   box-sizing: border-box;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
-.grid-item .content {
-  // font-size: 24px;
-  // text-align: center;
-  // position: absolute;
-  // top: 0;
-  // bottom: 0;
-  // left: 0;
-  // right: 0;
-  // margin: auto;
-  // height: 100%;
-  // width: 100%;
-}
-
-.grid-item .content .vue-draggable-handle {
+.grid-item .move-icon {
   display: none;
   position: absolute;
   width: 20px;
   height: 20px;
   top: 0;
   left: 0;
-  padding: 0 8px 8px 0;
-  background-origin: content-box;
-  box-sizing: border-box;
-  border-radius: 10px;
   cursor: move;
+  z-index: 999;
 }
 
-.grid-item:hover .content .vue-draggable-handle {
+.grid-item .delete-icon {
+  display: none;
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  top: 0;
+  right: 0;
+  cursor: pointer;
+  z-index: 999;
+  color: red;
+}
+
+.grid-item:hover .move-icon,
+.grid-item:hover .delete-icon {
   display: block;
 }
 
-.grid-item .content .no-drag {
-  height: 100%;
-  width: 100%;
+.grid-item .no-drag {
+  flex: 1;
+  overflow: auto;
 }
 </style>
