@@ -43,7 +43,8 @@ export default {
   background-color: #fff;
   font-family: Arial, sans-serif;
   color: #333;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
 
   header {
     padding: 10px;
@@ -56,6 +57,9 @@ export default {
   .el-menu {
     border: none;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+  }
+  .view-container{
+    overflow: auto;
   }
 }
 </style>

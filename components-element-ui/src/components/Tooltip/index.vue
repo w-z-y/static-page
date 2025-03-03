@@ -60,6 +60,7 @@ export default {
   width: 100%;
   white-space: normal;
   word-break: break-all;
+  line-height: normal;
 }
 </style>
 <style>

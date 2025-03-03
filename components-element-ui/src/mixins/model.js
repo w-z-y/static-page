@@ -7,7 +7,7 @@ export default {
     props: {
         /* 
             Common      String
-            MySelect    multiple: true => Array
+            MyTreeSelect    multiple: true => Array
             MyForm      Object
         */
         value: {},
@@ -18,8 +18,8 @@ export default {
                 return this.value;
             },
             set(value) {
-                this.$emit('input', value);
-            }
+                this.$emit("input", value);
+            },
         },
-    }
-}
+    },
+};
