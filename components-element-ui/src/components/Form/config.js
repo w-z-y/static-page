@@ -10,3 +10,10 @@ export const COMPONENT_MAP = {
     input: "el-input",
     "date-picker": "el-date-picker",
 };
+export const PLACEHOLDER_MAP = {
+    input: "请输入",
+    select: "请选择",
+    checkbox: "请选择",
+    radio: "请选择",
+    "date-picker": "请选择",
+};

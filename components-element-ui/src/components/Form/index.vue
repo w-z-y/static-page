@@ -1,6 +1,6 @@
 <template>
     <div class="flex flex-wrap">
-        <el-form :model="internalValue" v-bind="$attrs">
+        <el-form :model="internalValue" v-bind="$attrs" :rules="formRules">
             <el-row class="flex flex-wrap">
                 <template v-for="(option, index) in options">
                     <el-col
@@ -12,20 +12,31 @@
                         <el-form-item
                             v-model="internalValue[option.value]"
                             :label="option.label"
-                            :prop="option[option.value]"
+                            :prop="option.value"
                         >
                             <slot v-bind="option">
                                 <component
-                                    v-if="option.type"
+                                    v-if="option.type && COMPONENT_MAP[option.type]"
                                     :is="COMPONENT_MAP[option.type] || option.type"
                                     v-model="internalValue[option.value]"
-                                    v-bind="option.attrs"
+                                    v-bind="{
+                                        placeholder: getPlaceholder(option),
+                                        ...option.attrs,
+                                    }"
                                     v-on="option.listeners"
                                 />
-                                <div class="match-error" v-else-if="COMPONENT_MAP[option.type]">
-                                    需要配置[COMPONENT_MAP]的{{ option.type }}映射组件
+                                <div class="match-error" v-else-if="!option.type">
+                                    需要配置[type]属性,或使用插槽
                                 </div>
-                                <div class="match-error" v-else>需要配置[type]属性</div>
+                                <div class="match-error" v-else>
+                                    需要配置type=[{{ option.type }}]映射组件,或使用插槽
+                                </div>
+                                <!-- 
+                                    插槽使用
+                                    <template #default="option">
+                                        <div v-if="option.value === 'slot'">slot</div>
+                                    </template>
+                                -->
                             </slot>
                         </el-form-item>
                     </el-col>
@@ -51,14 +62,15 @@
 </template>
 
 <script>
-// import MyFormItem from "../FormItem";
 import propsMixin from "@/mixins/props"; /* defaultProps */
 import modelMixin from "@/mixins/model"; /* internalValue */
 
-import { COMPONENT_MAP } from "./config";
+import formRulesMixin from "./rules"; /* formRules */
+
+import { COMPONENT_MAP, PLACEHOLDER_MAP } from "./config";
 export default {
     name: "MyForm",
-    mixins: [propsMixin, modelMixin],
+    mixins: [propsMixin, modelMixin, formRulesMixin],
     props: {
         options: {
             type: Array,
@@ -80,25 +92,16 @@ export default {
             default: false,
         },
     },
-    computed: {
-        rSpanCount() {
-            const totalSpan = this.options.reduce((prev, next, index) => {
-                if (this.isExpandAll) {
-                    return prev + (next.span || 24);
-                }
-                return prev + (index < this.foldLength ? next.span || 24 : 0);
-            }, 0);
-            return 24 - (totalSpan % 24);
-        },
-    },
     data() {
         return {
             isExpandAll: false,
             COMPONENT_MAP: Object.freeze(COMPONENT_MAP),
         };
     },
-    created() {
-        console.log(this.options);
+    methods: {
+        getPlaceholder(option) {
+            return `${PLACEHOLDER_MAP[option.type] || "请输入"}${option.label}`;
+        },
     },
 };
 </script>

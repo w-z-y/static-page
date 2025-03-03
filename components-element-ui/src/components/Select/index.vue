@@ -10,6 +10,7 @@
         v-model="internalValue"
         @change="handleChangeValue"
         @visible-change="handleVisibleChange"
+        @clear="handleClear"
     >
         <template v-if="type === 'tree'">
             <el-option
@@ -21,7 +22,7 @@
             <MyTree
                 ref="tree"
                 @node-click="handleNodeClick"
-                :expand-on-click-node="false"
+                :expand-on-click-node="expandOnClickNode"
                 check-strictly
                 :node-key="defaultProps.value"
                 :default-checked-keys="defaultCheckedKeys"
@@ -38,7 +39,9 @@
                 :label="option[defaultProps.label]"
                 :value="option[defaultProps.value]"
             >
-                <MyTooltip>{{ option[defaultProps.label] }}</MyTooltip>
+                <MyTooltip>
+                    <slot v-bind="option">{{ option[defaultProps.label] }}</slot>
+                </MyTooltip>
             </el-option>
         </template>
     </el-select>
@@ -67,6 +70,11 @@ export default {
             },
         },
         multiple: {
+            type: Boolean,
+            default: false,
+        },
+        // 点击节点是否展开
+        expandOnClickNode: {
             type: Boolean,
             default: false,
         },
@@ -128,6 +136,11 @@ export default {
             const myTreeRef = this.$refs.tree.$refs.myTree;
             const selectDom = myTreeRef.$el.querySelector(".el-tree-node.is-checked");
             this.$refs.mySelectRef.scrollToOption({ $el: selectDom });
+        },
+        handleClear() {
+            const myTreeRef = this.$refs.tree.$refs.myTree;
+            myTreeRef.setCheckedKeys([]);
+            this.$emit("clear");
         },
     },
     mounted() {

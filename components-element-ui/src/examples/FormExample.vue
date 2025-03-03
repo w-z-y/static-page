@@ -5,7 +5,11 @@
         </MyCard>
         <MyCard style="width: 100%">
             <h2>default</h2>
-            <MyForm label-width="100px" v-model="formData" :options="options"> </MyForm>
+            <MyForm label-width="100px" v-model="formData" :options="options">
+                <template #default="option">
+                    <div v-if="option.value === 'slot'">slot</div>
+                </template>
+            </MyForm>
         </MyCard>
         <MyCard style="width: 100%">
             <h2>footer foldLength</h2>
@@ -16,9 +20,6 @@
                 v-model="formData"
                 :options="options"
             >
-                <template #default="option">
-                    <div v-if="option.value === 'slot'">slot</div>
-                </template>
             </MyForm>
         </MyCard>
         <MyCard style="width: 100%">
@@ -65,13 +66,12 @@ export default {
                 {
                     label: "输入框",
                     value: "name",
-                    type: "input",
-                    required: true,
                     // type对应的组件的属性
+                    type: "input",
+                    span: 6,
                     attrs: {
                         placeholder: "请输入姓名",
                     },
-                    span: 6,
                 },
                 {
                     label: "文本域",
@@ -188,6 +188,7 @@ export default {
                 {
                     label: "插槽",
                     value: "slot",
+                    type: "11",
                 },
             ];
         },
