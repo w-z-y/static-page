@@ -12,32 +12,36 @@
         flex-direction: column;
 
         // 顶部操作按钮
-        .left-move-icon,
-        .right-more-icon {
-            opacity: 0;
+        .left-icon-tools,
+        .right-icon-tools {
             position: absolute;
             height: 20px;
             top: 2px;
             z-index: 999;
         }
 
+        .left-icon-tools,
+        .right-icon {
+            opacity: 0;
+        }
+
         &:hover {
 
-            .left-move-icon,
-            .right-more-icon {
+            .left-icon-tools,
+            .right-icon-tools {
                 opacity: 1;
             }
         }
 
         // 左
-        .left-move-icon {
+        .left-icon-tools {
             width: 20px;
             left: 2px;
             cursor: move;
         }
 
         // 右
-        .right-more-icon {
+        .right-icon-tools {
             width: max-content;
             display: flex;
             right: 2px;

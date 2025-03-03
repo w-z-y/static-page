@@ -2,7 +2,6 @@
   <div>
     <el-popover placement="bottom-start" width="512" v-model="visible" :visible-arrow="false" transition="0">
       <div @mouseleave="handleMouseleave" @click="handleClick">
-        {{ hoverCell }}
         <div class="table-row" v-for="i in 8" :key="i">
           <div class="table-cell" v-for="j in 24" :key="i + '-' + j" @mouseenter="handleMouseenter(i, j)" :class="{
             'is-active': i <= hoverCell.y && j <= hoverCell.x

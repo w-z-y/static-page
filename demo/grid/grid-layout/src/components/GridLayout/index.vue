@@ -9,14 +9,17 @@
         <grid-item is-bounded v-for="item in layout" :key="item.i" :x="item.x" :y="item.y" :w="item.w" :h="item.h"
             :i="item.i" :class="['grid-item', { 'highlight': item.i == -1 }]" drag-allow-from=".vue-draggable-handle"
             @click.native="handleClick(item)">
-            <i class="left-move-icon vue-draggable-handle el-icon-rank">
-            </i>
-            <div class="right-more-icon">
-                <i class="el-icon-location-information" @click.stop="removeItem(item.i)">
+            <div class="left-icon-tools vue-draggable-handle">
+                <i class="left-icon el-icon-rank">
                 </i>
-                <i class="el-icon-edit-outline" @click.stop="removeItem(item.i)">
+            </div>
+            
+            <div class="right-icon-tools">
+                <i class="right-icon el-icon-location-information" @click.stop="handleFixItem(item.i)">
                 </i>
-                <i class="delete-icon el-icon-delete" @click.stop="removeItem(item.i)">
+                <i class="right-icon el-icon-edit-outline" @click.stop="handleRemoveItem(item.i)">
+                </i>
+                <i class="right-icon delete-icon el-icon-delete" @click.stop="handleRemoveItem(item.i)">
                 </i>
             </div>
             <slot :data="item.data"></slot>
@@ -56,7 +59,6 @@ export default {
     methods: {
         addItem(data = {}) {
             const { w = 1, h = 1 } = data
-            console.log(this.layout, data, w, h)
             const grid = layoutFill(this.layout, this.rowNum, this.colNum);
             const foundMaxEmpty = findItemEmptyRegion(grid, this.rowNum, this.colNum, { w, h })
             if (foundMaxEmpty) {
@@ -78,7 +80,12 @@ export default {
         handleClick(data) {
             this.$emit('item-click', data)
         },
-        removeItem(itemId) {
+        handleFixItem(itemId) {
+            const findeItem = this.layout.find(item => item.i === itemId)
+            findeItem.static = !findeItem.static
+            // this.$emit('change', this.layout)
+        },
+        handleRemoveItem(itemId) {
             this.$emit('change', this.layout.filter(item => item.i !== itemId));
         }
     },
@@ -126,6 +133,7 @@ function findItemEmptyRegion(grid, rows, cols, item) {
     return null;
 }
 
+// 找到一个空区域，缩放尺寸
 function findEmptyRegion(grid, rows, cols) {
     for (let x = 0; x < cols; x++) {
         for (let y = 0; y < rows; y++) {
