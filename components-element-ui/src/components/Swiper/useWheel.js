@@ -1,8 +1,8 @@
-import { ref } from "vue";
+import { ref } from 'vue';
 
 export default function useWheel({ vertical, onNext, onPrev }) {
   if (!vertical) return {};
-  
+
   const lastWheelTime = ref(0);
   const touchStartY = ref(0);
   const WHEEL_DELAY = 200;

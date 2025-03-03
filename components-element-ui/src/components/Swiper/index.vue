@@ -1,63 +1,32 @@
 <template>
-  <div
-    class="carousel-container"
-    @mouseenter="stopAutoPlay"
-    @mouseleave="startAutoPlay"
-    @wheel="handleWheel"
-    @touchstart="handleTouchStart"
-    @touchmove="handleTouchMove"
-    @touchend="handleTouchEnd"
-    :class="{ vertical: vertical }"
-  >
+  <div class="carousel-container" @mouseenter="stopAutoPlay" @mouseleave="startAutoPlay" @wheel="handleWheel" @touchstart="handleTouchStart" @touchmove="handleTouchMove" @touchend="handleTouchEnd" :class="{ vertical: vertical }">
     <div class="carousel-wrapper" :style="wrapperStyle">
-      <div
-        class="carousel-item"
-        v-for="(item, index) in displayItems"
-        :key="'slide-' + index"
-      >
+      <div class="carousel-item" v-for="(item, index) in displayItems" :key="'slide-' + index">
         <slot :item="item" :index="item && item.index">
           <div class="carousel-item-content">
-            {{ item && item.index || item }}
+            {{ (item && item.index) || item }}
           </div>
         </slot>
       </div>
     </div>
-    <Button
-      v-if="controls.indexOf('arrows') !== -1"
-      type="dark"
-      round
-      class="carousel-btn prev-btn"
-      @click="slidePrev"
-    >
-      {{ vertical ? "↑" : "←" }}
+    <Button v-if="controls.indexOf('arrows') !== -1" type="dark" round class="carousel-btn prev-btn" @click="slidePrev">
+      {{ vertical ? '↑' : '←' }}
     </Button>
-    <Button
-      v-if="controls.indexOf('arrows') !== -1"
-      type="dark"
-      round
-      class="carousel-btn next-btn"
-      @click="slideNext"
-    >
-      {{ vertical ? "↓" : "→" }}
+    <Button v-if="controls.indexOf('arrows') !== -1" type="dark" round class="carousel-btn next-btn" @click="slideNext">
+      {{ vertical ? '↓' : '→' }}
     </Button>
     <div v-if="controls.indexOf('dots') !== -1" class="dots-container">
-      <div
-        v-for="(_, index) in items"
-        :key="'dot-' + index"
-        class="dot"
-        :class="{ active: displayIndex === index }"
-        @click="goToSlide(index)"
-      ></div>
+      <div v-for="(_, index) in items" :key="'dot-' + index" class="dot" :class="{ active: displayIndex === index }" @click="goToSlide(index)"></div>
     </div>
   </div>
 </template>
 
 <script>
-import Button from "../Button/index.vue";
-import useWheel from "./useWheel";
+import Button from '../Button/index.vue';
+import useWheel from './useWheel';
 
 export default {
-  name: "MySwiper",
+  name: 'MySwiper',
   props: {
     items: {
       type: Array,
@@ -82,7 +51,7 @@ export default {
       type: Array,
       default: () => [],
       validator: (value) => {
-        return value.every((item) => ["arrows", "dots"].includes(item));
+        return value.every((item) => ['arrows', 'dots'].includes(item));
       },
     },
   },
@@ -101,7 +70,7 @@ export default {
       const first = this.items[0];
 
       return [last, ...this.items, first].map((item, index) => {
-        if (typeof item === "object") {
+        if (typeof item === 'object') {
           if (index === 0) {
             item.index = this.items.length - 1;
           } else if (index === this.items.length - 1) {
@@ -120,12 +89,8 @@ export default {
     },
     wrapperStyle() {
       return {
-        transform: this.vertical
-          ? `translateY(-${100 * (this.currentIndex + 1)}%)`
-          : `translateX(-${100 * (this.currentIndex + 1)}%)`,
-        transition: this.isAnimating
-          ? `transform ${this.TRANSITION_DURATION}ms ease`
-          : "none",
+        transform: this.vertical ? `translateY(-${100 * (this.currentIndex + 1)}%)` : `translateX(-${100 * (this.currentIndex + 1)}%)`,
+        transition: this.isAnimating ? `transform ${this.TRANSITION_DURATION}ms ease` : 'none',
       };
     },
   },
@@ -192,5 +157,5 @@ export default {
 </script>
 
 <style scoped lang="scss">
-@import "./index.scss";
+@import './index.scss';
 </style>

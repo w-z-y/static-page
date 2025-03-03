@@ -1,13 +1,15 @@
 <template>
-  <el-tooltip v-bind="$attrs" v-on="$listeners" :content="content || internalContent"
-    :disabled="!isOverflow && !alwaysShow" :placement="placement" popper-class="custom-tooltip" effect="dark"
-    :visible-arrow="false">
-    <div ref="textRef" class="tooltip-text" :style="{
-      '-webkit-line-clamp': lines,
-      '-webkit-box-orient': 'vertical',
-      'display': '-webkit-box',
-      'overflow': 'hidden'
-    }" @mouseenter="checkOverflow">
+  <el-tooltip v-bind="$attrs" v-on="$listeners" :content="content || internalContent" :disabled="!isOverflow && !alwaysShow" :placement="placement" popper-class="custom-tooltip" effect="dark" :visible-arrow="false">
+    <div
+      ref="textRef"
+      class="tooltip-text"
+      :style="{
+        '-webkit-line-clamp': lines,
+        '-webkit-box-orient': 'vertical',
+        display: '-webkit-box',
+        overflow: 'hidden',
+      }"
+      @mouseenter="checkOverflow">
       <slot></slot>
     </div>
   </el-tooltip>
@@ -19,40 +21,40 @@ export default {
   props: {
     lines: {
       type: Number,
-      default: 1
+      default: 1,
     },
     alwaysShow: {
       type: Boolean,
-      default: false
+      default: false,
     },
     content: {
       type: String,
-      default: ''
+      default: '',
     },
     placement: {
       type: String,
-      default: 'top'
-    }
+      default: 'top',
+    },
   },
   data() {
     return {
       isOverflow: false,
-      internalContent: ''
-    }
+      internalContent: '',
+    };
   },
   methods: {
     checkOverflow() {
-      const textEl = this.$refs.textRef
-      this.internalContent = textEl.innerText
-      this.isOverflow = textEl.scrollHeight > textEl.clientHeight
-    }
+      const textEl = this.$refs.textRef;
+      this.internalContent = textEl.innerText;
+      this.isOverflow = textEl.scrollHeight > textEl.clientHeight;
+    },
   },
   mounted() {
     this.$nextTick(() => {
-      this.checkOverflow()
-    })
-  }
-}
+      this.checkOverflow();
+    });
+  },
+};
 </script>
 
 <style scoped>
