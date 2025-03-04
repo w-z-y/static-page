@@ -1,5 +1,5 @@
 <template>
-  <div class="space" :style="containerStyle">
+  <div class="my-space" :style="containerStyle">
     <slot></slot>
   </div>
 </template>

@@ -1,45 +1,45 @@
 <template>
-  <div class="flex flex-wrap">
-    <el-form :model="internalValue" v-bind="$attrs" :rules="formRules">
-      <el-row class="flex flex-wrap">
-        <template v-for="(option, index) in options">
-          <el-col v-show="isExpandAll ? true : index < foldLength" v-if="option.visible !== false" :key="option.prop" :span="inline ? null : option.span || 24">
-            <el-form-item v-model="internalValue[option.value]" :label="option.label" :prop="option.value">
-              <slot v-bind="option">
-                <component
-                  v-if="option.type && COMPONENT_MAP[option.type]"
-                  :is="COMPONENT_MAP[option.type] || option.type"
-                  v-model="internalValue[option.value]"
-                  v-bind="{
-                    placeholder: getPlaceholder(option),
-                    ...option.attrs,
-                  }"
-                  v-on="option.listeners" />
-                <div class="match-error" v-else-if="!option.type">需要配置[type]属性,或使用插槽</div>
-                <div class="match-error" v-else>需要配置type=[{{ option.type }}]映射组件,或使用插槽</div>
-                <!-- 
+  <el-form ref="myFormRef" inline :model="internalValue" v-bind="$attrs" :rules="formRules">
+    <el-row class="flex flex-wrap" :gutter="16">
+      <template v-for="(option, index) in options">
+        <el-col v-show="isExpandAll ? true : index < foldLength" v-if="option.visible !== false" :key="option.prop" :span="option.span || 24">
+          <el-form-item v-model="internalValue[option.value]" :label="option.label" :prop="option.value">
+            <slot v-bind="option">
+              <component
+                v-if="option.type && COMPONENT_MAP[option.type]"
+                :is="COMPONENT_MAP[option.type] || option.type"
+                style="width: 100%"
+                v-model="internalValue[option.value]"
+                v-bind="{
+                  placeholder: getPlaceholder(option),
+                  clearable: true,
+                  ...option.attrs,
+                }"
+                v-on="option.listeners" />
+              <div class="match-component-error" v-else-if="!option.type">需要配置[type]属性,或使用插槽</div>
+              <div class="match-component-error" v-else>需要配置type=[{{ option.type }}]映射组件,或使用插槽</div>
+              <!-- 
                                     插槽使用
                                     <template #default="option">
                                         <div v-if="option.value === 'slot'">slot</div>
                                     </template>
                                 -->
-              </slot>
-            </el-form-item>
-          </el-col>
-        </template>
+            </slot>
+          </el-form-item>
+        </el-col>
+      </template>
 
-        <div v-if="footer" class="footer-btn-wrap">
-          <slot name="footer">
-            <el-button type="primary" icon="el-icon-search">查询</el-button>
-            <el-button type="default" icon="el-icon-refresh-right">重置</el-button>
-            <el-button type="text" class="expand-btn" :icon="isExpandAll ? 'el-icon-arrow-up' : 'el-icon-arrow-down'" @click="isExpandAll = !isExpandAll">
-              {{ isExpandAll ? '收起' : '展开' }}
-            </el-button>
-          </slot>
-        </div>
-      </el-row>
-    </el-form>
-  </div>
+      <div v-if="footer" class="footer-btn-wrap">
+        <slot name="footer">
+          <el-button @click="handleSearch" type="primary" icon="el-icon-search">查询</el-button>
+          <el-button @click="handleReset" type="default" icon="el-icon-refresh-right">重置</el-button>
+          <el-button v-if="foldLength < options.length" type="text" class="expand-btn" :icon="isExpandAll ? 'el-icon-arrow-up' : 'el-icon-arrow-down'" @click="isExpandAll = !isExpandAll">
+            {{ isExpandAll ? '收起' : '展开' }}
+          </el-button>
+        </slot>
+      </div>
+    </el-row>
+  </el-form>
 </template>
 
 <script>
@@ -56,12 +56,6 @@ export default {
     options: {
       type: Array,
       required: true,
-    },
-    // 不使用 el-form 的 inline 属性,使用自定义的 inline 属性
-    // 设置 inline 后, span当会失效, 需要自定义span
-    inline: {
-      type: Boolean,
-      default: false,
     },
     foldLength: {
       type: Number,
@@ -83,6 +77,13 @@ export default {
     getPlaceholder(option) {
       return `${PLACEHOLDER_MAP[option.type] || '请输入'}${option.label}`;
     },
+    handleSearch() {
+      this.$emit('search');
+    },
+    handleReset() {
+      this.$refs.myFormRef.resetFields();
+      this.$emit('reset');
+    },
   },
 };
 </script>
@@ -90,11 +91,22 @@ export default {
 <style lang="scss" scoped>
 .el-form {
   width: 100%;
-  .match-error {
-    color: #ccc;
-    cursor: not-allowed;
+  margin-bottom: -18px;
+  .el-form-item {
+    display: flex;
+    ::v-deep .el-form-item__label {
+      flex-shrink: 0;
+    }
+    ::v-deep .el-form-item__content {
+      flex: 1;
+    }
+    .match-component-error {
+      color: #ccc;
+      cursor: not-allowed;
+    }
   }
   .footer-btn-wrap {
+    margin-bottom: 18px;
     flex: 1;
     display: flex;
     align-items: self-start;

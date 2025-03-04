@@ -30,10 +30,10 @@ export default {
       required: true,
     },
     type: {
-      type: [String, Object],
-      default: null,
+      type: String,
+      default: '',
       validator: (value) => {
-        return [null, 'tree'].includes(value);
+        return ['', 'tree'].includes(value);
       },
     },
     multiple: {

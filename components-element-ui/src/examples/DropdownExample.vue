@@ -7,10 +7,10 @@
                 <h4>普通</h4>
                 <MySpace>
                     <MyDropdown :options="dropdownOptions" @change="handleDropdownChange">
-                        <MyButton>点击</MyButton>
+                        <MyButton hover type="text">点击</MyButton>
                     </MyDropdown>
                     <MyDropdown :options="dropdownOptions" trigger="hover" placement="bottom-end">
-                        <MyButton>悬浮 bottom-end</MyButton>
+                        <MyButton type="text">悬浮 bottom-end</MyButton>
                     </MyDropdown>
                 </MySpace>
             </MyCard>
