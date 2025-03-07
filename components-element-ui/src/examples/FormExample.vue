@@ -30,6 +30,8 @@
 </template>
 
 <script>
+import { now, getDate } from '../utils/dateUtil';
+
 export default {
   data() {
     return {
@@ -40,7 +42,8 @@ export default {
         sex: '1',
         radioradio: '1',
         checkbox: ['1', '2', '3'],
-        hobby: '1',
+        hobby: '',
+        hobby2: [1733565149901, 1741341112843],
         address1: '1',
         address2: '11',
       },
@@ -66,8 +69,32 @@ export default {
           required: true,
           attrs: {
             type: 'daterange',
-            placeholder: '请选择日期',
+            valueFormat: 'timestamp',
             format: 'yyyy-MM-dd',
+            'start-placeholder': '开始日期',
+            'end-placeholder': '结束日期',
+            pickerOptions: {
+              shortcuts: [
+                {
+                  text: '最近三个月',
+                  onClick(picker) {
+                    picker.$emit('pick', [getDate(-90).getTime(), now.getTime()]);
+                  },
+                },
+                {
+                  text: '最近半年',
+                  onClick(picker) {
+                    picker.$emit('pick', [getDate(-180).getTime(), now.getTime()]);
+                  },
+                },
+                {
+                  text: '最近一年',
+                  onClick(picker) {
+                    picker.$emit('pick', [getDate(-365).getTime(), now.getTime()]);
+                  },
+                },
+              ],
+            },
           },
           span: 6,
         },

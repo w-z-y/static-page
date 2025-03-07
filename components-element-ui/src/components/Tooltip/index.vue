@@ -58,7 +58,6 @@ export default {
 
 <style scoped>
 .my-tooltip {
-  width: max-content;
   white-space: normal;
   word-break: break-all;
   line-height: normal;

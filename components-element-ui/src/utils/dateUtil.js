@@ -9,3 +9,13 @@ export const getISODate = (date) => {
         .toISOString()
         .split("T")[0];
 };
+
+export const now = new Date();
+
+export const oneDay = 3600 * 1000 * 24;
+
+export function getDate(days) {
+  const date = new Date();
+  date.setTime(date.getTime() + oneDay * days);
+  return date;
+}

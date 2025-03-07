@@ -27,9 +27,16 @@ export default {
     },
     methods: {
         initEditor() {
+            let doc  = schema.node("doc", null, [
+                schema.node("paragraph", null, [schema.text("One.")]),
+                schema.node("horizontal_rule"),
+                schema.node("paragraph", null, [schema.text("Two!")]),
+            ]);
+
             this.view = new EditorView(this.$refs.editor, {
                 state: EditorState.create({
                     schema,
+                    doc,
                     plugins: [history(), keymap({ "Mod-z": undo, "Mod-y": redo, ...baseKeymap })],
                 }),
                 // 监听编辑器状态变化（事务）
@@ -46,7 +53,7 @@ export default {
                     this.view.updateState(newState);
                 },
             });
-            console.log(this.view);
+            console.log(schema, this.view);
         },
     },
 };
