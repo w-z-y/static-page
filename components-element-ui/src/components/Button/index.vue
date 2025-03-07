@@ -15,10 +15,6 @@ export default {
         return ['text', 'button'].includes(value);
       },
     },
-    hover: {
-      type: Boolean,
-      default: false,
-    },
   },
   methods: {
     handleClick() {

@@ -7,8 +7,8 @@
         </MyCard>
 
         <MyCard>
-            <h4>type='text'(宽度固定，如果要不固定的，建议用dropdown)</h4>
-            <MySelect style="width: max-content" v-model="value" :options="options" type="text">
+            <h4>(宽度固定，如果要不固定的，建议用dropdown)</h4>
+            <MySelect style="width: max-content" v-model="value" :options="options">
             </MySelect>
         </MyCard>
 

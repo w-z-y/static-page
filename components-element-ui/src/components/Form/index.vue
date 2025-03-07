@@ -4,7 +4,7 @@
       <template v-for="(option, index) in options">
         <el-col v-show="isExpandAll ? true : index < foldLength" v-if="option.visible !== false" :key="option.prop" :span="option.span || 24">
           <el-form-item v-model="internalValue[option.value]" :label="option.label" :prop="option.value">
-            <slot v-bind="option">
+            <slot v-bind="{ option }">
               <component
                 v-if="option.type && COMPONENT_MAP[option.type]"
                 :is="COMPONENT_MAP[option.type] || option.type"
@@ -13,9 +13,11 @@
                 v-bind="{
                   placeholder: getPlaceholder(option),
                   clearable: true,
+                  disabled: option.disabled,
                   ...option.attrs,
                 }"
-                v-on="option.listeners" />
+                v-on="option.listeners"
+              />
               <div class="match-component-error" v-else-if="!option.type">需要配置[type]属性,或使用插槽</div>
               <div class="match-component-error" v-else>需要配置type=[{{ option.type }}]映射组件,或使用插槽</div>
               <!-- 
@@ -31,8 +33,8 @@
 
       <div v-if="footer" class="footer-btn-wrap">
         <slot name="footer">
-          <el-button @click="handleSearch" type="primary" icon="el-icon-search">查询</el-button>
-          <el-button @click="handleReset" type="default" icon="el-icon-refresh-right">重置</el-button>
+          <el-button @click="search" type="primary" icon="el-icon-search">查询</el-button>
+          <el-button @click="reset" type="default" icon="el-icon-refresh-right">重置</el-button>
           <el-button v-if="foldLength < options.length" type="text" class="expand-btn" :icon="isExpandAll ? 'el-icon-arrow-up' : 'el-icon-arrow-down'" @click="isExpandAll = !isExpandAll">
             {{ isExpandAll ? '收起' : '展开' }}
           </el-button>
@@ -77,10 +79,10 @@ export default {
     getPlaceholder(option) {
       return `${PLACEHOLDER_MAP[option.type] || '请输入'}${option.label}`;
     },
-    handleSearch() {
+    search() {
       this.$emit('search');
     },
-    handleReset() {
+    reset() {
       this.$refs.myFormRef.resetFields();
       this.$emit('reset');
     },

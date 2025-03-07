@@ -1,17 +1,16 @@
 <template>
-  <el-tooltip v-bind="$attrs" v-on="$listeners" :content="content || internalContent" :disabled="!isOverflow && !alwaysShow" :placement="placement" popper-class="custom-tooltip" effect="dark" :visible-arrow="false">
-    <div
+  <el-tooltip class="my-tooltip" v-bind="$attrs" v-on="$listeners" :content="content || internalContent" :disabled="!isOverflow && !alwaysShow" :placement="placement" popper-class="custom-tooltip" effect="dark" :visible-arrow="false">
+    <span
       ref="textRef"
-      class="tooltip-text"
       :style="{
         '-webkit-line-clamp': lines,
         '-webkit-box-orient': 'vertical',
-        display: '-webkit-box',
+        display: '-webkit-inline-box',
         overflow: 'hidden',
       }"
       @mouseenter="checkOverflow">
       <slot></slot>
-    </div>
+    </span>
   </el-tooltip>
 </template>
 
@@ -58,8 +57,8 @@ export default {
 </script>
 
 <style scoped>
-.tooltip-text {
-  width: 100%;
+.my-tooltip {
+  width: max-content;
   white-space: normal;
   word-break: break-all;
   line-height: normal;

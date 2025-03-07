@@ -1,5 +1,5 @@
 <template>
-  <el-card class="my-card" hover :style="{ width: block ? '100%' : 'auto' }">
+  <el-card class="my-card" hover>
     <template #[slotName] v-for="(slot, slotName) in $slots">
       <slot :name="slotName" />
     </template>
@@ -27,6 +27,7 @@ export default {
   flex-direction: column;
   ::v-deep .el-card__body {
     flex: 1;
+    overflow: hidden;
   }
 }
 </style>

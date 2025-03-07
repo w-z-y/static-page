@@ -3,12 +3,20 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "serve": "vue-cli-service serve",
+    "dev": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
     "core-js": "^3.8.3",
+    "prosemirror-example-setup": "^1.2.3",
+    "prosemirror-model": "^1.24.1",
+    "prosemirror-schema-basic": "^1.2.3",
+    "prosemirror-schema-list": "^1.5.1",
+    "prosemirror-state": "^1.4.3",
+    "prosemirror-view": "^1.38.1",
+    "sass": "^1.85.1",
+    "sass-loader": "^16.0.5",
     "vue": "^2.6.14"
   },
   "devDependencies": {
@@ -33,7 +41,11 @@
     "parserOptions": {
       "parser": "@babel/eslint-parser"
     },
-    "rules": {}
+    "rules": {
+      "no-unused-vars": "warn",
+      "no-console": "warn",
+      "no-debugger": "warn"
+    }
   },
   "browserslist": [
     "> 1%",

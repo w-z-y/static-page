@@ -1,9 +1,7 @@
 <template>
-  <div class="full-screen">
-    <el-tooltip :content="isFullscreen ? '退出全屏' : '全屏'">
-      <i :class="['el-icon', isFullscreen ? 'el-icon-close' : 'el-icon-full-screen']" @click="toggleFullScreen"></i>
-    </el-tooltip>
-  </div>
+  <el-tooltip class="full-screen" :content="isFullscreen ? '退出全屏' : '全屏'" placement="top">
+    <i :class="['icon-ym', isFullscreen ? 'icon-ym-compress-screen' : 'icon-ym-full-screen']" @click="toggleFullScreen"></i>
+  </el-tooltip>
 </template>
 
 <script>
@@ -11,7 +9,6 @@ export default {
   name: 'MyFullScreen',
   props: {
     reference: {
-      type: Object,
       default: null,
     },
   },

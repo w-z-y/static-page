@@ -103,8 +103,10 @@ export default {
       this.$refs.mySelectRef.scrollToOption({ $el: selectDom });
     },
     handleClear() {
-      const myTreeRef = this.$refs.tree.$refs.myTree;
-      myTreeRef.setCheckedKeys([]);
+      if (this.isTree) {
+        const myTreeRef = this.$refs.tree.$refs.myTree;
+        myTreeRef.setCheckedKeys([]);
+      }
       this.$emit('clear');
     },
   },
