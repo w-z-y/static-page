@@ -5,8 +5,8 @@
       <MyTable border ref="tableRef" :data="tableData" :columns="columns" row-key="id" default-expand-all :span-method="spanMethod">
         <template #default="{ row, column }">
           <!-- <template v-if="column.value === 'name'">
-            <el-tag>{{ row.name }}</el-tag>
-          </template> -->
+              <el-tag>{{ row.name }}</el-tag>
+            </template> -->
           <template v-if="column.value === 'operation'">
             <el-button type="text" @click="handleEdit(row)">编辑</el-button>
             <el-button type="text" @click="handleDelete(row)">删除</el-button>
@@ -158,20 +158,40 @@ export default {
       console.log('删除', row);
     },
     spanMethod({ row, rowIndex, column }) {
-      // 数组的顺序存在=>合并顺序和依赖顺序（例：age基于name合并, address基于name和age合并）
-      const mergeColumns = ['name', 'age', 'address'];
+      // 定义合并规则
+      const mergeMap = {
+        name: {
+          deps: [], // 无依赖,直接合并
+          merge: true,
+        },
+        age: {
+          deps: ['name'], // 依赖name列
+          merge: true,
+        },
+        address: {
+          deps: ['name', 'age'], // 依赖name和age列
+          merge: true,
+        },
+        phone: {
+          merge: false, // 不参与合并
+        },
+      };
 
-      // 如果是序号列或不在合并列中,返回默认值
-      if (column.type === 'index' || !mergeColumns.includes(column.property)) {
+      const property = column.property;
+
+      // 如果列不需要合并,返回默认值
+      if (!mergeMap[property]?.merge) {
         return { rowspan: 1, colspan: 1 };
       }
 
-      const property = column.property;
+      const { deps } = mergeMap[property];
       const prevRow = this.tableData[rowIndex - 1];
-      const columnIndex = mergeColumns.indexOf(property);
 
       // 检查是否需要与上一行合并
-      const shouldMergeWithPrev = prevRow && prevRow[property] === row[property] && mergeColumns.slice(0, columnIndex).every((col) => prevRow[col] === row[col]);
+      const shouldMergeWithPrev =
+        prevRow &&
+        prevRow[property] === row[property] && // 当前列值相同
+        deps.every((dep) => prevRow[dep] === row[dep]); // 所有依赖列的值都相同
 
       if (shouldMergeWithPrev) {
         return { rowspan: 0, colspan: 0 };
@@ -181,7 +201,7 @@ export default {
       let mergeCount = 1;
       for (let i = rowIndex + 1; i < this.tableData.length; i++) {
         const nextRow = this.tableData[i];
-        const canMerge = nextRow[property] === row[property] && mergeColumns.slice(0, columnIndex).every((col) => nextRow[col] === row[col]);
+        const canMerge = nextRow[property] === row[property] && deps.every((dep) => nextRow[dep] === row[dep]);
 
         if (!canMerge) break;
         mergeCount++;
