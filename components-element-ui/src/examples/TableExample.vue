@@ -2,7 +2,7 @@
   <MySpace direction="vertical" class="table-example" style="background-color: #fff; padding: 50px 10px">
     <MyFullScreen ref=".table-example" style="margin-left: auto" />
     <MyCard class="w-100">
-      <MyTable border ref="tableRef" :data="tableData" :columns="columns" row-key="id" default-expand-all :span-method="spanMethod">
+      <MyTable size="mini" border ref="tableRef" :data="tableData" :columns="columns" row-key="id" default-expand-all :span-method="spanMethod">
         <template #default="{ row, column }">
           <!-- <template v-if="column.value === 'name'">
               <el-tag>{{ row.name }}</el-tag>
