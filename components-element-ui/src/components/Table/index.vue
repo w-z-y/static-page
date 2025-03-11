@@ -1,11 +1,9 @@
 <template>
-  <el-table ref="myTableRef" :data="data" :row-class-name="internalRowClassName" class="my-table" v-bind="$attrs" v-on="$listeners" :tree-props="defaultTreeProps">
+  <el-table ref="myTableRef" :default-expand-all="defaultExpandAll" :data="data" :row-class-name="internalRowClassName" class="my-table" v-bind="$attrs" v-on="$listeners" :tree-props="defaultTreeProps">
     <template v-for="column in columns">
       <el-table-column :show-overflow-tooltip="showOverflowTooltip" v-bind="column" :key="column.keyValue || column.value" :prop="column.value">
         <template #header="{ column: internalColumn, $index }">
-          <slot name="header" v-bind="{ column: { ...internalColumn, ...column }, $index }">
-            {{ column.label }}
-          </slot>
+          <slot name="header" v-bind="{ column: { ...internalColumn, ...column }, $index }"> {{ column.label }} </slot>
         </template>
         <template #default="{ row, column: internalColumn, $index }">
           <slot v-bind="{ row, column: { ...internalColumn, ...column }, $index }">
@@ -45,11 +43,20 @@ export default {
       type: Boolean,
       default: false,
     },
+    defaultExpandAll: {
+      type: Boolean,
+      default: false,
+    },
   },
   computed: {
     defaultTreeProps() {
       return merge({ ...DEFAULT_TREE_PROPS }, this.treeProps || {});
     },
+  },
+  data() {
+    return {
+      isExpandAll: this.defaultExpandAll,
+    };
   },
   methods: {
     internalRowClassName({ row, rowIndex }) {
@@ -64,12 +71,10 @@ export default {
     // 树切换
     toggleTreeExpansion() {
       const tableRef = this.$refs.myTableRef;
-      console.log('tableRef', tableRef);
       if (!tableRef && !this.data?.length) return;
-      const store = tableRef.store;
       this.isExpandAll = !this.isExpandAll;
       this.data.forEach((row) => {
-        store.toggleTreeExpansion(row);
+        tableRef.toggleRowExpansion(row, this.isExpandAll);
       });
     },
   },
@@ -81,7 +86,8 @@ export default {
   width: 100%;
   display: flex;
   flex-direction: column;
-  ::v-deep .el-table__body-wrapper {
+  ::v-deep .el-table__body-wrapper,
+  ::v-deep .el-table__fixed-right {
     flex: 1;
     .el-table__body {
       tr.root-row {
@@ -107,7 +113,8 @@ export default {
     }
     .el-table__empty-block {
       position: sticky;
-      width: 100%;
+      display: flex;
+      width: 100% !important;
       left: 0;
     }
   }

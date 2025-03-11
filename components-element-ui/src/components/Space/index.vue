@@ -1,4 +1,5 @@
 <template>
+  <!-- Space和Flex组件的组合 -->
   <div class="my-space" :style="containerStyle">
     <slot></slot>
   </div>
@@ -13,13 +14,9 @@ export default {
       type: [Number, String],
       default: 'small',
     },
-    // 排列方向
-    direction: {
-      type: String,
-      default: 'horizontal',
-      validator: function (val) {
-        return ['horizontal', 'vertical'].indexOf(val) !== -1;
-      },
+    vertical: {
+      type: Boolean,
+      default: false,
     },
     // 对齐方式
     alignment: {
@@ -49,7 +46,7 @@ export default {
     containerStyle() {
       return {
         display: 'flex',
-        flexDirection: this.direction === 'vertical' ? 'column' : 'row',
+        flexDirection: this.vertical ? 'column' : 'row',
         flexWrap: this.wrap ? 'wrap' : 'nowrap',
         alignItems: this.alignment,
         gap: this.gap,
