@@ -41,6 +41,7 @@
     },
     "rules": {
       "vue/no-unused-vars": "warn",
+      "vue/no-unused-components": "warn",
       "no-unused-vars": "warn",
       "no-console": "warn",
       "no-debugger": "warn"

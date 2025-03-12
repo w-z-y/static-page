@@ -20,7 +20,7 @@ const routes = requireComponent.keys().map(fileName => {
 // 添加默认重定向
 routes.push({
     path: '*',
-    redirect: `/${routes[0].name.toLowerCase()}`, // 默认重定向到第一个示例
+    redirect: `/${routes[7].name.toLowerCase()}`, // 默认重定向到第一个示例
 });
 
 console.log('routes', routes);
