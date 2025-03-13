@@ -193,7 +193,7 @@ export default {
     },
     spanMethod({ row, rowIndex, column }) {
       // 定义合并规则
-      const mergeMap = {
+      const mergeRule = {
         name: {
           deps: [], // 无依赖,直接合并
           merge: true,
@@ -214,11 +214,11 @@ export default {
       const property = column.property;
 
       // 如果列不需要合并,返回默认值
-      if (!mergeMap[property]?.merge) {
+      if (!mergeRule[property]?.merge) {
         return { rowspan: 1, colspan: 1 };
       }
 
-      const { deps } = mergeMap[property];
+      const { deps } = mergeRule[property];
       const prevRow = this.tableData[rowIndex - 1];
 
       // 检查是否需要与上一行合并

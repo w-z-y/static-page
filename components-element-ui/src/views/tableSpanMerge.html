@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Vue2 + Element UI</title>
+    <!-- 引入Vue -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <!-- 引入Element UI样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css" />
+    <!-- 引入Element UI组件库 -->
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <style>
+      .merged-cell {
+        background-color: #f5f7fa;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app">
+      <el-container>
+        <el-main>
+          <template v-for="(mergeItem,index) in mergeList">
+            <h2>{{mergeItem.label}}</h2>
+            <h4 :style="{color:mergeItem.errror? '#f00' : '#999' }" style="margin-bottom: 20px">{{mergeItem.desc}}</h4>
+            <el-table :key="index" :span-method="obj => spanMethod(obj, mergeItem.mergeRule)" :data="tableData" border style="width: 100%; margin-bottom: 20px; border: 1px solid #ccc" :cell-class-name="obj=>cellClassName(obj, mergeItem.mergeRule)  ">
+              <el-table-column prop="name" label="姓名"></el-table-column>
+              <el-table-column prop="age" label="年龄"></el-table-column>
+              <el-table-column prop="address" label="地址"></el-table-column>
+              <el-table-column prop="phone" label="电话"></el-table-column>
+            </el-table>
+          </template>
+        </el-main>
+      </el-container>
+    </div>
+
+    <script>
+      new Vue({
+        el: '#app',
+        computed: {
+          mergeList() {
+            return [
+              {
+                label: '不合并',
+                desc: '',
+                mergeRule: this.mergeRule0,
+              },
+              {
+                label: '无基准合并',
+                desc: '合并所有相同内容（年龄、地址 要基于"不同人"来合并）',
+                errror: true,
+                mergeRule: this.mergeRule1,
+              },
+              {
+                label: '合并单元格',
+                desc: '1.合并姓名 2.年龄基于姓名 3.地址基于姓名',
+                mergeRule: this.mergeRule2,
+              },
+              {
+                label: '合并单元格(地址合并基于名称)',
+                desc: '1.合并姓名 2.年龄基于姓名 3.地址基于姓名、年龄',
+                mergeRule: this.mergeRule3,
+              },
+            ];
+          },
+        },
+        data: {
+          mergeRule0: {},
+          // 定义合并规则
+          mergeRule1: {
+            name: {
+              deps: [], // 无依赖,直接合并
+              merge: true,
+            },
+            age: {
+              deps: [], // 无依赖,直接合并
+              merge: true,
+            },
+            address: {
+              merge: true,
+            },
+          },
+          mergeRule2: {
+            name: {
+              deps: [], // 无依赖,直接合并
+              merge: true,
+            },
+            age: {
+              deps: ['name'], // 依赖name列
+              merge: true,
+            },
+            address: {
+              deps: ['name'], // 依赖name和age列
+              merge: true,
+            },
+          },
+          mergeRule3: {
+            name: {
+              deps: [], // 无依赖,直接合并
+              merge: true,
+            },
+            age: {
+              deps: ['name'], // 依赖name列
+              merge: true,
+            },
+            address: {
+              deps: ['name', 'age'], // 依赖name和age列
+              merge: true,
+            },
+            phone: {
+              merge: false, // 不参与合并
+            },
+          },
+          tableData: [
+            {
+              id: 1,
+              name: '张三',
+              age: 18,
+              address: '上海市浦东新区',
+              phone: '13800138001',
+              date: 1,
+            },
+            {
+              id: 2,
+              name: '张三',
+              age: 18,
+              address: '上海市浦东新区',
+              phone: '13800138001',
+              date: new Date().getTime(),
+            },
+            {
+              id: 3,
+              name: '张三',
+              age: 25,
+              address: '上海市浦东新区',
+              phone: '13800138001',
+              date: new Date().getTime(),
+            },
+            {
+              id: 4,
+              name: '张三',
+              age: 25,
+              address: '上海市浦东新区',
+              phone: '13800138002',
+              date: new Date().getTime(),
+            },
+            {
+              id: 5,
+              name: '李四',
+              age: 25,
+              address: '上海市浦东新区',
+              phone: '13800138002',
+              date: new Date().getTime(),
+            },
+            {
+              id: 6,
+              name: '李四',
+              age: 25,
+              address: '上海市浦东新区',
+              phone: '13800138002',
+              date: new Date().getTime(),
+            },
+          ],
+        },
+        methods: {
+          cellClassName({ row, rowIndex, column }, mergeRule) {
+            const result = this.spanMethod({ row, rowIndex, column }, mergeRule);
+            return result.rowspan > 1 ? 'merged-cell' : '';
+          },
+          spanMethod({ row, rowIndex, column }, mergeRule) {
+            const property = column.property;
+
+            // 如果列不需要合并,返回默认值
+            if (!mergeRule[property]?.merge) {
+              return { rowspan: 1, colspan: 1 };
+            }
+
+            const { deps = [] } = mergeRule[property];
+            const prevRow = this.tableData[rowIndex - 1];
+
+            // 检查是否需要与上一行合并
+            const shouldMergeWithPrev =
+              prevRow &&
+              prevRow[property] === row[property] && // 当前列值相同
+              deps.every((dep) => prevRow[dep] === row[dep]); // 所有依赖列的值都相同
+
+            if (shouldMergeWithPrev) {
+              return { rowspan: 0, colspan: 0 };
+            }
+
+            // 计算向下合并的行数
+            let mergeCount = 1;
+            for (let i = rowIndex + 1; i < this.tableData.length; i++) {
+              const nextRow = this.tableData[i];
+              const canMerge = nextRow[property] === row[property] && deps.every((dep) => nextRow[dep] === row[dep]);
+
+              if (!canMerge) break;
+              mergeCount++;
+            }
+
+            return {
+              rowspan: mergeCount,
+              colspan: 1,
+            };
+          },
+        },
+      });
+    </script>
+  </body>
+</html>
