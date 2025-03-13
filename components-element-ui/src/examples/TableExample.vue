@@ -14,7 +14,7 @@
         </template>
       </MyTable>
     </MyCard>
-    <MyCard class="w-100" style="height: 300px">
+    <MyCard class="w-100" style="height: 200px">
       <MyTable row-key="id" size="small" ref="tableRef2" height="100%" :data="tableData2" :columns="columns">
         <template #header="{ column, $index }">
           <template v-if="$index === 0">
@@ -33,10 +33,22 @@
         </template>
       </MyTable>
     </MyCard>
+    <MyCard class="w-100" style="height: 400px">
+      <h1>原始el-table对比</h1>
+      <el-table :data="tableData">
+        <el-table-column type="index" label="序号" />
+        <el-table-column label="姓名" prop="name" />
+        <el-table-column label="年龄" prop="age" />
+        <el-table-column label="地址" prop="address" />
+        <el-table-column label="电话" prop="phone" />
+        <el-table-column label="日期" prop="date" />
+      </el-table>
+    </MyCard>
   </MySpace>
 </template>
 
 <script>
+import { formatTime } from '@/utils/dateUtil';
 export default {
   name: 'TableExample',
   data() {
@@ -48,6 +60,7 @@ export default {
           age: 18,
           address: '上海市浦东新区',
           phone: '13800138000',
+          date: 1,
         },
         {
           id: 2,
@@ -55,13 +68,15 @@ export default {
           age: 18,
           address: '上海市浦东新区',
           phone: '13800138001',
+          date: new Date().getTime(),
         },
         {
           id: 3,
           name: '张三',
           age: 25,
           address: '上海市浦东新区',
-          phone: '13800138002',
+          phone: [1, 2, 3, 4],
+          date: new Date().getTime(),
         },
         {
           id: 4,
@@ -69,6 +84,7 @@ export default {
           age: 25,
           address: '上海市浦东新区',
           phone: '13800138002',
+          date: new Date().getTime(),
         },
         {
           id: 5,
@@ -76,6 +92,7 @@ export default {
           age: 25,
           address: '上海市浦东新区',
           phone: '13800138002',
+          date: new Date().getTime(),
         },
         {
           id: 6,
@@ -83,6 +100,7 @@ export default {
           age: 25,
           address: '上海市浦东新区',
           phone: '13800138002',
+          date: new Date().getTime(),
         },
       ],
       tableData2: [
@@ -119,6 +137,12 @@ export default {
       ],
       columns: [
         {
+          label: '序号',
+          attrs: {
+            type: 'index',
+          },
+        },
+        {
           label: '姓名',
           value: 'name',
           //   slot: true,
@@ -134,6 +158,16 @@ export default {
         {
           label: '电话',
           value: 'phone',
+          attrs: {},
+        },
+        {
+          label: '日期',
+          value: 'date',
+          attrs: {
+            formatter(row, column, cellValue, index) {
+              return formatTime(cellValue);
+            },
+          },
         },
         {
           label: '操作',

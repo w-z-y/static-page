@@ -1,18 +1,22 @@
 <template>
   <el-table ref="myTableRef" :default-expand-all="defaultExpandAll" :data="data" :row-class-name="internalRowClassName" class="my-table" v-bind="$attrs" v-on="$listeners" :tree-props="defaultTreeProps">
-    <template v-for="column in columns">
-      <el-table-column :show-overflow-tooltip="showOverflowTooltip" v-bind="column" :key="column.keyValue || column.value" :prop="column.value">
+    <template #default>
+      <el-table-column v-for="(column, index) in columns" :show-overflow-tooltip="showOverflowTooltip || (column.attrs && column.attrs.showOverflowTooltip)" v-bind="column.attrs" :key="column.keyValue || column.value || index" :prop="column.value">
         <template #header="{ column: internalColumn, $index }">
           <slot name="header" v-bind="{ column: { ...internalColumn, ...column }, $index }"> {{ column.label }} </slot>
         </template>
-        <template #default="{ row, column: internalColumn, $index }">
+        <template v-if="!(column.attrs && column.attrs.type)" #default="{ row, column: internalColumn, $index }">
           <slot v-bind="{ row, column: { ...internalColumn, ...column }, $index }">
-            <span :class="{ 'table-cell-content': showOverflowTooltip }"> {{ row[column.value] }}</span>
+            <span :class="{ 'table-cell-content': showOverflowTooltip }">
+              {{ getValue(row, column, $index) }}
+            </span>
           </slot>
         </template>
       </el-table-column>
     </template>
-    <slot name="append"></slot>
+    <template #append>
+      <slot name="append"></slot>
+    </template>
   </el-table>
 </template>
 
@@ -76,6 +80,19 @@ export default {
       this.data.forEach((row) => {
         tableRef.toggleRowExpansion(row, this.isExpandAll);
       });
+    },
+    getValue(row, column, $index) {
+      let cellValue = row[column.value];
+      if (cellValue === undefined || cellValue === null) {
+        cellValue = '';
+      } else {
+        if (column.attrs?.formatter) {
+          cellValue = column.attrs.formatter(row, column, cellValue, $index);
+        } else if (cellValue instanceof Array) {
+          cellValue = cellValue.join(',');
+        }
+      }
+      return cellValue;
     },
   },
 };
