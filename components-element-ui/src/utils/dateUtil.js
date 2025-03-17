@@ -12,7 +12,7 @@ export const now = new Date();
 
 export const oneDay = 3600 * 1000 * 24;
 
-export function getDate(days) {
+export function getOffsetDate(days) {
   const date = new Date();
   date.setTime(date.getTime() + oneDay * days);
   return date;
@@ -38,71 +38,38 @@ export function getDate(days) {
 */
 // 定义格式化函数映射
 const formatMap = {
-  // 年份
-  yyyy: (date) => date.getFullYear().toString(),
-  yy: (date) => (date.getFullYear() % 100).toString().padStart(2, '0'),
-
-  // 月份
-  MM: (date) => (date.getMonth() + 1).toString().padStart(2, '0'),
-  M: (date) => (date.getMonth() + 1).toString(),
-
-  // 日期
-  dd: (date) => date.getDate().toString().padStart(2, '0'),
-  d: (date) => date.getDate().toString(),
-
-  // 小时（24小时制）
-  HH: (date) => date.getHours().toString().padStart(2, '0'),
-  H: (date) => date.getHours().toString(),
-
-  // 小时（12小时制）
-  hh: (date) => {
-    const hours = date.getHours() % 12 || 12;
-    return hours.toString().padStart(2, '0');
-  },
-  h: (date) => {
-    const hours = date.getHours() % 12 || 12;
-    return hours.toString();
-  },
-
-  // 分钟
-  mm: (date) => date.getMinutes().toString().padStart(2, '0'),
-  m: (date) => date.getMinutes().toString(),
-
-  // 秒
-  ss: (date) => date.getSeconds().toString().padStart(2, '0'),
-  s: (date) => date.getSeconds().toString(),
-
-  // 上午/下午
-  A: (date) => (date.getHours() >= 12 ? 'PM' : 'AM'),
-  a: (date) => (date.getHours() >= 12 ? 'pm' : 'am'),
+  'y+': (date, match) => (date.getFullYear() + '').substr(4 - match.length),
+  'M+': (date, match) => pad(date.getMonth() + 1, match.length),
+  'd+': (date, match) => pad(date.getDate(), match.length),
+  'H+': (date, match) => pad(date.getHours(), match.length),
+  'm+': (date, match) => pad(date.getMinutes(), match.length),
+  's+': (date, match) => pad(date.getSeconds(), match.length),
+  S: (date) => date.getMilliseconds(),
 };
 
-/**
- * 生成匹配格式符号的正则表达式
- * @param {Object} map 格式化函数映射
- * @returns {RegExp} 匹配格式符号的正则
- */
-function createFormatRegex(map) {
-  const keys = Object.keys(map).sort((a, b) => b.length - a.length);
-  const escapedKeys = keys.map((key) => key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
-  return new RegExp(`(${escapedKeys.join('|')})`, 'g');
+// 补零函数
+function pad(num, len) {
+  return ('00' + num).slice(-(len || 2));
 }
 
 /**
  * 格式化时间
- * @param {string} formatStr 格式字符串（如 "yyyy-MM-dd HH:mm:ss"）
- * @param {Date||Number} date 时间对象
- * @param {Object} map 格式化函数映射
+ * @param {Date|number|string} date 时间
+ * @param {string} fmt 格式字符串，默认'yyyy-MM-dd HH:mm:ss'
  * @returns {string} 格式化后的时间字符串
  */
-export function formatTime(date, formatStr = 'yyyy-MM-dd HH:mm:ss', map = formatMap) {
-  const dateObj = date instanceof Date ? date : new Date(date);
-  if (isNaN(dateObj.getTime())) {
-    return date;
+export function formatTime(date, fmt = 'yyyy-MM-dd HH:mm:ss') {
+  if (!date || date.toString().startsWith('NaN')) {
+    return '';
   }
-  const regex = createFormatRegex(map);
-  return formatStr.replace(regex, (match) => {
-    const formatter = map[match];
-    return formatter ? formatter(dateObj) : match;
-  });
+
+  const dateObj = new Date(date);
+
+  for (let key in formatMap) {
+    if (new RegExp('(' + key + ')').test(fmt)) {
+      fmt = fmt.replace(RegExp.$1, formatMap[key](dateObj, RegExp.$1));
+    }
+  }
+
+  return fmt;
 }

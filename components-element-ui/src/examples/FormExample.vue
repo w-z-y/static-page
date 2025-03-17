@@ -30,7 +30,7 @@
 </template>
 
 <script>
-import { now, getDate } from '../utils/dateUtil';
+import { now, getOffsetDate } from '../utils/dateUtil';
 
 export default {
   data() {
@@ -78,19 +78,19 @@ export default {
                 {
                   text: '最近三个月',
                   onClick(picker) {
-                    picker.$emit('pick', [getDate(-90).getTime(), now.getTime()]);
+                    picker.$emit('pick', [getOffsetDate(-90).getTime(), now.getTime()]);
                   },
                 },
                 {
                   text: '最近半年',
                   onClick(picker) {
-                    picker.$emit('pick', [getDate(-180).getTime(), now.getTime()]);
+                    picker.$emit('pick', [getOffsetDate(-180).getTime(), now.getTime()]);
                   },
                 },
                 {
                   text: '最近一年',
                   onClick(picker) {
-                    picker.$emit('pick', [getDate(-365).getTime(), now.getTime()]);
+                    picker.$emit('pick', [getOffsetDate(-365).getTime(), now.getTime()]);
                   },
                 },
               ],
