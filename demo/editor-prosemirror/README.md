@@ -1,24 +1,15 @@
-# editor-prosemirror
+## schema
 
-## Project setup
-```
-pnpm install
-```
+### nodes
 
-### Compiles and hot-reloads for development
-```
-pnpm run serve
-```
+顶级节点 doc,文本内容 text 必须
 
-### Compiles and minifies for production
-```
-pnpm run build
-```
+#### parseDOM
 
-### Lints and fixes files
-```
-pnpm run lint
-```
+粘贴文本时解析匹配规则
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+#### toDOM
+
+toDOM() {
+return ["strong", 0]; // 0 相当于 slot
+}
