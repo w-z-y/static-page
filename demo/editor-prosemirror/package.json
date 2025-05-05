@@ -17,6 +17,7 @@
     "prosemirror-view": "^1.38.1",
     "sass": "^1.85.1",
     "sass-loader": "^16.0.5",
+    "tippy.js": "^6.3.7",
     "vue": "^2.6.14"
   },
   "devDependencies": {

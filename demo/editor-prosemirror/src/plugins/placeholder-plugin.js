@@ -6,9 +6,9 @@ class Placeholder {
     this.update(view, null);
   }
 
-  update(view, lastState) {
+  update(view, oldState) {
     let state = view.state;
-    if (lastState && lastState.doc.eq(state.doc)) return;
+    if (oldState && oldState.doc.eq(state.doc)) return;
 
     if (view.state.doc.textContent) {
       view.dom.removeAttribute("data-placeholder");
@@ -22,7 +22,7 @@ class Placeholder {
   }
 }
 
-export default function placeholder(text) {
+export default function placeholderPlugin(text) {
   return new Plugin({
     view(editorView) {
       return new Placeholder(editorView, text);
