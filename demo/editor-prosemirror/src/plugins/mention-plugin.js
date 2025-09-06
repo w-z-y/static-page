@@ -20,8 +20,11 @@ class MentionView {
 
     const { state } = view;
     const { selection } = state;
-    const { $from } = selection;
+    const { $from, from } = selection;
+    const coords = view.coordsAtPos(from)
 
+
+    console.log("selection", coords,selection, from);
     // 检查光标前的文本是否包含 @
     const textBeforeCursor = $from.parent.textContent.slice(
       0,
@@ -31,7 +34,7 @@ class MentionView {
 
     if (match) {
       // 如果找到 @，显示提示框
-      this.showMentionPopup(match[1]);
+      this.showMentionPopup(match[1], coords);
     } else {
       // 否则关闭提示框
       this.hideMentionPopup();
@@ -40,7 +43,7 @@ class MentionView {
     return true;
   }
 
-  showMentionPopup(query) {
+  showMentionPopup(query, coords) {
     // 过滤用户列表
     const filteredUsers = this.users.filter((user) =>
       user.name.toLowerCase().includes(query.toLowerCase())
@@ -57,6 +60,7 @@ class MentionView {
         trigger: "manual",
         interactive: true,
         placement: "bottom-start",
+        getReferenceClientRect: () => coords,
         theme: "light",
         arrow: true,
         appendTo: () => document.body,
