@@ -1,0 +1,23 @@
+.jl-checkbox-group {
+  &.is-gap {
+    .jl-checkbox {
+      // 按钮
+      &.el-checkbox-button {
+        ::v-deep {
+          .el-checkbox-button__inner {
+            border: 1px solid var(--jl-border-color);
+            border-radius: var(--jl-border-radius);
+            box-shadow: none;
+          }
+        }
+        &.is-round {
+          ::v-deep {
+            .el-checkbox-button__inner {
+              border-radius: 100px;
+            }
+          }
+        }
+      }
+    }
+  }
+}

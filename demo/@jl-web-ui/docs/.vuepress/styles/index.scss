@@ -1,0 +1,169 @@
+div[class*='language-'],
+div[class*='language-'].line-numbers-mode::after,
+div[class*='language-'].line-numbers-mode .line-numbers-wrapper {
+  background-color: transparent !important;
+  color: #333 !important;
+  border-color: #ccc !important;
+}
+div[class*='language-'] pre,
+div[class*='language-'] pre[class*='language-'],
+.demo-block .meta,
+.theme-default-content pre code,
+.theme-default-content pre[class*='language-'] code,
+.theme-default-content pre,
+.theme-default-content pre[class*='language-'] {
+  margin: 0;
+  background-color: transparent !important;
+  color: #333 !important;
+  border-radius: 0 !important;
+}
+
+.theme-default-content:not(.custom) {
+  max-width: 1000px !important;
+}
+// sidebar
+.sidebar-group.is-sub-group > .sidebar-heading:not(.clickable) {
+  opacity: 1 !important;
+  cursor: pointer !important;
+}
+
+.demo-block .demo-block-control {
+  background-color: #fff !important;
+}
+
+.token.selector,
+.token.important,
+.token.atrule,
+.token.keyword,
+.token.builtin {
+  color: var(--jl-success) !important;
+}
+.token.property,
+.token.class-name,
+.token.constant,
+.token.symbol {
+  color: var(--jl-warning) !important;
+}
+
+.token.tag,
+.token.attr-name,
+.token.namespace,
+.token.deleted {
+  color: var(--jl-primary) !important;
+}
+
+.language-vue {
+  overflow: hidden;
+  .token {
+    font-weight: bold;
+  }
+}
+
+a.sidebar-link.active {
+  color: #fff !important;
+  background-image: linear-gradient(90deg, var(--jl-primary), pink) !important;
+}
+
+.sidebar-group.is-sub-group > .sidebar-heading:not(.clickable) {
+  cursor: not-allowed !important;
+}
+
+/* element-ui样式冲突处理 */
+.el-date-picker,
+.vxe-table--body-inner-wrapper {
+  table {
+    width: 100%;
+    display: table;
+  }
+  tr,
+  th,
+  td {
+    border: none;
+  }
+  th {
+    border-bottom: 1px solid rgb(235, 238, 245);
+  }
+  tr:nth-child(2n) {
+    background-color: unset;
+  }
+}
+
+.el-table {
+  table {
+    border-collapse: unset;
+    margin: unset;
+    display: table;
+  }
+  tr,
+  th,
+  td {
+    border: none;
+  }
+}
+
+.jl-dialog-fullscreen {
+  position: fixed !important;
+}
+
+.scroll-hover {
+  &::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 4px;
+  }
+}
+
+/* 
+
+
+
+
+  自定义
+
+
+
+
+
+*/
+
+.demo-content {
+  .transition-box {
+    border: 1px solid var(--jl-primary);
+    width: 300px;
+    height: 100px;
+    border-radius: 4px;
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: var(--jl-primary);
+  }
+
+  .el-card + .el-card {
+    margin-top: 10px;
+  }
+
+  .box {
+    width: 340px;
+    .left {
+      float: left;
+      width: 60px;
+    }
+    .right {
+      float: right;
+      width: 60px;
+    }
+    .bottom {
+      clear: both;
+      text-align: center;
+    }
+    .top {
+      clear: both;
+      text-align: center;
+    }
+
+    .el-button {
+      margin: 4px;
+    }
+  }
+}

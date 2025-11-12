@@ -1,0 +1,113 @@
+@use '../Form/checkbox/index.scss';
+.jl-table {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--jl-border-radius);
+
+  &.el-table--border {
+    border-bottom: 1px solid #ebeef5;
+  }
+
+  // 单选
+  &.table-is-single-selection {
+    ::v-deep .jl-table-header-row {
+      // 标识为是否内置类型
+      .is-built-in {
+        .el-checkbox {
+          display: none;
+        }
+      }
+    }
+    ::v-deep .jl-table-row {
+      .is-built-in {
+        .el-checkbox {
+          .el-checkbox__inner {
+            border-radius: 50%;
+          }
+        }
+      }
+    }
+  }
+
+  ::v-deep .cell {
+    text-overflow: initial;
+  }
+  ::v-deep {
+    .el-table__header-wrapper,
+    .el-table__fixed-header-wrapper {
+      flex-shrink: 0;
+
+      .cell {
+        // 解决内容换行的问题，导致拖拽交换列时（宽度不交换），导致不换行的列换行了，换行的列不换行(sortablejs功能)
+        white-space: nowrap;
+        display: inline-flex;
+        width: fit-content;
+        max-width: 100%;
+        align-items: center;
+        overflow: hidden;
+      }
+    }
+  }
+  ::v-deep .el-table__fixed,
+  ::v-deep .el-table__fixed-right {
+    height: 100% !important;
+  }
+  ::v-deep .el-table__body-wrapper,
+  ::v-deep .el-table__fixed,
+  ::v-deep .el-table__fixed-right {
+    &::before {
+      display: none;
+    }
+    .el-table__body {
+      tr {
+        &.root-row {
+          position: sticky;
+          top: 0;
+          background-color: #f3f9ee;
+          z-index: 1;
+          td {
+            background-color: #f3f9ee;
+          }
+        }
+        // 表单
+        .el-form-item {
+          margin: 0;
+          .el-form-item__content {
+            line-height: 1;
+          }
+        }
+      }
+    }
+    .el-table__empty-block {
+      position: sticky;
+      display: flex;
+      width: 100% !important;
+      left: 0;
+      .el-empty__description {
+        margin-top: 0;
+      }
+    }
+  }
+  ::v-deep .el-button--text.el-button--mini {
+    padding: 3px 0;
+  }
+}
+.pagination {
+  width: max-content;
+  margin-left: auto;
+  margin-top: 8px;
+  &.is-background {
+    ::v-deep .el-pager {
+      li:not(.disabled) {
+        &:hover {
+          color: var(--jl-primary);
+        }
+        &.active {
+          color: var(--jl-white);
+          background-color: var(--jl-primary);
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,55 @@
+/* 
+
+  element-ui主题色, !default表示：如果之前有定义过则用之前的
+
+*/
+@import './element.scss';
+/* 
+
+  通用样式
+
+*/
+* {
+  --jl-primary: #{$--color-primary};
+  --jl-success: #{$--color-success};
+  --jl-danger: #{$--color-danger};
+  --jl-warning: #{$--color-warning};
+  --jl-info: #{$--color-info};
+  --jl-border-color: #{$--border-color-base};
+  --jl-border-radius: #{$--border-radius-base};
+
+  --jl-text-second: #606266;
+  --jl-text-gray: #999;
+
+  --jl-text-quaternary: rgba(0, 0, 0, 0.3);
+
+  --jl-white: #fff;
+  --jl-black: #000;
+
+  --jl-dialog-border-radius: 10px;
+
+  --jl-shadow-level1: 0px 0px 4px 0px rgba(0, 0, 0, 0.02), 0px 6px 10px 0px rgba(47, 53, 64, 0.1);
+  /* 
+  
+  业务相关
+
+  */
+  --jl-sidebar-collapse-width: 68px;
+  --jl-sidebar-padding-top: 20px;
+  --jl-sidebar-padding-inline: 12px;
+  --jl-sidebar-width: 280px;
+  --jl-chat-padding-inline: 3rem;
+
+  --jl-transition-duration: 300ms;
+  --jl-transition-collapse-duration: 200ms;
+  --jl-transition-easing: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@import './theme/light.scss';
+@import './theme/dark.scss';
+
+@import './animation.scss';
+
+@import './components/button.scss';
+@import './components/slider.scss';
+@import './components/input.scss';

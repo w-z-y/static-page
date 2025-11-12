@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>移动端自定义文字框选组件</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background: #f5f5f5;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      }
+      .page {
+        padding: 16px;
+        max-width: 600px;
+        margin: 0 auto;
+      }
+      .card {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+        padding: 20px;
+        margin-bottom: 16px;
+      }
+      .card-title {
+        font-size: 18px;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 12px;
+      }
+      .target-content {
+        position: relative;
+        line-height: 1.8;
+        font-size: 16px;
+        color: #333;
+        white-space: pre-wrap;
+        word-break: break-word;
+        -webkit-user-select: none;
+        user-select: none;
+      }
+      .text-selector-overlay {
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 9999;
+      }
+      .highlight-rect {
+        position: absolute;
+        background: rgba(64, 158, 255, 0.2);
+        pointer-events: none;
+      }
+      .selection-box {
+        position: absolute;
+        border: 2px solid #409eff;
+        border-radius: 4px;
+        pointer-events: none;
+        opacity: 0;
+      }
+      .handle {
+        position: absolute;
+        width: 24px;
+        height: 24px;
+        background: #409eff;
+        border: 3px solid #fff;
+        border-radius: 50%;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+        z-index: 10;
+        pointer-events: auto;
+        touch-action: none;
+      }
+      .handle::after {
+        content: '';
+        position: absolute;
+        width: 3px;
+        height: 24px;
+        background: #409eff;
+        left: 50%;
+        transform: translateX(-50%);
+        bottom: 20px;
+      }
+      .handle.left::after {
+        top: 20px;
+        bottom: auto;
+      }
+      .toolbar {
+        display: flex;
+        gap: 8px;
+        margin-top: 12px;
+      }
+      .btn {
+        flex: 1;
+        padding: 10px 16px;
+        border: 1px solid #dcdfe6;
+        border-radius: 8px;
+        background: #fff;
+        color: #606266;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .btn:active {
+        background: #f2f3f5;
+      }
+      .btn.primary {
+        background: #409eff;
+        color: #fff;
+        border-color: #409eff;
+      }
+      .btn.primary:active {
+        background: #3a8ee6;
+      }
+      .info {
+        margin-top: 8px;
+        font-size: 13px;
+        color: #909399;
+        line-height: 1.6;
+      }
+      .tip {
+        color: #409eff;
+        font-weight: 500;
+        margin-top: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app" class="page">
+      <div class="card">
+        <div class="card-title">移动端自定义文字框选组件</div>
+        <div id="target-text" class="target-content">
+          这是一个完全自定义实现的移动端文字框选组件。 不依赖系统默认的选择 API，通过 DOM Range 计算字符位置，自绘高亮、外框和拖动手柄。
+          长按文本可启动框选，拖动手指扩展选区，松手后可通过左右手柄精确调整。
+          特别支持手柄交换：当左手柄向右拖动超过右手柄时，两者会自动交换角色，反之亦然。 这样可以更自然地调整选区范围，无需担心拖反方向的问题。
+          这是一个完全自定义实现的移动端文字框选组件。 不依赖系统默认的选择 API，通过 DOM Range 计算字符位置，自绘高亮、外框和拖动手柄。
+          长按文本可启动框选，拖动手指扩展选区，松手后可通过左右手柄精确调整。
+          特别支持手柄交换：当左手柄向右拖动超过右手柄时，两者会自动交换角色，反之亦然。 这样可以更自然地调整选区范围，无需担心拖反方向的问题。
+        </div>
+        <div class="toolbar">
+          <button class="btn" @click="clearSelection">清除选区</button>
+          <button class="btn primary" @click="copySelection">复制文本</button>
+        </div>
+        <div class="info" v-if="selectedText">
+          已选中：{{ selectedLength }} 字<br />
+          内容：{{ selectedText }}
+        </div>
+        <div class="info tip" v-else>💡 长按文本区域可开始框选</div>
+      </div>
+      <mobile-text-selector ref="selector" target-selector="#target-text" @selection-change="onSelectionChange"></mobile-text-selector>
+    </div>
+
+    <script src="https://unpkg.com/vue@2.7.16/dist/vue.js"></script>
+    <script>
+      // 工具函数
+      const getEventPos = (e) => ({ x: (e.touches?.[0] || e).clientX, y: (e.touches?.[0] || e).clientY });
+      const getDist = (p1, p2) => (p1.x - p2.x) ** 2 + (p1.y - p2.y) ** 2;
+      const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
+
+      // 常量
+      const MOVE_THRESHOLD = 25; // 移动检测阈值
+      const HANDLE_OFFSET = 12; // 手柄偏移量
+
+      // 移动端文字框选组件
+      Vue.component('mobile-text-selector', {
+        props: {
+          targetSelector: { type: String, required: true },
+          longPressDuration: { type: Number, default: 400 },
+        },
+        data() {
+          return {
+            targetEl: null,
+            charMap: [], // 字符索引映射
+            startIndex: null,
+            endIndex: null,
+            isSelecting: false,
+            isLongPressed: false,
+            activeHandle: null,
+            // 触摸状态
+            touchStartPos: null,
+            hasMoved: false,
+            prevSelection: null,
+            longPressTimer: null,
+            // UI 渲染数据
+            highlightRects: [],
+            selectionBox: null,
+            startHandlePos: null,
+            endHandlePos: null,
+            // 全局点击状态
+            clickState: { startPos: null, moved: false },
+          };
+        },
+        computed: {
+          hasSelection() {
+            return this.startIndex !== null && this.endIndex !== null && this.isLongPressed;
+          },
+          normalizedIndices() {
+            if (!this.hasSelection) return [null, null];
+            return [Math.min(this.startIndex, this.endIndex), Math.max(this.startIndex, this.endIndex)];
+          },
+          selectedText() {
+            if (!this.hasSelection) return '';
+            const [s, e] = this.normalizedIndices;
+            return this.charMap.slice(s, e + 1).map((item) => item.node.textContent[item.offset]).join('');
+          },
+        },
+        watch: {
+          startIndex: 'updateUI',
+          endIndex: 'updateUI',
+          isLongPressed: 'updateUI',
+        },
+        mounted() {
+          this.init();
+          // 滚动/resize刷新高亮
+          this.scrollUpdateScheduled = false;
+          const scrollHandler = () => {
+            if (this.hasSelection && !this.scrollUpdateScheduled) {
+              this.scrollUpdateScheduled = true;
+              requestAnimationFrame(() => {
+                this.updateUI();
+                this.scrollUpdateScheduled = false;
+              });
+            }
+          };
+          window.addEventListener('scroll', scrollHandler, true);
+          window.addEventListener('resize', scrollHandler);
+          this.$once('hook:beforeDestroy', () => {
+            window.removeEventListener('scroll', scrollHandler, true);
+            window.removeEventListener('resize', scrollHandler);
+          });
+        },
+        beforeDestroy() {
+          clearTimeout(this.longPressTimer);
+          // 解绑全局事件
+          Object.entries(this.globalEventHandlers || {}).forEach(([evt, handler]) => {
+            document.removeEventListener(evt, handler, true);
+          });
+          window.removeEventListener('blur', this.onWindowBlur);
+        },
+        methods: {
+          init() {
+            this.$nextTick(() => {
+              this.targetEl = document.querySelector(this.targetSelector);
+              if (!this.targetEl) return console.error('目标元素未找到:', this.targetSelector);
+              this.buildCharMap();
+              this.bindTargetEvents();
+            });
+            this.bindGlobalEvents();
+          },
+          bindTargetEvents() {
+            ['touchstart', 'touchmove', 'touchend', 'touchcancel'].forEach((evt) => {
+              const handler = this[`onTarget${capitalize(evt)}`].bind(this);
+              this.targetEl.addEventListener(evt, handler, { passive: false });
+            });
+          },
+          bindGlobalEvents() {
+            this.globalEventHandlers = {
+              touchstart: this.onGlobalStart,
+              touchmove: this.onGlobalMove,
+              touchend: this.onGlobalEnd,
+              touchcancel: this.onGlobalEnd,
+              mousedown: this.onGlobalStart,
+              mousemove: this.onGlobalMove,
+              mouseup: this.onGlobalEnd,
+            };
+            Object.entries(this.globalEventHandlers).forEach(([evt, handler]) => {
+              document.addEventListener(evt, handler, true);
+            });
+            window.addEventListener('blur', this.onWindowBlur);
+          },
+          // 构建字符索引映射
+          buildCharMap() {
+            this.charMap = [];
+            const walk = (node) => {
+              if (node.nodeType === 3) {
+                // 文本节点
+                node.textContent.split('').forEach((_, i) => {
+                  this.charMap.push({ node, offset: i });
+                });
+              } else if (node.nodeType === 1) {
+                // 元素节点
+                Array.from(node.childNodes).forEach(walk);
+              }
+            };
+            walk(this.targetEl);
+          },
+          // 获取字符矩形
+          getCharRect(index) {
+            if (index < 0 || index >= this.charMap.length) return null;
+            const { node, offset } = this.charMap[index];
+            const range = document.createRange();
+            range.setStart(node, offset);
+            range.setEnd(node, offset + 1);
+            return range.getClientRects()[0] || range.getBoundingClientRect();
+          },
+          // 坐标点转字符索引（最近距离算法）
+          pointToIndex(x, y) {
+            if (!this.charMap.length) return 0;
+            let minDist = Infinity, minIdx = 0;
+            this.charMap.forEach((_, i) => {
+              const rect = this.getCharRect(i);
+              if (!rect) return;
+              const cx = Math.max(rect.left, Math.min(x, rect.right));
+              const cy = Math.max(rect.top, Math.min(y, rect.bottom));
+              const dist = getDist({ x, y }, { x: cx, y: cy });
+              if (dist < minDist) {
+                minDist = dist;
+                minIdx = i;
+              }
+            });
+            return minIdx;
+          },
+          // 目标元素触摸事件
+          onTargetTouchstart(e) {
+            if (e.touches?.length !== 1) return;
+            const pos = getEventPos(e);
+            this.touchStartPos = pos;
+            this.hasMoved = false;
+            this.isSelecting = false;
+            // 保存当前选区状态
+            this.prevSelection = {
+              hasSelection: this.hasSelection,
+              isLongPressed: this.isLongPressed,
+              startIndex: this.startIndex,
+              endIndex: this.endIndex,
+            };
+            // 启动长按定时器
+            clearTimeout(this.longPressTimer);
+            this.longPressTimer = setTimeout(() => {
+              if (!this.hasMoved) {
+                this.isLongPressed = true;
+                this.isSelecting = true;
+                const idx = this.pointToIndex(pos.x, pos.y);
+                this.startIndex = this.endIndex = idx;
+              }
+            }, this.longPressDuration);
+          },
+          onTargetTouchmove(e) {
+            const pos = getEventPos(e);
+            // 检测移动
+            if (getDist(pos, this.touchStartPos || pos) > MOVE_THRESHOLD) {
+              this.hasMoved = true;
+              clearTimeout(this.longPressTimer);
+              // 拖动时清除新选区（保留已有选区）
+              if (!this.prevSelection?.hasSelection && !this.isSelecting) {
+                this.isLongPressed = false;
+                this.startIndex = this.endIndex = null;
+              }
+            }
+            // 正在选择时更新选区
+            if (this.isSelecting && e.touches?.length === 1) {
+              e.preventDefault();
+              this.endIndex = this.pointToIndex(pos.x, pos.y);
+            }
+          },
+          onTargetTouchend() {
+            clearTimeout(this.longPressTimer);
+            // 纯点击时清除选区
+            if (!this.isSelecting && !this.hasMoved) {
+              this.isLongPressed = false;
+              this.startIndex = this.endIndex = null;
+            }
+            this.isSelecting = false;
+            this.hasMoved = false;
+            this.prevSelection = null;
+          },
+          onTargetTouchcancel() {
+            this.onTargetTouchend();
+          },
+          // 手柄拖动
+          onHandleStart(type, e) {
+            e.stopPropagation();
+            this.activeHandle = type;
+          },
+          onHandleMove(e) {
+            if (!this.activeHandle || e.touches?.length !== 1) return;
+            e.preventDefault();
+            e.stopPropagation();
+            const idx = this.pointToIndex(...Object.values(getEventPos(e)));
+            // 手柄交换逻辑
+            if (this.activeHandle === 'start') {
+              this.startIndex = idx;
+              if (this.startIndex > this.endIndex) {
+                [this.startIndex, this.endIndex, this.activeHandle] = [this.endIndex, this.startIndex, 'end'];
+              }
+            } else {
+              this.endIndex = idx;
+              if (this.endIndex < this.startIndex) {
+                [this.endIndex, this.startIndex, this.activeHandle] = [this.startIndex, this.endIndex, 'start'];
+              }
+            }
+          },
+          onHandleEnd(e) {
+            e.stopPropagation();
+            this.activeHandle = null;
+          },
+          // 计算高亮+外框+手柄
+          updateUI() {
+            if (!this.hasSelection) {
+              this.highlightRects = this.selectionBox = this.startHandlePos = this.endHandlePos = null;
+              this.$emit('selection-change', { text: '', start: null, end: null });
+              return;
+            }
+            const [s, e] = this.normalizedIndices;
+            const startInfo = this.charIndexMap[s];
+            const endInfo = this.charIndexMap[e];
+            const range = document.createRange();
+            range.setStart(startInfo.node, startInfo.offset);
+            range.setEnd(endInfo.node, endInfo.offset + 1);
+            // 计算高亮矩形
+            this.highlightRects = Array.from(range.getClientRects())
+              .filter((rect) => rect.width > 0 && rect.height > 0)
+              .map((rect) => ({ left: rect.left, top: rect.top, width: rect.width, height: rect.height }));
+            // 计算外框
+            if (this.highlightRects.length) {
+              const rects = this.highlightRects;
+              const minLeft = Math.min(...rects.map((r) => r.left));
+              const minTop = Math.min(...rects.map((r) => r.top));
+              const maxRight = Math.max(...rects.map((r) => r.left + r.width));
+              const maxBottom = Math.max(...rects.map((r) => r.top + r.height));
+              this.selectionBox = { left: minLeft, top: minTop, width: maxRight - minLeft, height: maxBottom - minTop };
+            }
+            // 计算手柄位置
+            this.startHandlePos = this.getHandlePos(s, 'start');
+            this.endHandlePos = this.getHandlePos(e, 'end');
+            // 触发事件
+            this.$emit('selection-change', { text: this.selectedText, start: s, end: e });
+          },
+          getHandlePos(index, type) {
+            const rect = this.getCharRect(index);
+            if (!rect) return null;
+            return {
+              x: type === 'start' ? rect.left : rect.right,
+              y: type === 'start' ? rect.top : rect.bottom,
+            };
+          },
+          clearSelection() {
+            this.startIndex = this.endIndex = null;
+            this.longPressTriggered = this.isSelecting = false;
+          },
+          getSelectedText() {
+            return this.selectedText;
+          },
+          // 全局事件处理（点击外部清除选区）
+          onGlobalStart(e) {
+            if (!this.hasSelection) return;
+            const pos = getEventPos(e);
+            const targetRect = this.targetEl.getBoundingClientRect();
+            const inTarget = pos.x >= targetRect.left && pos.x <= targetRect.right && pos.y >= targetRect.top && pos.y <= targetRect.bottom;
+            const el = document.elementFromPoint(pos.x, pos.y);
+            const isHandle = el?.classList.contains('handle') || el?.closest('.handle');
+            // 检查是否点击了按钮或其他交互元素
+            const isButton = el?.tagName === 'BUTTON' || el?.closest('button') || el?.closest('.btn');
+            this.globalTouchState = { startPos: { ...pos, inTarget, isHandle, isButton }, moved: false };
+          },
+          onGlobalMove(e) {
+            if (!this.globalTouchState.startPos) return;
+            const pos = getEventPos(e);
+            const dx = pos.x - this.globalTouchState.startPos.x;
+            const dy = pos.y - this.globalTouchState.startPos.y;
+            if (dx ** 2 + dy ** 2 > 25) this.globalTouchState.moved = true;
+          },
+          onGlobalEnd() {
+            const { startPos, moved } = this.globalTouchState;
+            // 只有在点击空白区域（非目标区域、非手柄、非按钮）时才清除选区
+            if (startPos && !moved && !startPos.inTarget && !startPos.isHandle && !startPos.isButton) {
+              this.clearSelection();
+            }
+            this.globalTouchState = { startPos: null, moved: false };
+          },
+          onWindowBlur() {
+            /* 窗口失焦时清除选区 */
+          },
+        },
+        template: `
+        <div class="text-selector-overlay" v-if="hasSelection">
+          <!-- 高亮矩形 -->
+          <div v-for="(rect, i) in highlightRects" :key="'rect-' + i" class="highlight-rect"
+            :style="{ left: rect.left + 'px', top: rect.top + 'px', width: rect.width + 'px', height: rect.height + 'px' }"></div>
+          <!-- 外框 -->
+          <div v-if="selectionBox" class="selection-box"
+            :style="{ left: selectionBox.left + 'px', top: selectionBox.top + 'px', width: selectionBox.width + 'px', height: selectionBox.height + 'px' }"></div>
+          <!-- 手柄 -->
+          <div v-if="startHandlePos" class="handle left"
+            :style="{ left: (startHandlePos.x - 12) + 'px', top: (startHandlePos.y - 12) + 'px' }"
+            @touchstart="onHandleStart('start', $event)" @touchmove="onHandleMove" @touchend="onHandleEnd"></div>
+          <div v-if="endHandlePos" class="handle right"
+            :style="{ left: (endHandlePos.x - 12) + 'px', top: (endHandlePos.y - 12) + 'px' }"
+            @touchstart="onHandleStart('end', $event)" @touchmove="onHandleMove" @touchend="onHandleEnd"></div>
+        </div>
+      `,
+      });
+
+      // 主应用
+      new Vue({
+        el: '#app',
+        data() {
+          return { selectedText: '', selectedLength: 0 };
+        },
+        methods: {
+          onSelectionChange(data) {
+            this.selectedText = data.text;
+            this.selectedLength = data.text.length;
+          },
+          clearSelection() {
+            this.$refs.selector.clearSelection();
+          },
+          copySelection() {
+            const text = this.$refs.selector.getSelectedText();
+            if (!text) return alert('请先选择文本');
+            // 简化复制逻辑
+            const copy = () => {
+              try {
+                document.execCommand('copy') ? alert('已复制：' + text) : alert('复制失败');
+              } catch (e) {
+                alert('复制失败');
+              }
+            };
+            if (navigator.clipboard?.writeText) {
+              navigator.clipboard.writeText(text).then(() => alert('已复制：' + text), copy);
+            } else {
+              const textarea = document.createElement('textarea');
+              textarea.value = text;
+              textarea.style.cssText = 'position:fixed;opacity:0';
+              document.body.appendChild(textarea);
+              textarea.select();
+              copy();
+              document.body.removeChild(textarea);
+            }
+          },
+        },
+      });
+    </script>
+  </body>
+</html>

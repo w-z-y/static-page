@@ -1,0 +1,45 @@
+hr {
+  margin-top: 20px;
+  margin-bottom: 20px;
+  border: 0;
+  border-top: 1px solid #eee;
+}
+
+h1,
+h2,
+h3 {
+  font-weight: 600;
+  margin-block: 20px 10px;
+}
+
+h4,
+h5,
+h6 {
+  font-weight: 600;
+  margin-block: 10px;
+}
+
+ul,
+ol {
+  margin-block: 0 10px;
+  padding-inline-start: 40px;
+}
+
+p {
+  margin: 0;
+}
+
+blockquote {
+  padding: 10px 20px;
+  margin: 0 0 20px;
+  font-size: 17.5px;
+  border-left: 5px solid #eee;
+}
+
+.space {
+  margin-bottom: 0.5em;
+}
+
+::v-deep .katex-html {
+  display: none;
+}

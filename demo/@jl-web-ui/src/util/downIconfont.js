@@ -1,0 +1,11 @@
+const updateIconfont = require('../../plugins/downIconfont');
+
+// 不同项目只需要更换url
+const ICONFONT_URL =
+  'https://www.iconfont.cn/api/project/download.zip?spm=a313x.manage_type_myprojects.i1.d7543c303.64813a81hQlvxn&pid=5006157&ctoken=null';
+
+// 用户cookie
+const COOKIE =
+  'xlly_s=1; EGG_SESS_ICONFONT=Hu68kBY7XO7C6Udp3T99M1asKmUZ0gxjps8xjTrjx4bVP23DuZfsTSJHWJSyJ9AwQ3AJirJQSurW-BQledf-eLLCPNa1UJopXUZQ_pqX-ZC7RTBIAZzGZhXvfdcwApCC0nnaI3oiyAOFjMqKUCwHDNGhPktI-__9VUaOeMpCIAca0OKlHraB7ZsYl8-qoYOo-KLY_MNrIZefMUj5tvZqCPjJ4wwFNxQ-B_qJMcqBGJU_GrPZhmiMVoN2WbWZcDtb6iBUFHV790Ewje-mVeh5KlQumeFrQ5NE5fkQZcj23kE=; locale=zh-cn; ctoken=lZtI0SiM6atzUuhcRUBtMWG5; u=5870858; u.sig=hJea1LfGvSIVZ2U5FAWvjFBZmY5v7KtQvPHZpXPmQQc; tfstk=gGRnHngqmpWI_1mOBC1InrpM74kTR61503FR2_IrQGS_vkFpzbjkbhpRvUIJIgxGf93ByvZuZG-heQ3Qwy96DEPp9v18Z615amnxMj3BR_1yJg0vukZNowl8T77FO1-acyHiMjLB8yQEkFlvwdc4QGSPa9WzQ1S1ykze4JWZSa78Y8Pe4V0Gyw2z8WSPbF7C8_Sy4_uM7G_laa-Pav_0Lidy3Co_f02kAQHJ_wXh0eSeJedah9wB-GfCtC7HSi8UF7PyswXe_pVHLdXpUE6X9Clu16LDQ17vRXVGge7DvGKqg5fwWF-Rhdi7M6KMZtAOdzo5LHvwkLWi8X8GtMXvthU4I6vyAQXBKzgX76-6hi6ECc_M9IBlcOqZYFLGYtvkvcNPvKYwjtdTXSCWfL-Prhrh4q2a3ui4NtmBn8w5LN_GD95k3WCvMRUrSV2vP971li3iS8w5LN_GDV0gHQ6F5ZsA.';
+
+updateIconfont(ICONFONT_URL, COOKIE);

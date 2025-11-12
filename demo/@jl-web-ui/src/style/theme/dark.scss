@@ -1,0 +1,32 @@
+[data-theme='dark'] {
+  &,
+  * {
+    --jl-global-color: #f8faff;
+    --jl-global-background-color: #292a2d;
+    --jl-global-border-color: #8b8b8b;
+    --jl-global-border-color2: #525252;
+
+    --jl-input-border-color: rgba(192, 192, 192, 0.3);
+    --jl-input-background-color: #404045;
+    --jl-input-box-shadow-color: #f3f4f6;
+    --jl-input-box-shadow-color: #0f0f0f;
+
+    --jl-button-color-rgb: 255, 255, 255;
+    --jl-button-background-color: #3a3b3d;
+
+    --jl-sidebar-background-color: #212327;
+    --jl-sidebar-active-background-color: #494949;
+    --jl-sidebar-hover-background-color: #333;
+    --jl-sidebar-box-shadow-color: #000;
+    --jl-sidebar-color: #e4e4e7;
+
+    --jl-bubble-background-color: #414158;
+
+    --jl-icon-color: #abb2bd;
+    --jl-icon-background-color-hover: #323438;
+
+    --jl-markdown-table-background-color: #333;
+
+    --jl-button-hover-background-color: #222222;
+  }
+}

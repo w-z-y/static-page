@@ -1,0 +1,118 @@
+// 合并颜色函数，减少重复定义
+@function btn-color($type) {
+  @return var(--jl-#{$type});
+}
+
+@function btn-bg($type) {
+  @return btn-color($type);
+}
+// 提取通用类型列表，便于统一维护
+$button-types: success, warning, danger, info, primary;
+
+@mixin btn-type($type) {
+  &,
+  &[#{$type}] {
+    border-color: btn-color($type);
+    color: #fff;
+    background-color: btn-bg($type);
+
+    &.is-plain {
+      color: btn-color($type);
+      background-color: transparent;
+      border-color: btn-color($type);
+    }
+
+    &.el-button--text {
+      color: btn-color($type);
+      background-color: transparent;
+      border-color: transparent;
+    }
+  }
+}
+
+// 提取状态样式混合器，减少重复
+@mixin interactive-states($bg-color: var(--jl-button-hover-background-color)) {
+  &:not(.is-disabled) {
+    &:active,
+    &:focus,
+    &:hover {
+      background-color: $bg-color;
+      opacity: 0.8;
+    }
+  }
+}
+
+// 按钮基础样式
+@mixin jl-button-base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--jl-global-color);
+  background-color: var(--jl-button-background-color);
+  border: 1px solid rgba(var(--jl-button-color-rgb), 0.08);
+
+  // 统一处理边框圆角
+  &:not(.is-round):not(.is-circle) {
+    border-radius: var(--jl-border-radius);
+  }
+  &.is-round {
+    border-radius: 20px;
+  }
+
+  // plain 按钮
+  &.is-plain {
+    border: 1px solid var(--jl-primary);
+    color: var(--jl-primary);
+
+    @include interactive-states(transparent);
+
+    // 应用所有类型样式
+    @each $type in $button-types {
+      @include btn-type($type);
+    }
+  }
+
+  // 禁用状态
+  &.is-disabled {
+    opacity: 0.6;
+    pointer-events: none;
+  }
+
+  // 默认交互状态
+  @include interactive-states();
+
+  // 文字按钮
+  &.el-button--text {
+    border-color: transparent;
+    background-color: transparent;
+
+    @each $type in $button-types {
+      @include btn-type($type);
+    }
+
+    @include interactive-states(transparent);
+  }
+
+  // 非文本、非plain按钮
+  &:not(.el-button--text):not(.is-plain) {
+    @each $type in $button-types {
+      &[#{$type}] {
+        background-color: btn-bg($type);
+        color: #fff;
+      }
+    }
+  }
+
+  // 按钮内容
+  & > ::v-deep span {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  // mini 圆形按钮
+  &.el-button--mini.is-circle {
+    padding: 8px;
+  }
+}

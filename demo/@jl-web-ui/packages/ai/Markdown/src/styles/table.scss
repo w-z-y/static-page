@@ -1,0 +1,36 @@
+.markdown-table-wrapper {
+  max-height: 411px;
+  width: 100%;
+  max-width: fit-content;
+  margin-bottom: 20px;
+  &.is-expand {
+    max-height: unset;
+    overflow: unset;
+    ::v-deep .bubble-list-inner {
+      overflow-y: unset;
+    }
+  }
+  table {
+    width: max-content;
+    --table-border-color: #ebeef5;
+    --table-cell-padding: 0 20px;
+    border-collapse: collapse;
+    border-right: 1px solid var(--table-border-color);
+    border-bottom: 1px solid var(--table-border-color);
+
+    thead {
+      position: sticky;
+      top: 0;
+    }
+    th,
+    td {
+      height: 32px;
+      border-left: 1px solid var(--table-border-color);
+      border-bottom: 1px solid var(--table-border-color);
+      padding: var(--table-cell-padding);
+    }
+    th {
+      background-color: var(--jl-markdown-table-background-color);
+    }
+  }
+}

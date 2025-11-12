@@ -1,0 +1,39 @@
+.jl-animation-shake-y {
+  animation: jl-animation-shake-y 0.5s;
+}
+
+.jl-animation-shake-infinite-y {
+  animation: jl-animation-shake-infinite-y 1s linear infinite;
+}
+
+@keyframes jl-animation-shake-y {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  25%,
+  75% {
+    transform: translateY(-3px);
+  }
+  50% {
+    transform: translateY(3px);
+  }
+}
+
+@keyframes jl-animation-shake-infinite-y {
+  0%,
+  50% {
+    transform: translateY(0);
+  }
+  12.5%,
+  37.5% {
+    transform: translateY(-3px);
+  }
+  25% {
+    transform: translateY(3px);
+  }
+  50%,
+  100% {
+    transform: translateY(0);
+  }
+}

@@ -1,0 +1,72 @@
+@import '../element.scss';
+
+@mixin jl-tag-base {
+  @each $name, $color in $--color-map {
+    &,
+    &[#{$name}] {
+      color: #fff;
+      background-color: $color;
+      border-color: $color;
+
+      &.is-plain {
+        color: $color;
+        background-color: mix($color, #fff, 10%);
+        border-color: transparent;
+      }
+
+      &.is-border {
+        border-color: mix($color, #fff, 50%);
+      }
+
+      // 文本
+      &.el-tag[text] {
+        color: $color;
+        border-color: transparent;
+        background-color: transparent;
+        &.is-text-background,
+        &:hover {
+          background-color: mix($color, #fff, 10%);
+        }
+        &.el-tag--mini {
+          ::v-deep .el-tag__close {
+            transform: translate(50%, -50%) scale(0.7);
+          }
+        }
+
+        &:hover {
+          background-color: mix($color, #fff, 10%);
+          ::v-deep .el-tag__close {
+            visibility: visible;
+          }
+        }
+        // close图标
+        ::v-deep .el-tag__close {
+          visibility: hidden;
+          position: absolute;
+          right: 0;
+          top: 0;
+          transform: translate(50%, -50%);
+          color: #fff;
+          background-color: $color;
+        }
+      }
+      ::v-deep .el-tag__close {
+        color: #fff;
+        &:hover {
+          color: $color;
+          background-color: #fff;
+        }
+      }
+      &:not(.el-tag--dark) {
+        // close图标
+        ::v-deep .el-tag__close {
+          color: $color;
+          &:hover {
+            color: #fff;
+            background-color: $color;
+          }
+        }
+      }
+    }
+  }
+}

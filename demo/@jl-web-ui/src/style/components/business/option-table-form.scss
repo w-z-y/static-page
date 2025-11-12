@@ -1,0 +1,20 @@
+// 操作按钮
+.operate-icon {
+  cursor: pointer;
+  & + .operate-icon {
+    margin-left: 10px;
+  }
+  &.edit-icon {
+    color: var(--jl-primary);
+  }
+  &.add-icon {
+    color: var(--jl-primary);
+  }
+  .delete-icon {
+    color: var(--jl-danger);
+    &.is-disabled {
+      color: var(--jl-info);
+      cursor: not-allowed;
+    }
+  }
+}

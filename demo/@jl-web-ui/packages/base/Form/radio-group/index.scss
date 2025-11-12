@@ -1,0 +1,23 @@
+.jl-radio-group {
+  .el-radio-group {
+    line-height: inherit;
+    display: flex;
+    flex-wrap: wrap;
+  }
+  &.is-gap {
+    ::v-deep .el-radio-button {
+      .el-radio-button__inner {
+        border: 1px solid var(--jl-border-color);
+        border-radius: var(--jl-border-radius);
+        box-shadow: none;
+      }
+    }
+    &.is-round {
+      ::v-deep {
+        .el-radio-button__inner {
+          border-radius: 100px;
+        }
+      }
+    }
+  }
+}

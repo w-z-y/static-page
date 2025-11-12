@@ -1,0 +1,103 @@
+{
+  "name": "@jl/web-ui",
+  "version": "2.1.0",
+  "private": false,
+  "main": "lib/index.js",
+  "module": "lib/index.js",
+  "scripts": {
+    "dev": "vue-cli-service serve",
+    "build": "vue-cli-service build && npm run build:node",
+    "build:node": "rollup -c ./build/rollup.config.js",
+    "build:analyze": "set ANALYZE=true && vue-cli-service build",
+    "iconfont": "node ./plugins/downIconfont.js && git add ./src/assets/fonts/iconfont",
+    "lang": "node ./node/downLang.js && git add ./src/locale/lang",
+    "lint": "vue-cli-service lint",
+    "docs:dev": "vuepress dev docs",
+    "docs:build": "vuepress build docs"
+  },
+  "postcss": {
+    "plugins": {
+      "autoprefixer": {}
+    }
+  },
+  "peerDependencies": {
+    "echarts": "4.2.1",
+    "element-ui": "2.15.5"
+  },
+  "dependencies": {
+    "@moefe/vue-aplayer": "^2.0.0-beta.5",
+    "babel-plugin-import": "^1.13.8",
+    "dompurify": "^3.2.6",
+    "highlight.js": "^11.11.1",
+    "jsoneditor": "^9.10.5",
+    "katex": "^0.16.22",
+    "marked": "^5.1.2",
+    "mix-css-color": "^0.2.0",
+    "monaco-editor": "^0.20.0",
+    "normalize-wheel": "^1.0.1",
+    "reconnecting-websocket": "^4.4.0",
+    "sortablejs": "^1.8.4",
+    "uuid": "^3.4.0",
+    "vditor": "^3.11.2",
+    "vue": "2.6.10",
+    "vue-i18n": "^7.3.2",
+    "vuedraggable": "^2.20.0",
+    "vuex": "^3.1.0",
+    "vxe-pc-ui": "^3.8.20",
+    "vxe-table": "^3.17.10"
+  },
+  "devDependencies": {
+    "@babel/core": "7.0.0",
+    "@babel/preset-env": "^7.28.0",
+    "@vue/cli-plugin-babel": "~4.5.15",
+    "@vue/cli-plugin-eslint": "~4.5.15",
+    "@vue/cli-service": "~4.5.15",
+    "@vuepress/plugin-register-components": "^1.9.10",
+    "adm-zip": "^0.5.16",
+    "axios": "^0.18.1",
+    "babel-eslint": "^10.1.0",
+    "babel-loader": "^10.0.0",
+    "compression-webpack-plugin": "^6.1.1",
+    "core-js": "^2.6.12",
+    "echarts": "^4.2.1",
+    "element-ui": "2.15.5",
+    "eslint": "^6.7.2",
+    "eslint-plugin-vue": "^6.2.2",
+    "json-templater": "^1.2.0",
+    "markdown-it-attrs": "^4.3.1",
+    "node-xlsx": "^0.24.0",
+    "sass": "1.32.5",
+    "sass-loader": "^7.3.1",
+    "vue-server-renderer": "2.6.10",
+    "vue-svg-loader": "^0.16.0",
+    "vue-template-babel-compiler": "^2.0.0",
+    "vue-template-compiler": "2.6.10",
+    "vuepress": "^1.9.10",
+    "vuepress-plugin-demo-container": "^0.2.0",
+    "webpack-fix-style-only-entries": "^0.6.1",
+    "rollup": "^2.79.0",
+    "@rollup/plugin-node-resolve": "^13.3.0",
+    "@rollup/plugin-commonjs": "^22.0.2",
+    "@rollup/plugin-babel": "^5.3.1",
+    "rollup-plugin-terser": "^7.0.2"
+  },
+  "eslintConfig": {
+    "root": true,
+    "env": {
+      "node": true
+    },
+    "extends": [
+      "plugin:vue/essential",
+      "eslint:recommended"
+    ],
+    "parserOptions": {
+      "parser": "babel-eslint"
+    },
+    "rules": {}
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead"
+  ]
+}
